@@ -25,10 +25,18 @@ export default function PlaceCard({ place }: PlaceCardProps) {
       onMouseLeave={() => setIsHovered(false)}
       sx={{
         position: "relative",
-        height: 400,
+        height: {
+          xs: 280,
+          sm: 320,
+          md: 400,
+        },
         cursor: "pointer",
         overflow: "hidden",
-        borderRadius: "20px",
+        borderRadius: {
+          xs: "12px",
+          sm: "16px",
+          md: "20px",
+        },
         "&:hover": {
           "& .MuiCardMedia-root": {
             transform: "scale(1.1)",
@@ -63,8 +71,8 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-end",
-          padding: 3,
-          opacity: isHovered ? 1 : 0.7,
+          padding: { xs: 2, sm: 2.5, md: 3 },
+          opacity: { xs: 1, md: isHovered ? 1 : 0.7 },
           transition: "opacity 0.3s ease-in-out",
         }}
       >
@@ -75,6 +83,11 @@ export default function PlaceCard({ place }: PlaceCardProps) {
             fontWeight: 600,
             textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
             mb: 1,
+            fontSize: {
+              xs: "1.25rem",
+              sm: "1.5rem",
+              md: "1.75rem",
+            },
           }}
         >
           {place.name}
@@ -86,9 +99,17 @@ export default function PlaceCard({ place }: PlaceCardProps) {
             color: "rgba(255,255,255,0.9)",
             textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
             mb: 2,
-            opacity: isHovered ? 1 : 0,
-            transform: isHovered ? "translateY(0)" : "translateY(20px)",
+            opacity: { xs: 1, md: isHovered ? 1 : 0 },
+            transform: {
+              xs: "translateY(0)",
+              md: isHovered ? "translateY(0)" : "translateY(20px)",
+            },
             transition: "all 0.3s ease-in-out",
+            fontSize: {
+              xs: "0.875rem",
+              sm: "0.9rem",
+              md: "1rem",
+            },
           }}
         >
           {place.description}

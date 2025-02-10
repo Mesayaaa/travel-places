@@ -2,6 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animated-title {
+  animation: slideIn 0.8s ease-out, gradientFlow 5s ease infinite;
+  background-size: 200% auto;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -18,4 +78,28 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-animate {
+    view-timeline-name: --card;
+    view-timeline-axis: block;
+    animation-timeline: --card;
+    animation-range: entry 20% cover 30%;
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scroll-animate {
+  animation: fadeSlideUp linear;
 }

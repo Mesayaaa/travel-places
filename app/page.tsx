@@ -1,37 +1,122 @@
 "use client";
 
-import { Container, Grid, Box, Fade } from "@mui/material";
+import { Container, Grid, Box, Typography } from "@mui/material";
+import { motion, useInView } from "framer-motion";
 import PlaceCard from "./components/PlaceCard";
 import { places } from "./data/places";
+import { useRef } from "react";
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
+};
 
 export default function Home() {
+  const gridRef = useRef(null);
+  const isInView = useInView(gridRef, {
+    once: false,
+    margin: "-100px",
+  });
+
   return (
     <Box
+      component={motion.div}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       sx={{
         minHeight: "100vh",
         background: "linear-gradient(to bottom, #f8f9fa, #e9ecef)",
-        pt: 4,
+        pt: { xs: 2, sm: 3, md: 4 },
       }}
     >
       <Container maxWidth="xl">
-        <Grid
-          container
-          spacing={{ xs: 2, md: 3 }}
-          columns={{ xs: 4, sm: 8, md: 12 }}
-          sx={{
-            py: 2,
-            mx: "auto",
-            maxWidth: "1600px",
-          }}
+        <motion.div
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          {places.map((place, index) => (
-            <Fade key={place.id} in={true} timeout={500 + index * 200}>
-              <Grid item xs={4} sm={4} md={4}>
-                <PlaceCard place={place} />
+          <Typography
+            variant="h1"
+            className="animated-title"
+            sx={{
+              fontSize: { xs: "2rem", sm: "2.5rem", md: "3.5rem" },
+              mb: { xs: 2, sm: 3, md: 4 },
+              textAlign: "center",
+              position: "relative",
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                bottom: "-10px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "100px",
+                height: "4px",
+                background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
+                borderRadius: "2px",
+              },
+            }}
+          >
+            LESGOOO KITA PERGI KE
+          </Typography>
+        </motion.div>
+
+        <motion.div
+          ref={gridRef}
+          variants={container}
+          initial="hidden"
+          animate={isInView ? "show" : "hidden"}
+          style={{ perspective: "1000px" }}
+        >
+          <Grid
+            container
+            spacing={{ xs: 2, sm: 2, md: 3 }}
+            columns={{ xs: 4, sm: 8, md: 12 }}
+            sx={{
+              py: { xs: 1, sm: 2 },
+              mx: "auto",
+              maxWidth: "1600px",
+            }}
+          >
+            {places.map((place, index) => (
+              <Grid
+                item
+                xs={4}
+                sm={4}
+                md={4}
+                key={place.id}
+                component={motion.div}
+                variants={item}
+                whileHover={{ scale: 1.02, zIndex: 1 }}
+                custom={index}
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      duration: 0.5,
+                      delay: index * 0.1,
+                    },
+                  }}
+                  viewport={{ once: true, margin: "-50px" }}
+                >
+                  <PlaceCard place={place} />
+                </motion.div>
               </Grid>
-            </Fade>
-          ))}
-        </Grid>
+            ))}
+          </Grid>
+        </motion.div>
       </Container>
     </Box>
   );
