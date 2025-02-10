@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import PlaceCard from "./PlaceCard";
 import { Place } from "../data/places";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const container = {
   hidden: { opacity: 0 },
@@ -82,7 +83,14 @@ export default function SearchResults({
       }}
     >
       {isLoading ? (
-        renderLoadingSkeleton()
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="100vh"
+        >
+          <CircularProgress />
+        </Box>
       ) : error ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -95,7 +103,7 @@ export default function SearchResults({
             component="h2"
             sx={{ mb: 1, textAlign: "center", color: "error.main" }}
           >
-            {error}
+            Terjadi kesalahan: {error}
           </Typography>
           <Button
             variant="contained"

@@ -1,10 +1,17 @@
 "use client";
 
-import { Container, Grid, Box, Typography } from "@mui/material";
+import {
+  Container,
+  Grid,
+  Box,
+  Typography,
+  Button as MuiButton,
+} from "@mui/material";
 import { motion, useInView } from "framer-motion";
 import PlaceCard from "./components/PlaceCard";
 import { places } from "./data/places";
 import { useRef } from "react";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 
 const container = {
   hidden: { opacity: 0 },
@@ -19,6 +26,20 @@ const container = {
 const item = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0 },
+};
+
+// Create a motion-enhanced Button
+const MotionButton = motion(MuiButton);
+
+const scrollToTop = () => {
+  const scrollStep = -window.scrollY / (500 / 15); // 500ms untuk scroll ke atas
+  const scrollInterval = setInterval(() => {
+    if (window.scrollY !== 0) {
+      window.scrollBy(0, scrollStep);
+    } else {
+      clearInterval(scrollInterval);
+    }
+  }, 15);
 };
 
 export default function Home() {
@@ -117,6 +138,34 @@ export default function Home() {
             ))}
           </Grid>
         </motion.div>
+
+        {/* Tombol Kembali ke Atas */}
+        <MotionButton
+          variant="contained"
+          onClick={scrollToTop}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          sx={{
+            position: "fixed",
+            bottom: 20,
+            right: 20,
+            bgcolor: "primary.main",
+            color: "white",
+            "&:hover": {
+              bgcolor: "secondary.main",
+              transform: "scale(1.1)",
+            },
+            borderRadius: "50%",
+            width: 56,
+            height: 56,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <ArrowUpwardIcon />
+        </MotionButton>
       </Container>
     </Box>
   );
