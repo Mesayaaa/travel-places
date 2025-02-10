@@ -9,8 +9,9 @@ import {
 } from "@mui/material";
 import { motion, useInView } from "framer-motion";
 import PlaceCard from "./components/PlaceCard";
+import LoadingSkeleton from "./components/LoadingSkeleton";
 import { places } from "./data/places";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 
 const container = {
@@ -31,23 +32,26 @@ const item = {
 // Create a motion-enhanced Button
 const MotionButton = motion(MuiButton);
 
-const scrollToTop = () => {
-  const scrollStep = -window.scrollY / (500 / 15); // 500ms untuk scroll ke atas
-  const scrollInterval = setInterval(() => {
-    if (window.scrollY !== 0) {
-      window.scrollBy(0, scrollStep);
-    } else {
-      clearInterval(scrollInterval);
-    }
-  }, 15);
-};
-
 export default function Home() {
-  const gridRef = useRef(null);
-  const isInView = useInView(gridRef, {
-    once: false,
-    margin: "-100px",
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const ref = useRef(null);
+  const isInView = useInView(ref);
+
+  // Simulasi loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // Loading selama 2 detik
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <Box
@@ -92,7 +96,7 @@ export default function Home() {
         </motion.div>
 
         <motion.div
-          ref={gridRef}
+          ref={ref}
           variants={container}
           initial="hidden"
           animate={isInView ? "show" : "hidden"}
@@ -108,34 +112,42 @@ export default function Home() {
               maxWidth: "1600px",
             }}
           >
-            {places.map((place, index) => (
-              <Grid
-                item
-                xs={4}
-                sm={4}
-                md={4}
-                key={place.id}
-                component={motion.div}
-                variants={item}
-                whileHover={{ scale: 1.02, zIndex: 1 }}
-                custom={index}
-              >
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{
-                    opacity: 1,
-                    y: 0,
-                    transition: {
-                      duration: 0.5,
-                      delay: index * 0.1,
-                    },
-                  }}
-                  viewport={{ once: true, margin: "-50px" }}
-                >
-                  <PlaceCard place={place} />
-                </motion.div>
-              </Grid>
-            ))}
+            {isLoading
+              ? // Tampilkan skeleton saat loading
+                Array.from(new Array(6)).map((_, index) => (
+                  <Grid item xs={4} sm={4} md={4} key={index}>
+                    <LoadingSkeleton />
+                  </Grid>
+                ))
+              : // Tampilkan data sebenarnya setelah loading selesai
+                places.map((place, index) => (
+                  <Grid
+                    item
+                    xs={4}
+                    sm={4}
+                    md={4}
+                    key={place.id}
+                    component={motion.div}
+                    variants={item}
+                    whileHover={{ scale: 1.02, zIndex: 1 }}
+                    custom={index}
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{
+                        opacity: 1,
+                        y: 0,
+                        transition: {
+                          duration: 0.5,
+                          delay: index * 0.1,
+                        },
+                      }}
+                      viewport={{ once: true, margin: "-50px" }}
+                    >
+                      <PlaceCard place={place} />
+                    </motion.div>
+                  </Grid>
+                ))}
           </Grid>
         </motion.div>
 
