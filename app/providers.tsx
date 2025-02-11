@@ -36,14 +36,14 @@ let theme = createTheme({
   },
   palette: {
     primary: {
+      main: "#FF6B6B",
+      light: "#FF8E8E",
+      dark: "#E54B4B",
+    },
+    secondary: {
       main: "#4ECDC4",
       light: "#7EDCD6",
       dark: "#3B9B95",
-    },
-    secondary: {
-      main: "#FF6B6B",
-      light: "#FF9B9B",
-      dark: "#CC5555",
     },
     background: {
       default: "#f8f9fa",
@@ -55,7 +55,7 @@ let theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 16,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           transition: "all 0.3s ease-in-out",
         },
       },
@@ -74,6 +74,14 @@ let theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
+          transition: "all 0.2s ease-in-out",
+        },
+      },
+    },
+    MuiModal: {
+      styleOverrides: {
+        root: {
+          backdropFilter: "blur(8px)",
         },
       },
     },
