@@ -16,7 +16,7 @@ export const places: Place[] = [
   },
   {
     id: 2,
-    name: "Nyanyi Nyanyi",
+    name: "Nyanyi nyanyi",
     image: getImagePath("/images/karaoke.jpg"),
     mapsLink: "https://maps.app.goo.gl/nvWQFFjTdtx5yYxe7"
   },
