@@ -30,6 +30,7 @@ export default function PlaceCard({ place }: PlaceCardProps) {
 
   const handleMapClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (place.id === 4 || !place.mapsLink) return;
     window.open(place.mapsLink, "_blank");
   };
 
@@ -52,25 +53,29 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           height: {
             xs: 180,
             sm: 280,
-            md: 360,
+            md: 400,
           },
           cursor: "pointer",
           overflow: "hidden",
           borderRadius: {
             xs: "16px",
             sm: "16px",
-            md: "20px",
+            md: "24px",
           },
           boxShadow: isHovered
-            ? (theme) => `0 8px 24px ${theme.palette.primary.main}20`
-            : "0 4px 12px rgba(0,0,0,0.1)",
-          transition: "all 0.3s ease-in-out",
+            ? (theme) => `0 16px 40px ${theme.palette.primary.main}40`
+            : "0 8px 24px rgba(0,0,0,0.15)",
+          transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
           "&:hover": {
             "& .MuiCardMedia-root": {
-              transform: "scale(1.05)",
+              transform: "scale(1.08)",
             },
             "& .overlay": {
               opacity: 1,
+              background: (theme) => `linear-gradient(to top, 
+                ${theme.palette.common.black}F0 0%, 
+                ${theme.palette.common.black}99 50%, 
+                ${theme.palette.common.black}66 100%)`,
             },
           },
         }}
@@ -114,82 +119,113 @@ export default function PlaceCard({ place }: PlaceCardProps) {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <Typography
-              variant="h5"
-              sx={{
-                color: "white",
-                fontWeight: 700,
-                textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
-                mb: { xs: 1, sm: 1.5 },
-                fontSize: {
-                  xs: "1.25rem",
-                  sm: "1.5rem",
-                  md: "1.75rem",
-                },
-                lineHeight: { xs: 1.2, sm: 1.4 },
-              }}
-            >
-              {place.name}
-            </Typography>
+            {place.id !== 4 && (
+              <Typography
+                variant="h5"
+                sx={{
+                  color: "white",
+                  fontWeight: 800,
+                  textShadow: "2px 2px 12px rgba(0,0,0,0.9)",
+                  mb: { xs: 1, sm: 1.5, md: 2 },
+                  fontSize: {
+                    xs: "1.1rem",
+                    sm: "1.3rem",
+                    md: "1.8rem",
+                  },
+                  lineHeight: { xs: 1.2, sm: 1.4, md: 1.3 },
+                  position: "relative",
+                  zIndex: 2,
+                  background: "rgba(0, 0, 0, 0.7)",
+                  padding: { xs: "4px 12px", md: "8px 16px" },
+                  borderRadius: "12px",
+                  display: "inline-block",
+                  maxWidth: "90%",
+                  wordWrap: "break-word",
+                  transform: isHovered ? "translateY(-4px)" : "translateY(0)",
+                  transition: "transform 0.3s ease",
+                }}
+              >
+                {place.name}
+              </Typography>
+            )}
           </motion.div>
 
-          <Box
-            onClick={handleMapClick}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              mt: { xs: "auto", sm: 0 },
-              cursor: "pointer",
-              transition: "transform 0.2s ease",
-              "&:hover": {
-                transform: "scale(1.05)",
-              },
-            }}
-          >
-            <LocationOnIcon
+          {place.id !== 4 && (
+            <Box
+              onClick={handleMapClick}
               sx={{
-                color: "white",
-                fontSize: { xs: "1.2rem", sm: "1.5rem" },
-              }}
-            />
-            <Typography
-              variant="button"
-              sx={{
-                color: "white",
-                fontWeight: 500,
-                letterSpacing: 0.5,
-                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                mt: { xs: "auto", sm: 0 },
+                cursor: "pointer",
+                transition: "transform 0.2s ease",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                },
+                background: (theme) => ({
+                  xs: "rgba(0, 0, 0, 0.5)",
+                  sm: "rgba(0, 0, 0, 0.7)",
+                }),
+                borderRadius: "8px",
+                padding: "6px 12px",
+                width: "fit-content",
+                backdropFilter: "blur(4px)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              View on Maps
-            </Typography>
-          </Box>
+              <LocationOnIcon
+                sx={{
+                  color: "white",
+                  fontSize: { xs: "1.2rem", sm: "1.5rem" },
+                }}
+              />
+              <Typography
+                variant="button"
+                sx={{
+                  color: "white",
+                  fontWeight: 500,
+                  letterSpacing: 0.5,
+                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                  whiteSpace: "nowrap",
+                }}
+              >
+                View on Maps
+              </Typography>
+            </Box>
+          )}
         </Box>
 
-        <IconButton
-          onClick={handleMapClick}
-          sx={(theme) => ({
-            position: "absolute",
-            top: 8,
-            right: 8,
-            background: `${theme.palette.primary.main}CC`,
-            backdropFilter: "blur(4px)",
-            padding: { xs: "8px", sm: "10px" },
-            "&:hover": {
-              background: theme.palette.primary.dark,
-              transform: "scale(1.1)",
-              boxShadow: `0 2px 12px ${theme.palette.primary.main}66`,
-            },
-          })}
-        >
-          <MapIcon
-            sx={{
-              fontSize: { xs: "1.2rem", sm: "1.5rem" },
-              color: "white",
-            }}
-          />
-        </IconButton>
+        {place.id !== 4 && (
+          <IconButton
+            onClick={handleMapClick}
+            sx={(theme) => ({
+              position: "absolute",
+              top: { xs: 8, md: 16 },
+              right: { xs: 8, md: 16 },
+              background: `${theme.palette.primary.main}E6`,
+              backdropFilter: "blur(8px)",
+              padding: { xs: "8px", sm: "10px", md: "12px" },
+              cursor: "pointer",
+              "&:hover": {
+                background: theme.palette.primary.dark,
+                transform: "scale(1.15) rotate(8deg)",
+                boxShadow: `0 4px 20px ${theme.palette.primary.main}99`,
+              },
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            })}
+          >
+            <MapIcon
+              sx={{
+                fontSize: { xs: "1.2rem", sm: "1.5rem", md: "1.8rem" },
+                color: "white",
+              }}
+            />
+          </IconButton>
+        )}
       </MotionCard>
 
       <Modal
@@ -199,24 +235,28 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          p: { xs: 2, sm: 3, md: 4 },
+          p: { xs: 2, sm: 3, md: 6 },
+          "& .MuiBackdrop-root": {
+            backdropFilter: "blur(8px) brightness(0.5)",
+          },
         }}
       >
         <Box
           sx={{
             position: "relative",
-            maxWidth: "90vw",
-            maxHeight: "90vh",
+            maxWidth: { xs: "90vw", md: "80vw" },
+            maxHeight: { xs: "90vh", md: "85vh" },
             outline: "none",
-            borderRadius: 3,
+            borderRadius: { xs: 3, md: 4 },
             overflow: "hidden",
+            boxShadow: "0 24px 48px rgba(0,0,0,0.4)",
           }}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           >
             <img
               src={place.image}
@@ -225,25 +265,27 @@ export default function PlaceCard({ place }: PlaceCardProps) {
                 width: "100%",
                 height: "100%",
                 objectFit: "contain",
-                borderRadius: "16px",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                borderRadius: "20px",
+                boxShadow: "0 12px 36px rgba(0,0,0,0.4)",
               }}
             />
             <IconButton
               onClick={() => setIsModalOpen(false)}
               sx={(theme) => ({
                 position: "absolute",
-                top: 8,
-                right: 8,
-                backgroundColor: `${theme.palette.common.black}99`,
+                top: 16,
+                right: 16,
+                backgroundColor: `${theme.palette.common.black}CC`,
                 color: "white",
+                padding: "12px",
                 "&:hover": {
                   backgroundColor: theme.palette.primary.main,
-                  transform: "scale(1.1)",
+                  transform: "scale(1.1) rotate(90deg)",
                 },
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               })}
             >
-              <CloseIcon />
+              <CloseIcon sx={{ fontSize: "1.8rem" }} />
             </IconButton>
           </motion.div>
         </Box>

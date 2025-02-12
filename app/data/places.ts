@@ -10,32 +10,26 @@ export interface Place {
 export const places: Place[] = [
   {
     id: 1,
-    name: "Mall",
-    image: getImagePath("/images/borobudur.jpg"),
-    mapsLink: "https://goo.gl/maps/QKQYYZqx6YdNgzjZ6"
+    name: "The Breeze",
+    image: getImagePath("/images/breeze.jpg"),
+    mapsLink: "https://maps.app.goo.gl/HeGoPoKg3dhJuSFXA"
   },
   {
     id: 2,
-    name: "Raja Ampat",
-    image: getImagePath("/images/borobudur.jpg"),
-    mapsLink: "https://goo.gl/maps/xMHQgGZ8qH8LFNRP6"
+    name: "Nyanyi Nyanyi",
+    image: getImagePath("/images/karaoke.jpg"),
+    mapsLink: "https://maps.app.goo.gl/nvWQFFjTdtx5yYxe7"
   },
   {
     id: 3,
-    name: "Mount Bromo",
-    image: getImagePath("/images/borobudur.jpg"),
-    mapsLink: "https://goo.gl/maps/L4c8Vt8zoQYoUqWb7"
+    name: "Cafe",
+    image: getImagePath("/images/nako.jpg"),
+    mapsLink: "https://maps.app.goo.gl/MnxJLDm8wQDUkGY27"
   },
   {
     id: 4,
-    name: "Tanah Lot",
-    image: getImagePath("/images/borobudur.jpg"),
-    mapsLink: "https://goo.gl/maps/YQxYyZH8xvYKFDFR9"
-  },
-  {
-    id: 5,
-    name: "Pink Beach",
-    image: getImagePath("/images/borobudur.jpg"),
-    mapsLink: "https://goo.gl/maps/xX3vX8TQQkqhJ7Lz8"
+    name: "Hunting makannn",
+    image: getImagePath("/images/makan.jpg"),
+    mapsLink: "https://goo.gl/maps/L4c8Vt8zoQYoUqWb7"
   }
 ]; 

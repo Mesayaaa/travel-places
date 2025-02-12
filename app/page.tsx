@@ -111,12 +111,23 @@ export default function Home() {
                     item
                     xs={12}
                     sm={6}
-                    md={4}
+                    md={place.id === 4 ? 7 : 4}
                     key={place.id}
                     component={motion.div}
                     variants={item}
                     whileHover={{ scale: 1.02, zIndex: 1 }}
                     custom={index}
+                    sx={{
+                      ...(place.id === 4 && {
+                        maxWidth: "100%",
+                        width: "100%",
+                        px: { md: 4 },
+                        margin: "0 auto",
+                        display: "flex",
+                        justifyContent: "center",
+                        gridColumn: { md: "span 12" },
+                      }),
+                    }}
                   >
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -129,6 +140,11 @@ export default function Home() {
                         },
                       }}
                       viewport={{ once: true, margin: "-50px" }}
+                      style={
+                        place.id === 4
+                          ? { width: "100%", maxWidth: "800px" }
+                          : undefined
+                      }
                     >
                       <PlaceCard place={place} />
                     </motion.div>
