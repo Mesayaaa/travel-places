@@ -10,7 +10,7 @@ export interface Place {
 export const places: Place[] = [
   {
     id: 1,
-    name: "The Breeze",
+    name: "The Breeze BSD?? mau ke taman ato pantai sih masnya ato ke kidzaniaaaa aaaa mau walopun km kayanya masi blum lama dari sana",
     image: getImagePath("/images/breeze.jpg"),
     mapsLink: "https://maps.app.goo.gl/HeGoPoKg3dhJuSFXA"
   },

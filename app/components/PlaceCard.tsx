@@ -127,22 +127,37 @@ export default function PlaceCard({ place }: PlaceCardProps) {
                   fontWeight: 800,
                   textShadow: "2px 2px 12px rgba(0,0,0,0.9)",
                   mb: { xs: 1, sm: 1.5, md: 2 },
-                  fontSize: {
-                    xs: "1.1rem",
-                    sm: "1.3rem",
-                    md: "1.8rem",
-                  },
+                  fontSize:
+                    place.id === 1
+                      ? {
+                          xs: "0.75rem",
+                          sm: "1.1rem",
+                          md: "1.5rem",
+                        }
+                      : {
+                          xs: "0.9rem",
+                          sm: "1.3rem",
+                          md: "1.8rem",
+                        },
                   lineHeight: { xs: 1.2, sm: 1.4, md: 1.3 },
                   position: "relative",
                   zIndex: 2,
                   background: "rgba(0, 0, 0, 0.7)",
-                  padding: { xs: "4px 12px", md: "8px 16px" },
+                  padding: {
+                    xs: "4px 8px",
+                    sm: "4px 12px",
+                    md: "8px 16px",
+                  },
                   borderRadius: "12px",
-                  display: "inline-block",
+                  display: "inline-flex",
                   maxWidth: "90%",
-                  wordWrap: "break-word",
+                  wordBreak: "break-word",
+                  whiteSpace: "pre-wrap",
                   transform: isHovered ? "translateY(-4px)" : "translateY(0)",
                   transition: "transform 0.3s ease",
+                  WebkitBoxDecorationBreak: "clone",
+                  boxDecorationBreak: "clone",
+                  alignItems: "center",
                 }}
               >
                 {place.name}
@@ -172,8 +187,6 @@ export default function PlaceCard({ place }: PlaceCardProps) {
                 width: "fit-content",
                 backdropFilter: "blur(4px)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
-                display: "inline-flex",
-                alignItems: "center",
                 justifyContent: "center",
               }}
             >
