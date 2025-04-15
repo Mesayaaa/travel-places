@@ -204,7 +204,7 @@ export default function Home() {
               transition={{ duration: 0.5 }}
               sx={{
                 textAlign: "center",
-                py: { xs: 4, md: 8 },
+                py: { xs: 4, md: 10 },
                 px: { xs: 2, md: 4 },
                 borderRadius: "16px",
                 background: isDarkMode
@@ -214,7 +214,7 @@ export default function Home() {
                 boxShadow: "0 5px 15px rgba(0,0,0,0.08)",
                 maxWidth: "700px",
                 mx: "auto",
-                mt: { xs: 2, md: 4 },
+                mt: { xs: 6, md: 6 },
               }}
             >
               <EmojiEmotionsIcon
@@ -245,24 +245,6 @@ export default function Home() {
               >
                 Coba pilih kategori lain atau cari tempat baru
               </Typography>
-              <Button
-                variant="outlined"
-                onClick={() => handleCategoryChange("all")}
-                sx={{
-                  borderRadius: "8px",
-                  textTransform: "none",
-                  px: { xs: 2, md: 3 },
-                  py: { xs: 0.5, md: 1 },
-                  borderWidth: "2px",
-                  fontSize: { xs: "0.875rem", md: "1rem" },
-                  "&:hover": {
-                    borderWidth: "2px",
-                    transform: "translateY(-2px)",
-                  },
-                }}
-              >
-                Tampilkan Semua Tempat
-              </Button>
             </Box>
           )}
         </Container>

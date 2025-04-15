@@ -60,7 +60,6 @@ interface Trip {
 const PlaceCard = ({ place, delay = 0 }: { place: Place; delay?: number }) => {
   const { mode } = useTheme();
   const isDarkMode = mode === "dark";
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <Grid item xs={12} sm={6} md={4} key={place.id}>
@@ -68,29 +67,20 @@ const PlaceCard = ({ place, delay = 0 }: { place: Place; delay?: number }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: delay }}
-        whileHover={{ scale: 1.03 }}
-        onHoverStart={() => setIsHovered(true)}
-        onHoverEnd={() => setIsHovered(false)}
       >
         <Card
           sx={{
             height: "100%",
             display: "flex",
             flexDirection: "column",
-            transition: "transform 0.3s, box-shadow 0.3s",
-            transform: isHovered ? "translateY(-8px)" : "translateY(0)",
-            boxShadow: isHovered
-              ? isDarkMode
-                ? "0 12px 20px rgba(120,120,255,0.3)"
-                : "0 12px 24px rgba(66,99,235,0.25)"
-              : isDarkMode
-              ? "0 4px 20px rgba(120,120,255,0.15)"
-              : "0 4px 16px rgba(66,99,235,0.12)",
             borderRadius: 3,
             overflow: "hidden",
             bgcolor: isDarkMode ? "#2a2a3a" : "#ffffff",
             position: "relative",
             border: isDarkMode ? "none" : "1px solid rgba(228,233,247,0.7)",
+            boxShadow: isDarkMode
+              ? "0 4px 20px rgba(120,120,255,0.15)"
+              : "0 4px 16px rgba(66,99,235,0.12)",
           }}
         >
           <CardMedia
@@ -100,8 +90,6 @@ const PlaceCard = ({ place, delay = 0 }: { place: Place; delay?: number }) => {
             alt={place.name}
             sx={{
               objectFit: "cover",
-              transition: "transform 0.5s",
-              transform: isHovered ? "scale(1.05)" : "scale(1)",
             }}
           />
           <CardContent sx={{ flexGrow: 1 }}>
@@ -153,31 +141,6 @@ const PlaceCard = ({ place, delay = 0 }: { place: Place; delay?: number }) => {
                 {place.address || "Indonesia"}
               </Typography>
             </Box>
-
-            {isHovered && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Button
-                  variant="text"
-                  size="small"
-                  sx={{
-                    mt: 1,
-                    color: isDarkMode ? "#8c9eff" : "#4263eb",
-                    "&:hover": {
-                      backgroundColor: isDarkMode
-                        ? "rgba(140,158,255,0.08)"
-                        : "rgba(66,99,235,0.08)",
-                    },
-                    textTransform: "none",
-                  }}
-                >
-                  Lihat Detail
-                </Button>
-              </motion.div>
-            )}
           </CardContent>
         </Card>
       </motion.div>

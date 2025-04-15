@@ -145,17 +145,6 @@ export default function HeroSection() {
                   position: "relative",
                   color: "rgba(255,255,255,0.98)",
                   textShadow: "0 2px 8px rgba(0,0,0,0.7)",
-                  "&::after": {
-                    content: '""',
-                    position: "absolute",
-                    width: { xs: "20%", sm: "25%", md: "30%" },
-                    height: { xs: "2px", sm: "2.5px", md: "3px" },
-                    bottom: { xs: "8px", sm: "12px", md: "15px" },
-                    left: { xs: "3px", sm: "4px", md: "5px" },
-                    background:
-                      "linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0))",
-                    borderRadius: "2px",
-                  },
                 }}
               >
                 Jelajahi
@@ -189,17 +178,6 @@ export default function HeroSection() {
                   color: "rgba(255,255,255,0.98)",
                   textShadow: "0 2px 8px rgba(0,0,0,0.7)",
                   transform: "translateY(2px)",
-                  "&::after": {
-                    content: '""',
-                    position: "absolute",
-                    width: { xs: "80%", sm: "90%", md: "100%" },
-                    height: { xs: "2px", sm: "2.5px", md: "3px" },
-                    bottom: { xs: "8px", sm: "12px", md: "15px" },
-                    left: { xs: "0", sm: "0", md: "0" },
-                    background:
-                      "linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0))",
-                    borderRadius: "2px",
-                  },
                 }}
               >
                 Bersamanya
@@ -269,28 +247,51 @@ export default function HeroSection() {
           onClick={scrollToCategories}
           aria-label="Scroll to destinations"
           component={motion.button}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, y: [0, 10, 0] }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{
+            opacity: 1,
+            y: [0, 10, 0],
+            scale: [1, 1.1, 1],
+          }}
           transition={{
             duration: 2,
             repeat: Infinity,
             repeatType: "loop",
+            ease: "easeInOut",
           }}
+          whileHover={{
+            scale: 1.2,
+            backgroundColor: "rgba(255,255,255,0.3)",
+          }}
+          whileTap={{ scale: 0.95 }}
           sx={{
             color: "white",
             bgcolor: "rgba(255,255,255,0.15)",
-            backdropFilter: "blur(4px)",
+            backdropFilter: "blur(8px)",
             p: { xs: 1.5, sm: 2 },
+            border: "1px solid rgba(255,255,255,0.2)",
+            transition: "all 0.3s ease",
             "&:hover": {
               bgcolor: "rgba(255,255,255,0.25)",
-              transform: "scale(1.1)",
+              border: "1px solid rgba(255,255,255,0.4)",
+              boxShadow: isDarkMode
+                ? "0 8px 32px rgba(0,0,0,0.4)"
+                : "0 8px 32px rgba(0,0,0,0.2)",
             },
             boxShadow: isDarkMode
               ? "0 4px 20px rgba(0,0,0,0.4)"
               : "0 4px 20px rgba(0,0,0,0.2)",
           }}
         >
-          <KeyboardArrowDownIcon fontSize="large" />
+          <KeyboardArrowDownIcon
+            fontSize="large"
+            sx={{
+              transition: "transform 0.3s ease",
+              "&:hover": {
+                transform: "translateY(2px)",
+              },
+            }}
+          />
         </IconButton>
       </Box>
     </Box>
