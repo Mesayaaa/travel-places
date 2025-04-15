@@ -398,6 +398,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                     px: 1,
                     fontSize: "0.85rem",
                     fontWeight: 700,
+                    color: "#000000",
                   },
                   "&:hover": {
                     transform: "translateY(-2px) scale(1.05)",

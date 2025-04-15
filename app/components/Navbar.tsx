@@ -77,6 +77,7 @@ export default function Navbar() {
   const router = useRouter();
   const { mode, toggleTheme } = useTheme();
   const isDarkMode = mode === "dark";
+  const [isProfilePage, setIsProfilePage] = useState(false);
 
   // Helper function to check if an item should be active
   const isItemActive = (href: string) => {
@@ -92,8 +93,11 @@ export default function Navbar() {
       }
 
       // Check if we're on the profile page
-      const isProfilePage = window.location.pathname.includes("/profile");
-      if (isProfilePage) {
+      const currentIsProfilePage =
+        window.location.pathname.includes("/profile");
+      setIsProfilePage(currentIsProfilePage);
+
+      if (currentIsProfilePage) {
         setActiveSection("/profile");
         return;
       }
@@ -127,7 +131,7 @@ export default function Navbar() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [scrolled]);
+  }, [scrolled, navItems]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -139,9 +143,6 @@ export default function Navbar() {
     }
 
     setActiveSection(href);
-
-    // Check if we're on the profile page
-    const isProfilePage = window.location.pathname.includes("/profile");
 
     // Handle Home link to scroll to top
     if (href === "/") {
@@ -311,6 +312,14 @@ export default function Navbar() {
         width: "100%",
         zIndex: 1000,
         transition: "all 0.3s ease-in-out",
+        // Hide navbar only on profile page in light mode when not scrolled
+        opacity: isProfilePage && !isDarkMode && !scrolled ? 0 : 1,
+        visibility:
+          isProfilePage && !isDarkMode && !scrolled ? "hidden" : "visible",
+        transform:
+          isProfilePage && !isDarkMode && !scrolled
+            ? "translateY(-100%)"
+            : "translateY(0)",
       }}
     >
       <Container maxWidth="xl">

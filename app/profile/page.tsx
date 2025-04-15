@@ -72,14 +72,15 @@ const PlaceCard = ({ place, delay = 0 }: { place: Place; delay?: number }) => {
             "&:hover": {
               transform: "translateY(-8px)",
               boxShadow: isDarkMode
-                ? "0 12px 20px rgba(0,0,0,0.4)"
-                : "0 12px 20px rgba(0,0,0,0.2)",
+                ? "0 12px 20px rgba(120,120,255,0.2)"
+                : "0 12px 20px rgba(66,99,235,0.15)",
             },
             borderRadius: 3,
             overflow: "hidden",
             boxShadow: isDarkMode
-              ? "0 4px 20px rgba(0,0,0,0.3)"
-              : "0 4px 20px rgba(0,0,0,0.1)",
+              ? "0 4px 20px rgba(120,120,255,0.15)"
+              : "0 4px 20px rgba(66,99,235,0.08)",
+            bgcolor: isDarkMode ? "#2a2a3a" : "#ffffff",
           }}
         >
           <CardMedia
@@ -90,12 +91,23 @@ const PlaceCard = ({ place, delay = 0 }: { place: Place; delay?: number }) => {
             sx={{ objectFit: "cover" }}
           />
           <CardContent sx={{ flexGrow: 1 }}>
-            <Typography variant="h6" component="div" gutterBottom noWrap>
+            <Typography
+              variant="h6"
+              component="div"
+              gutterBottom
+              noWrap
+              sx={{
+                color: isDarkMode ? "#ffffff" : "#1e293b",
+                fontWeight: 600,
+              }}
+            >
               {place.name}
             </Typography>
             <Typography
               variant="body2"
-              color="text.secondary"
+              color={
+                isDarkMode ? "rgba(255,255,255,0.7)" : "rgba(30,41,59,0.7)"
+              }
               sx={{
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -115,9 +127,15 @@ const PlaceCard = ({ place, delay = 0 }: { place: Place; delay?: number }) => {
             >
               <LocationOnIcon
                 fontSize="small"
-                sx={{ mr: 0.5, color: "primary.main" }}
+                sx={{ mr: 0.5, color: isDarkMode ? "#8c9eff" : "#4263eb" }}
               />
-              <Typography variant="caption" color="text.secondary" noWrap>
+              <Typography
+                variant="caption"
+                color={
+                  isDarkMode ? "rgba(255,255,255,0.6)" : "rgba(30,41,59,0.6)"
+                }
+                noWrap
+              >
                 {place.address || "Indonesia"}
               </Typography>
             </Box>
@@ -151,12 +169,14 @@ const RecentTrips = ({ trips }: { trips: Trip[] }) => {
               borderRadius: 2,
               position: "relative",
               overflow: "visible",
+              bgcolor: isDarkMode ? "#2a2a3a" : "#ffffff",
+              borderColor: isDarkMode ? "rgba(255,255,255,0.1)" : "#e9effd",
               transition: "transform 0.2s ease-in-out, box-shadow 0.2s",
               "&:hover": {
                 transform: "translateY(-5px)",
                 boxShadow: isDarkMode
-                  ? "0 10px 20px rgba(0,0,0,0.3)"
-                  : "0 10px 20px rgba(0,0,0,0.1)",
+                  ? "0 10px 20px rgba(120,120,255,0.15)"
+                  : "0 10px 20px rgba(66,99,235,0.12)",
               },
               "&:before": {
                 content: '""',
@@ -166,20 +186,36 @@ const RecentTrips = ({ trips }: { trips: Trip[] }) => {
                 transform: "translateY(-50%)",
                 width: isMobile ? "16px" : "24px",
                 height: isMobile ? "16px" : "24px",
-                backgroundColor: "primary.main",
+                backgroundColor: isDarkMode ? "#8c9eff" : "#4263eb",
                 borderRadius: "50%",
                 zIndex: 1,
-                boxShadow: isDarkMode ? "0 0 0 4px #1e1e1e" : "0 0 0 4px white",
+                boxShadow: isDarkMode
+                  ? "0 0 0 4px #1e1e1e"
+                  : "0 0 0 4px white, 0 4px 8px rgba(66,99,235,0.2)",
               },
             }}
           >
             <CardContent>
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={12} sm={7}>
-                  <Typography variant="h6" component="div">
+                  <Typography
+                    variant="h6"
+                    component="div"
+                    sx={{
+                      color: isDarkMode ? "#ffffff" : "#1e293b",
+                      fontWeight: 600,
+                    }}
+                  >
                     {trip.destination}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    color={
+                      isDarkMode
+                        ? "rgba(255,255,255,0.7)"
+                        : "rgba(30,41,59,0.7)"
+                    }
+                  >
                     {trip.date}
                   </Typography>
                 </Grid>
@@ -188,7 +224,11 @@ const RecentTrips = ({ trips }: { trips: Trip[] }) => {
                     label="Selesai"
                     color="success"
                     size="small"
-                    sx={{ fontWeight: 500 }}
+                    sx={{
+                      fontWeight: 500,
+                      bgcolor: isDarkMode ? "#2e7d32" : "#e6f7e9",
+                      color: isDarkMode ? "#ffffff" : "#2e7d32",
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -305,7 +345,7 @@ export default function ProfilePage() {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: isDarkMode ? "#121212" : "#f8f9fa",
+        bgcolor: isDarkMode ? "#121212" : "#f8faff",
       }}
     >
       <Navbar />
@@ -319,8 +359,8 @@ export default function ProfilePage() {
             mb: 4,
             bgcolor: isDarkMode ? "#1e1e1e" : "#ffffff",
             boxShadow: isDarkMode
-              ? "0 4px 20px rgba(0,0,0,0.3)"
-              : "0 4px 20px rgba(0,0,0,0.1)",
+              ? "0 4px 20px rgba(120,120,255,0.15)"
+              : "0 4px 20px rgba(66,99,235,0.08)",
           }}
         >
           {isLoading ? (
@@ -364,9 +404,10 @@ export default function ProfilePage() {
                   sx={{
                     p: { xs: 3, md: 4 },
                     borderRadius: 3,
-                    background:
-                      "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-                    color: "text.primary",
+                    background: isDarkMode
+                      ? "linear-gradient(135deg, #2d3748 0%, #1a202c 100%)"
+                      : "linear-gradient(135deg, #e0eaff 0%, #c5d6ff 100%)",
+                    color: isDarkMode ? "#ffffff" : "#1e293b",
                     position: "relative",
                     overflow: "hidden",
                     mb: 4,
@@ -378,7 +419,7 @@ export default function ProfilePage() {
                       right: 0,
                       bottom: 0,
                       background: "url('/images/pattern.png')",
-                      opacity: 0.05,
+                      opacity: isDarkMode ? 0.03 : 0.08,
                       zIndex: 0,
                     },
                   }}
@@ -405,12 +446,19 @@ export default function ProfilePage() {
                           <IconButton
                             size="small"
                             sx={{
-                              bgcolor: "white",
-                              "&:hover": { bgcolor: "grey.100" },
-                              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                              bgcolor: isDarkMode ? "#2a2a3a" : "white",
+                              "&:hover": {
+                                bgcolor: isDarkMode ? "#3a3a4a" : "#f0f4ff",
+                              },
+                              boxShadow: isDarkMode
+                                ? "0 2px 8px rgba(0,0,0,0.1)"
+                                : "0 2px 8px rgba(66,99,235,0.15)",
                             }}
                           >
-                            <PhotoCameraIcon fontSize="small" color="primary" />
+                            <PhotoCameraIcon
+                              fontSize="small"
+                              sx={{ color: isDarkMode ? "#8c9eff" : "#4263eb" }}
+                            />
                           </IconButton>
                         }
                       >
@@ -419,9 +467,13 @@ export default function ProfilePage() {
                             width: { xs: 100, md: 140 },
                             height: { xs: 100, md: 140 },
                             mx: { xs: "auto", md: 0 },
-                            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-                            border: "4px solid white",
-                            bgcolor: "primary.light",
+                            boxShadow: isDarkMode
+                              ? "0 8px 24px rgba(120,120,255,0.2)"
+                              : "0 8px 24px rgba(66,99,235,0.15)",
+                            border: isDarkMode
+                              ? "4px solid #2a2a3a"
+                              : "4px solid white",
+                            bgcolor: isDarkMode ? "#3f51b5" : "#4263eb",
                             transition: "transform 0.3s ease-in-out",
                             "&:hover": {
                               transform: "scale(1.05)",
@@ -429,7 +481,10 @@ export default function ProfilePage() {
                           }}
                         >
                           <AccountCircleIcon
-                            sx={{ fontSize: { xs: 60, md: 80 } }}
+                            sx={{
+                              fontSize: { xs: 60, md: 80 },
+                              color: isDarkMode ? "#ffffff" : "#ffffff",
+                            }}
                           />
                         </Avatar>
                       </Badge>
@@ -442,20 +497,35 @@ export default function ProfilePage() {
                         fontWeight="bold"
                         gutterBottom
                         sx={{
-                          color: "primary.main",
-                          textShadow: "0 1px 1px rgba(0,0,0,0.05)",
+                          color: isDarkMode ? "#8c9eff" : "#4263eb",
+                          textShadow: isDarkMode
+                            ? "0 1px 2px rgba(0,0,0,0.3)"
+                            : "0 1px 1px rgba(66,99,235,0.1)",
                         }}
                       >
                         {user.name}
                       </Typography>
                       <Typography
                         variant="body1"
-                        color="text.secondary"
+                        color={
+                          isDarkMode
+                            ? "rgba(255,255,255,0.8)"
+                            : "rgba(30,41,59,0.8)"
+                        }
                         paragraph
                       >
                         {user.email}
                       </Typography>
-                      <Typography variant="body2" paragraph>
+                      <Typography
+                        variant="body2"
+                        paragraph
+                        sx={{
+                          color: isDarkMode
+                            ? "rgba(255,255,255,0.9)"
+                            : "rgba(30,41,59,0.9)",
+                          lineHeight: 1.6,
+                        }}
+                      >
                         {user.bio}
                       </Typography>
                       <Box
@@ -463,13 +533,30 @@ export default function ProfilePage() {
                       >
                         <LocationOnIcon
                           fontSize="small"
-                          sx={{ mr: 1, color: "primary.main" }}
+                          sx={{
+                            mr: 1,
+                            color: isDarkMode ? "#8c9eff" : "#4263eb",
+                          }}
                         />
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography
+                          variant="body2"
+                          color={
+                            isDarkMode
+                              ? "rgba(255,255,255,0.7)"
+                              : "rgba(30,41,59,0.7)"
+                          }
+                        >
                           {user.location}
                         </Typography>
                       </Box>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography
+                        variant="caption"
+                        color={
+                          isDarkMode
+                            ? "rgba(255,255,255,0.6)"
+                            : "rgba(30,41,59,0.6)"
+                        }
+                      >
                         Bergabung sejak {user.joinedDate}
                       </Typography>
                     </Grid>
@@ -483,13 +570,20 @@ export default function ProfilePage() {
                           borderRadius: 8,
                           px: 3,
                           py: 1.2,
-                          boxShadow: "0 4px 10px rgba(66, 99, 235, 0.2)",
+                          boxShadow: isDarkMode
+                            ? "0 4px 10px rgba(140,158,255,0.3)"
+                            : "0 4px 10px rgba(66,99,235,0.2)",
                           textTransform: "none",
                           fontWeight: "bold",
+                          bgcolor: isDarkMode ? "#8c9eff" : "#4263eb",
+                          color: isDarkMode ? "#1a1a2a" : "#ffffff",
                           transition: "all 0.3s ease",
                           "&:hover": {
                             transform: "translateY(-3px)",
-                            boxShadow: "0 6px 15px rgba(66, 99, 235, 0.3)",
+                            bgcolor: isDarkMode ? "#a5b4ff" : "#3651d4",
+                            boxShadow: isDarkMode
+                              ? "0 6px 15px rgba(140,158,255,0.4)"
+                              : "0 6px 15px rgba(66,99,235,0.3)",
                           },
                         }}
                         onClick={() => setIsEditing(true)}
@@ -513,12 +607,17 @@ export default function ProfilePage() {
                         height: "100%",
                         position: "relative",
                         overflow: "hidden",
-                        background:
-                          "linear-gradient(to bottom, #ffffff, #f8f9fa)",
-                        boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
+                        background: isDarkMode
+                          ? "linear-gradient(to bottom, #2a2a3a, #1e1e2e)"
+                          : "linear-gradient(to bottom, #ffffff, #f5f8ff)",
+                        boxShadow: isDarkMode
+                          ? "0 5px 15px rgba(120,120,255,0.1)"
+                          : "0 5px 15px rgba(66,99,235,0.08)",
                         transition: "transform 0.3s ease, box-shadow 0.3s ease",
                         "&:hover": {
-                          boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+                          boxShadow: isDarkMode
+                            ? "0 8px 20px rgba(120,120,255,0.15)"
+                            : "0 8px 20px rgba(66,99,235,0.12)",
                           transform: "translateY(-5px)",
                         },
                       }}
@@ -527,11 +626,18 @@ export default function ProfilePage() {
                         variant="h6"
                         fontWeight="bold"
                         gutterBottom
-                        sx={{ color: "primary.main" }}
+                        sx={{ color: isDarkMode ? "#8c9eff" : "#4263eb" }}
                       >
                         Statistik Perjalanan
                       </Typography>
-                      <Divider sx={{ mb: 3 }} />
+                      <Divider
+                        sx={{
+                          mb: 3,
+                          borderColor: isDarkMode
+                            ? "rgba(255,255,255,0.1)"
+                            : "rgba(66,99,235,0.15)",
+                        }}
+                      />
 
                       <List disablePadding>
                         <ListItem
@@ -542,16 +648,22 @@ export default function ProfilePage() {
                             borderRadius: 2,
                             "&:hover": {
                               transform: "translateX(5px)",
-                              backgroundColor: "rgba(0,0,0,0.01)",
+                              backgroundColor: isDarkMode
+                                ? "rgba(255,255,255,0.03)"
+                                : "rgba(66,99,235,0.03)",
                             },
                           }}
                         >
                           <ListItemIcon>
                             <Avatar
                               sx={{
-                                bgcolor: "rgba(66, 99, 235, 0.1)",
-                                color: "primary.main",
-                                boxShadow: "0 3px 6px rgba(0,0,0,0.05)",
+                                bgcolor: isDarkMode
+                                  ? "rgba(140,158,255,0.15)"
+                                  : "rgba(66,99,235,0.1)",
+                                color: isDarkMode ? "#8c9eff" : "#4263eb",
+                                boxShadow: isDarkMode
+                                  ? "0 3px 6px rgba(0,0,0,0.2)"
+                                  : "0 3px 6px rgba(66,99,235,0.15)",
                               }}
                             >
                               <FlightTakeoffIcon />
@@ -560,11 +672,16 @@ export default function ProfilePage() {
                           <ListItemText
                             primary="Trip Selesai"
                             secondary={user.trips}
-                            primaryTypographyProps={{ fontWeight: 500 }}
+                            primaryTypographyProps={{
+                              fontWeight: 500,
+                              color: isDarkMode
+                                ? "rgba(255,255,255,0.9)"
+                                : "rgba(30,41,59,0.9)",
+                            }}
                             secondaryTypographyProps={{
                               fontWeight: "bold",
                               fontSize: "1.2rem",
-                              color: "primary.main",
+                              color: isDarkMode ? "#8c9eff" : "#4263eb",
                             }}
                           />
                         </ListItem>
@@ -577,16 +694,22 @@ export default function ProfilePage() {
                             borderRadius: 2,
                             "&:hover": {
                               transform: "translateX(5px)",
-                              backgroundColor: "rgba(0,0,0,0.01)",
+                              backgroundColor: isDarkMode
+                                ? "rgba(255,255,255,0.03)"
+                                : "rgba(235,66,66,0.03)",
                             },
                           }}
                         >
                           <ListItemIcon>
                             <Avatar
                               sx={{
-                                bgcolor: "rgba(237, 73, 86, 0.1)",
-                                color: "error.main",
-                                boxShadow: "0 3px 6px rgba(0,0,0,0.05)",
+                                bgcolor: isDarkMode
+                                  ? "rgba(255,128,128,0.15)"
+                                  : "rgba(235,66,66,0.1)",
+                                color: isDarkMode ? "#ff8080" : "#e64646",
+                                boxShadow: isDarkMode
+                                  ? "0 3px 6px rgba(0,0,0,0.2)"
+                                  : "0 3px 6px rgba(235,66,66,0.15)",
                               }}
                             >
                               <FavoriteIcon />
@@ -595,11 +718,16 @@ export default function ProfilePage() {
                           <ListItemText
                             primary="Favorit"
                             secondary={user.favoritesCount}
-                            primaryTypographyProps={{ fontWeight: 500 }}
+                            primaryTypographyProps={{
+                              fontWeight: 500,
+                              color: isDarkMode
+                                ? "rgba(255,255,255,0.9)"
+                                : "rgba(30,41,59,0.9)",
+                            }}
                             secondaryTypographyProps={{
                               fontWeight: "bold",
                               fontSize: "1.2rem",
-                              color: "error.main",
+                              color: isDarkMode ? "#ff8080" : "#e64646",
                             }}
                           />
                         </ListItem>
@@ -612,16 +740,22 @@ export default function ProfilePage() {
                             borderRadius: 2,
                             "&:hover": {
                               transform: "translateX(5px)",
-                              backgroundColor: "rgba(0,0,0,0.01)",
+                              backgroundColor: isDarkMode
+                                ? "rgba(255,255,255,0.03)"
+                                : "rgba(3,169,244,0.03)",
                             },
                           }}
                         >
                           <ListItemIcon>
                             <Avatar
                               sx={{
-                                bgcolor: "rgba(3, 169, 244, 0.1)",
-                                color: "info.main",
-                                boxShadow: "0 3px 6px rgba(0,0,0,0.05)",
+                                bgcolor: isDarkMode
+                                  ? "rgba(80,200,255,0.15)"
+                                  : "rgba(3,169,244,0.1)",
+                                color: isDarkMode ? "#80c8ff" : "#0398de",
+                                boxShadow: isDarkMode
+                                  ? "0 3px 6px rgba(0,0,0,0.2)"
+                                  : "0 3px 6px rgba(3,169,244,0.15)",
                               }}
                             >
                               <HistoryIcon />
@@ -630,11 +764,16 @@ export default function ProfilePage() {
                           <ListItemText
                             primary="Trip Direncanakan"
                             secondary={user.plannedTrips}
-                            primaryTypographyProps={{ fontWeight: 500 }}
+                            primaryTypographyProps={{
+                              fontWeight: 500,
+                              color: isDarkMode
+                                ? "rgba(255,255,255,0.9)"
+                                : "rgba(30,41,59,0.9)",
+                            }}
                             secondaryTypographyProps={{
                               fontWeight: "bold",
                               fontSize: "1.2rem",
-                              color: "info.main",
+                              color: isDarkMode ? "#80c8ff" : "#0398de",
                             }}
                           />
                         </ListItem>
@@ -657,11 +796,20 @@ export default function ProfilePage() {
                               mb: 2,
                               borderWidth: 2,
                               fontWeight: 600,
+                              color: isDarkMode ? "#8c9eff" : "#4263eb",
+                              borderColor: isDarkMode ? "#8c9eff" : "#4263eb",
                               transition: "all 0.3s ease",
                               "&:hover": {
                                 borderWidth: 2,
+                                borderColor: isDarkMode ? "#a5b4ff" : "#3651d4",
+                                color: isDarkMode ? "#a5b4ff" : "#3651d4",
                                 transform: "translateY(-3px)",
-                                boxShadow: "0 6px 15px rgba(0,0,0,0.1)",
+                                bgcolor: isDarkMode
+                                  ? "rgba(140,158,255,0.05)"
+                                  : "rgba(66,99,235,0.05)",
+                                boxShadow: isDarkMode
+                                  ? "0 6px 15px rgba(140,158,255,0.2)"
+                                  : "0 6px 15px rgba(66,99,235,0.15)",
                               },
                             }}
                           >
@@ -677,15 +825,29 @@ export default function ProfilePage() {
                             textTransform: "none",
                             py: 1.2,
                             borderWidth: 2,
-                            color: "text.secondary",
-                            borderColor: "divider",
+                            color: isDarkMode
+                              ? "rgba(255,255,255,0.7)"
+                              : "rgba(30,41,59,0.7)",
+                            borderColor: isDarkMode
+                              ? "rgba(255,255,255,0.2)"
+                              : "rgba(30,41,59,0.2)",
                             fontWeight: 600,
                             transition: "all 0.3s ease",
                             "&:hover": {
                               borderWidth: 2,
-                              borderColor: "text.secondary",
+                              borderColor: isDarkMode
+                                ? "rgba(255,255,255,0.3)"
+                                : "rgba(30,41,59,0.4)",
+                              color: isDarkMode
+                                ? "rgba(255,255,255,0.9)"
+                                : "rgba(30,41,59,0.9)",
                               transform: "translateY(-3px)",
-                              boxShadow: "0 6px 15px rgba(0,0,0,0.05)",
+                              bgcolor: isDarkMode
+                                ? "rgba(255,255,255,0.05)"
+                                : "rgba(30,41,59,0.03)",
+                              boxShadow: isDarkMode
+                                ? "0 6px 15px rgba(255,255,255,0.05)"
+                                : "0 6px 15px rgba(0,0,0,0.05)",
                             },
                           }}
                         >
@@ -707,12 +869,17 @@ export default function ProfilePage() {
                         mb: 4,
                         position: "relative",
                         overflow: "hidden",
-                        background:
-                          "linear-gradient(to bottom, #ffffff, #f8f9fa)",
-                        boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
+                        background: isDarkMode
+                          ? "linear-gradient(to bottom, #2a2a3a, #1e1e2e)"
+                          : "linear-gradient(to bottom, #ffffff, #f5f8ff)",
+                        boxShadow: isDarkMode
+                          ? "0 5px 15px rgba(120,120,255,0.1)"
+                          : "0 5px 15px rgba(66,99,235,0.08)",
                         transition: "transform 0.3s ease, box-shadow 0.3s ease",
                         "&:hover": {
-                          boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+                          boxShadow: isDarkMode
+                            ? "0 8px 20px rgba(120,120,255,0.15)"
+                            : "0 8px 20px rgba(66,99,235,0.12)",
                         },
                       }}
                     >
@@ -720,11 +887,18 @@ export default function ProfilePage() {
                         variant="h6"
                         fontWeight="bold"
                         gutterBottom
-                        sx={{ color: "primary.main" }}
+                        sx={{ color: isDarkMode ? "#8c9eff" : "#4263eb" }}
                       >
                         Trip Terbaru
                       </Typography>
-                      <Divider sx={{ mb: 3 }} />
+                      <Divider
+                        sx={{
+                          mb: 3,
+                          borderColor: isDarkMode
+                            ? "rgba(255,255,255,0.1)"
+                            : "rgba(66,99,235,0.15)",
+                        }}
+                      />
 
                       {completedTrips.length > 0 ? (
                         <RecentTrips trips={completedTrips} />
@@ -732,7 +906,11 @@ export default function ProfilePage() {
                         <Box sx={{ py: 4, textAlign: "center" }}>
                           <Typography
                             variant="body1"
-                            color="text.secondary"
+                            color={
+                              isDarkMode
+                                ? "rgba(255,255,255,0.7)"
+                                : "rgba(30,41,59,0.7)"
+                            }
                             paragraph
                           >
                             Anda belum memiliki trip yang selesai
@@ -748,13 +926,20 @@ export default function ProfilePage() {
                             borderRadius: 8,
                             px: 3,
                             py: 1.2,
-                            boxShadow: "0 4px 10px rgba(66, 99, 235, 0.2)",
+                            boxShadow: isDarkMode
+                              ? "0 4px 10px rgba(140,158,255,0.3)"
+                              : "0 4px 10px rgba(66,99,235,0.2)",
                             textTransform: "none",
                             fontWeight: "bold",
+                            bgcolor: isDarkMode ? "#8c9eff" : "#4263eb",
+                            color: isDarkMode ? "#1a1a2a" : "#ffffff",
                             transition: "all 0.3s ease",
                             "&:hover": {
                               transform: "translateY(-3px)",
-                              boxShadow: "0 6px 15px rgba(66, 99, 235, 0.3)",
+                              bgcolor: isDarkMode ? "#a5b4ff" : "#3651d4",
+                              boxShadow: isDarkMode
+                                ? "0 6px 15px rgba(140,158,255,0.4)"
+                                : "0 6px 15px rgba(66,99,235,0.3)",
                             },
                           }}
                         >
@@ -771,12 +956,17 @@ export default function ProfilePage() {
                       sx={{
                         p: 3,
                         borderRadius: 3,
-                        background:
-                          "linear-gradient(to bottom, #ffffff, #f8f9fa)",
-                        boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
+                        background: isDarkMode
+                          ? "linear-gradient(to bottom, #2a2a3a, #1e1e2e)"
+                          : "linear-gradient(to bottom, #ffffff, #f5f8ff)",
+                        boxShadow: isDarkMode
+                          ? "0 5px 15px rgba(120,120,255,0.1)"
+                          : "0 5px 15px rgba(66,99,235,0.08)",
                         transition: "transform 0.3s ease, box-shadow 0.3s ease",
                         "&:hover": {
-                          boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+                          boxShadow: isDarkMode
+                            ? "0 8px 20px rgba(120,120,255,0.15)"
+                            : "0 8px 20px rgba(66,99,235,0.12)",
                         },
                       }}
                     >
@@ -784,11 +974,18 @@ export default function ProfilePage() {
                         variant="h6"
                         fontWeight="bold"
                         gutterBottom
-                        sx={{ color: "primary.main" }}
+                        sx={{ color: isDarkMode ? "#8c9eff" : "#4263eb" }}
                       >
                         Destinasi Favorit
                       </Typography>
-                      <Divider sx={{ mb: 3 }} />
+                      <Divider
+                        sx={{
+                          mb: 3,
+                          borderColor: isDarkMode
+                            ? "rgba(255,255,255,0.1)"
+                            : "rgba(66,99,235,0.15)",
+                        }}
+                      />
 
                       {favorites && favorites.length > 0 ? (
                         <Grid container spacing={2}>
@@ -804,7 +1001,11 @@ export default function ProfilePage() {
                         <Box sx={{ py: 4, textAlign: "center" }}>
                           <Typography
                             variant="body1"
-                            color="text.secondary"
+                            color={
+                              isDarkMode
+                                ? "rgba(255,255,255,0.7)"
+                                : "rgba(30,41,59,0.7)"
+                            }
                             paragraph
                           >
                             Anda belum menambahkan destinasi favorit
@@ -824,11 +1025,22 @@ export default function ProfilePage() {
                                 py: 1.2,
                                 borderWidth: 2,
                                 fontWeight: 600,
+                                color: isDarkMode ? "#8c9eff" : "#4263eb",
+                                borderColor: isDarkMode ? "#8c9eff" : "#4263eb",
                                 transition: "all 0.3s ease",
                                 "&:hover": {
                                   borderWidth: 2,
+                                  borderColor: isDarkMode
+                                    ? "#a5b4ff"
+                                    : "#3651d4",
+                                  color: isDarkMode ? "#a5b4ff" : "#3651d4",
                                   transform: "translateY(-3px)",
-                                  boxShadow: "0 6px 15px rgba(0,0,0,0.1)",
+                                  bgcolor: isDarkMode
+                                    ? "rgba(140,158,255,0.05)"
+                                    : "rgba(66,99,235,0.05)",
+                                  boxShadow: isDarkMode
+                                    ? "0 6px 15px rgba(140,158,255,0.2)"
+                                    : "0 6px 15px rgba(66,99,235,0.15)",
                                 },
                               }}
                             >
@@ -850,11 +1062,20 @@ export default function ProfilePage() {
                               textTransform: "none",
                               borderWidth: 2,
                               fontWeight: 600,
+                              color: isDarkMode ? "#8c9eff" : "#4263eb",
+                              borderColor: isDarkMode ? "#8c9eff" : "#4263eb",
                               transition: "all 0.3s ease",
                               "&:hover": {
                                 borderWidth: 2,
+                                borderColor: isDarkMode ? "#a5b4ff" : "#3651d4",
+                                color: isDarkMode ? "#a5b4ff" : "#3651d4",
                                 transform: "translateY(-3px)",
-                                boxShadow: "0 6px 15px rgba(0,0,0,0.1)",
+                                bgcolor: isDarkMode
+                                  ? "rgba(140,158,255,0.05)"
+                                  : "rgba(66,99,235,0.05)",
+                                boxShadow: isDarkMode
+                                  ? "0 6px 15px rgba(140,158,255,0.2)"
+                                  : "0 6px 15px rgba(66,99,235,0.15)",
                               },
                             }}
                           >
