@@ -158,7 +158,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
   const { mode } = useCustomTheme();
   const isDarkMode = mode === "dark";
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
-  const { toggleFavorite, isFavorite } = useFavorites();
+  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
   const { addPlaceToTrip, removePlaceFromTrip, isInCurrentTrip } = useTrip();
   const favoriteStatus = isFavorite(place.id);
   const inTripStatus = isInCurrentTrip(place.id);
@@ -204,7 +204,11 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
 
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleFavorite(place);
+    if (isFavorite(place.id)) {
+      removeFromFavorites(place.id);
+    } else {
+      addToFavorites(place);
+    }
   };
 
   const handleAddToTrip = () => {

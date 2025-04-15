@@ -141,7 +141,7 @@ export default function Home() {
             : "linear-gradient(to bottom, #f8f9fa, #f0f2f5)",
         }}
       >
-        <Container maxWidth="xl">
+        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
           <motion.div
             variants={container}
             initial="hidden"
@@ -204,8 +204,8 @@ export default function Home() {
               transition={{ duration: 0.5 }}
               sx={{
                 textAlign: "center",
-                py: 8,
-                px: 2,
+                py: { xs: 4, md: 8 },
+                px: { xs: 2, md: 4 },
                 borderRadius: "16px",
                 background: isDarkMode
                   ? "rgba(30,30,30,0.6)"
@@ -214,23 +214,35 @@ export default function Home() {
                 boxShadow: "0 5px 15px rgba(0,0,0,0.08)",
                 maxWidth: "700px",
                 mx: "auto",
-                mt: 4,
+                mt: { xs: 2, md: 4 },
               }}
             >
               <EmojiEmotionsIcon
-                sx={{ fontSize: 70, color: "text.disabled", mb: 2 }}
+                sx={{
+                  fontSize: { xs: 50, md: 70 },
+                  color: "text.disabled",
+                  mb: { xs: 1, md: 2 },
+                }}
               />
               <Typography
                 variant="h5"
                 sx={{
-                  mb: 2,
+                  mb: { xs: 1, md: 2 },
                   fontWeight: 600,
                   color: "text.secondary",
+                  fontSize: { xs: "1.25rem", md: "1.5rem" },
                 }}
               >
                 Tidak ada tempat untuk kategori ini
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{
+                  mb: { xs: 2, md: 4 },
+                  fontSize: { xs: "0.875rem", md: "1rem" },
+                }}
+              >
                 Coba pilih kategori lain atau cari tempat baru
               </Typography>
               <Button
@@ -239,9 +251,10 @@ export default function Home() {
                 sx={{
                   borderRadius: "8px",
                   textTransform: "none",
-                  px: 3,
-                  py: 1,
+                  px: { xs: 2, md: 3 },
+                  py: { xs: 0.5, md: 1 },
                   borderWidth: "2px",
+                  fontSize: { xs: "0.875rem", md: "1rem" },
                   "&:hover": {
                     borderWidth: "2px",
                     transform: "translateY(-2px)",
@@ -260,7 +273,7 @@ export default function Home() {
         id="plan"
         ref={planSectionRef}
         sx={{
-          py: { xs: 8, md: 10 },
+          py: { xs: 4, md: 10 },
           background: isDarkMode
             ? "linear-gradient(135deg, #121212 0%, #1d1d1d 100%)"
             : "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
@@ -285,7 +298,7 @@ export default function Home() {
           },
         }}
       >
-        <Container maxWidth="xl">
+        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
           {useTrip().placesInTrip.length > 0 ? (
             <Box
               component={motion.div}
@@ -296,15 +309,15 @@ export default function Home() {
                   : { opacity: 0, y: 40 }
               }
               transition={{ duration: 0.8 }}
-              sx={{ textAlign: "center", mb: { xs: 6, md: 8 } }}
+              sx={{ textAlign: "center", mb: { xs: 4, md: 8 } }}
             >
               <Typography
                 variant="h3"
                 component="h2"
                 sx={{
                   fontWeight: 800,
-                  mb: 2,
-                  fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" },
+                  mb: { xs: 1, md: 2 },
+                  fontSize: { xs: "1.5rem", sm: "2rem", md: "3rem" },
                   background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
                   backgroundClip: "text",
                   WebkitBackgroundClip: "text",
@@ -323,8 +336,9 @@ export default function Home() {
                   maxWidth: "800px",
                   mx: "auto",
                   color: "text.secondary",
-                  mb: 5,
-                  fontSize: { xs: "1rem", md: "1.1rem" },
+                  mb: { xs: 3, md: 5 },
+                  fontSize: { xs: "0.875rem", md: "1.1rem" },
+                  px: { xs: 2, md: 0 },
                 }}
               >
                 Buat rencana perjalanan dengan mudah dan nikmati momen spesial
@@ -341,15 +355,15 @@ export default function Home() {
                   startIcon={<AddIcon />}
                   onClick={() => setOpenTripPlanModal(true)}
                   sx={{
-                    py: 1.5,
-                    px: 4,
+                    py: { xs: 1, md: 1.5 },
+                    px: { xs: 2, md: 4 },
                     borderRadius: "12px",
                     fontWeight: 600,
                     background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
                     transition: "all 0.3s",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
                     textTransform: "none",
-                    fontSize: "1.1rem",
+                    fontSize: { xs: "0.875rem", md: "1.1rem" },
                     "&:hover": {
                       transform: "translateY(-3px)",
                       boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
@@ -373,8 +387,8 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               sx={{
                 textAlign: "center",
-                mb: { xs: 5, md: 6 },
-                p: 4,
+                mb: { xs: 4, md: 6 },
+                p: { xs: 2, md: 4 },
                 borderRadius: "16px",
                 background: isDarkMode
                   ? "rgba(30,30,30,0.5)"
@@ -390,8 +404,8 @@ export default function Home() {
                 component="h2"
                 sx={{
                   fontWeight: 800,
-                  mb: 2,
-                  fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" },
+                  mb: { xs: 1, md: 2 },
+                  fontSize: { xs: "1.5rem", sm: "2rem", md: "3rem" },
                   background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
                   backgroundClip: "text",
                   WebkitBackgroundClip: "text",
@@ -410,8 +424,9 @@ export default function Home() {
                   maxWidth: "800px",
                   mx: "auto",
                   color: "text.secondary",
-                  mb: 4,
-                  fontSize: { xs: "1rem", md: "1.1rem" },
+                  mb: { xs: 3, md: 4 },
+                  fontSize: { xs: "0.875rem", md: "1.1rem" },
+                  px: { xs: 2, md: 0 },
                 }}
               >
                 Anda perlu menambahkan tempat ke trip sebelum dapat membuat
@@ -434,9 +449,10 @@ export default function Home() {
                   sx={{
                     borderRadius: "8px",
                     textTransform: "none",
-                    px: 3,
-                    py: 1.2,
+                    px: { xs: 2, md: 3 },
+                    py: { xs: 0.5, md: 1.2 },
                     borderWidth: "2px",
+                    fontSize: { xs: "0.875rem", md: "1rem" },
                     "&:hover": {
                       borderWidth: "2px",
                       transform: "translateY(-2px)",

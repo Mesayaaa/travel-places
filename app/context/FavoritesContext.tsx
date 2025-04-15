@@ -9,73 +9,87 @@ import React, {
 } from "react";
 import { Place } from "../data/places";
 
-type FavoritesContextType = {
+interface FavoritesContextType {
   favorites: Place[];
-  toggleFavorite: (place: Place) => void;
-  isFavorite: (placeId: number) => boolean;
+  addToFavorites: (place: Place) => void;
+  removeFromFavorites: (id: number) => void;
+  isFavorite: (id: number) => boolean;
   favoritesCount: number;
-};
+}
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(
   undefined
 );
 
-export const FavoritesProvider = ({ children }: { children: ReactNode }) => {
+export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<Place[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load favorites from localStorage on mount
+  // Load favorites from localStorage on initial render
   useEffect(() => {
-    const storedFavorites = localStorage.getItem("favorites");
-    if (storedFavorites) {
-      try {
-        setFavorites(JSON.parse(storedFavorites));
-      } catch (error) {
-        console.error("Error parsing favorites from localStorage", error);
+    if (typeof window !== "undefined") {
+      const storedFavorites = localStorage.getItem("favorites");
+      if (storedFavorites) {
+        try {
+          const parsedFavorites = JSON.parse(storedFavorites);
+          setFavorites(parsedFavorites);
+        } catch (error) {
+          console.error("Error parsing favorites from localStorage:", error);
+          localStorage.removeItem("favorites");
+        }
       }
+      setIsInitialized(true);
     }
   }, []);
 
-  // Save favorites to localStorage when updated
+  // Save favorites to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem("favorites", JSON.stringify(favorites));
-  }, [favorites]);
+    if (isInitialized && typeof window !== "undefined") {
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+    }
+  }, [favorites, isInitialized]);
 
-  const toggleFavorite = (place: Place) => {
+  const addToFavorites = (place: Place) => {
     setFavorites((prevFavorites) => {
-      const isAlreadyFavorite = prevFavorites.some(
-        (fav) => fav.id === place.id
-      );
-
-      if (isAlreadyFavorite) {
-        return prevFavorites.filter((fav) => fav.id !== place.id);
-      } else {
-        return [...prevFavorites, place];
+      // Check if the place is already in favorites
+      if (prevFavorites.some((fav) => fav.id === place.id)) {
+        return prevFavorites;
       }
+      return [...prevFavorites, place];
     });
   };
 
-  const isFavorite = (placeId: number) => {
-    return favorites.some((fav) => fav.id === placeId);
+  const removeFromFavorites = (id: number) => {
+    setFavorites((prevFavorites) =>
+      prevFavorites.filter((place) => place.id !== id)
+    );
   };
+
+  const isFavorite = (id: number) => {
+    return favorites.some((place) => place.id === id);
+  };
+
+  const favoritesCount = favorites.length;
 
   return (
     <FavoritesContext.Provider
       value={{
         favorites,
-        toggleFavorite,
+        addToFavorites,
+        removeFromFavorites,
         isFavorite,
-        favoritesCount: favorites.length,
+        favoritesCount,
       }}
     >
       {children}
     </FavoritesContext.Provider>
   );
-};
+}
 
-export const useFavorites = () => {
+export function useFavorites() {
   const context = useContext(FavoritesContext);
   if (context === undefined) {
     throw new Error("useFavorites must be used within a FavoritesProvider");
   }
   return context;
-};
+}

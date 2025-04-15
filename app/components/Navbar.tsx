@@ -72,8 +72,11 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("/");
+  const [loading, setLoading] = useState(false);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
   const muiTheme = useMuiTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(muiTheme.breakpoints.between("sm", "md"));
   const { favoritesCount } = useFavorites();
   const { placesInTrip, openTripPlanModal, setOpenTripPlanModal } = useTrip();
   const router = useRouter();
@@ -81,7 +84,6 @@ export default function Navbar() {
   const { mode, toggleTheme } = useTheme();
   const isDarkMode = mode === "dark";
   const [isProfilePage, setIsProfilePage] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   // Helper function to check if an item should be active
   const isItemActive = (href: string) => {
@@ -223,6 +225,30 @@ export default function Navbar() {
     }
   };
 
+  const handleFavoritesClick = () => {
+    // If already on favorites page, do nothing
+    if (pathname === "/favorites") {
+      return;
+    }
+
+    setLoadingFavorites(true);
+
+    try {
+      // Set timeout to ensure loading state is visible before navigation
+      setTimeout(() => {
+        router.push("/favorites");
+
+        // Set a fallback timeout to clear loading state in case navigation fails
+        setTimeout(() => {
+          if (loadingFavorites) setLoadingFavorites(false);
+        }, 3000);
+      }, 300);
+    } catch (error) {
+      console.error("Navigation error:", error);
+      setLoadingFavorites(false);
+    }
+  };
+
   const drawer = (
     <Box sx={{ textAlign: "center", py: 2 }}>
       <Box
@@ -246,6 +272,12 @@ export default function Navbar() {
               sx={{
                 color: isDarkMode ? "orange" : "primary.main",
                 transition: "all 0.3s ease",
+                "&:hover": {
+                  transform: "rotate(180deg)",
+                  backgroundColor: isDarkMode
+                    ? "rgba(255, 165, 0, 0.1)"
+                    : "rgba(25, 118, 210, 0.1)",
+                },
               }}
             >
               {isDarkMode ? (
@@ -261,6 +293,11 @@ export default function Navbar() {
                 display: "flex",
                 alignItems: "center",
                 color: "primary.main",
+                position: "relative",
+                "&:hover": {
+                  transform: "scale(1.1)",
+                  transition: "transform 0.2s ease",
+                },
               }}
             >
               <Badge
@@ -272,6 +309,13 @@ export default function Navbar() {
                     fontWeight: "bold",
                     minWidth: "16px",
                     height: "16px",
+                    animation:
+                      favoritesCount > 0 ? "pulse 1.5s infinite" : "none",
+                  },
+                  "@keyframes pulse": {
+                    "0%": { transform: "scale(1)" },
+                    "50%": { transform: "scale(1.2)" },
+                    "100%": { transform: "scale(1)" },
                   },
                 }}
               >
@@ -279,7 +323,16 @@ export default function Navbar() {
               </Badge>
             </Box>
           </Tooltip>
-          <IconButton onClick={handleDrawerToggle} aria-label="close menu">
+          <IconButton
+            onClick={handleDrawerToggle}
+            aria-label="close menu"
+            sx={{
+              transition: "transform 0.2s ease",
+              "&:hover": {
+                transform: "rotate(90deg)",
+              },
+            }}
+          >
             <CloseIcon />
           </IconButton>
         </Box>
@@ -303,9 +356,24 @@ export default function Navbar() {
               backgroundColor: isItemActive(item.href)
                 ? "rgba(25, 118, 210, 0.08)"
                 : "transparent",
-              transition: "all 0.2s ease",
+              transition: "all 0.3s ease",
               "&:hover": {
                 backgroundColor: "rgba(25, 118, 210, 0.15)",
+                transform: "translateX(5px)",
+              },
+              position: "relative",
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                top: 0,
+                left: 0,
+                borderRadius: "10px",
+                boxShadow: isItemActive(item.href)
+                  ? "0 0 15px rgba(25, 118, 210, 0.2)"
+                  : "none",
+                transition: "box-shadow 0.3s ease",
               },
             }}
           >
@@ -322,12 +390,15 @@ export default function Navbar() {
             )}
             <ListItemText
               primary={item.name}
-              primaryTypographyProps={{
-                fontWeight: isItemActive(item.href) ? 600 : 500,
-                fontSize: "1rem",
-                color: isItemActive(item.href)
-                  ? "primary.main"
-                  : "text.primary",
+              sx={{
+                "& .MuiTypography-root": {
+                  fontWeight: isItemActive(item.href) ? 600 : 500,
+                  fontSize: "1rem",
+                  color: isItemActive(item.href)
+                    ? "primary.main"
+                    : "text.primary",
+                  transition: "all 0.3s ease",
+                },
               }}
             />
           </ListItem>
@@ -353,13 +424,28 @@ export default function Navbar() {
             backgroundColor: isProfilePage
               ? "rgba(25, 118, 210, 0.08)"
               : "transparent",
-            transition: "all 0.2s ease",
+            transition: "all 0.3s ease",
             "&:hover": {
               backgroundColor: "rgba(25, 118, 210, 0.15)",
+              transform: "translateX(5px)",
             },
             border: isProfilePage
               ? "1px solid rgba(25, 118, 210, 0.3)"
               : "none",
+            position: "relative",
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              top: 0,
+              left: 0,
+              borderRadius: "10px",
+              boxShadow: isProfilePage
+                ? "0 0 15px rgba(25, 118, 210, 0.2)"
+                : "none",
+              transition: "box-shadow 0.3s ease",
+            },
           }}
         >
           <Box
@@ -397,6 +483,10 @@ export default function Navbar() {
                 height: 24,
                 bgcolor: isProfilePage ? "primary.dark" : "primary.main",
                 boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  transform: "scale(1.1)",
+                },
               }}
             >
               <AccountCircleIcon sx={{ fontSize: 16 }} />
@@ -404,10 +494,12 @@ export default function Navbar() {
           </Box>
           <ListItemText
             primary="Profil Saya"
-            primaryTypographyProps={{
-              fontWeight: isProfilePage ? 600 : 500,
-              fontSize: "1rem",
-              color: isProfilePage ? "primary.main" : "text.primary",
+            sx={{
+              "& .MuiTypography-root": {
+                fontWeight: isProfilePage ? 600 : 500,
+                fontSize: "1rem",
+                color: isProfilePage ? "primary.main" : "text.primary",
+              },
             }}
           />
         </ListItem>
@@ -437,7 +529,6 @@ export default function Navbar() {
           width: "100%",
           zIndex: 1000,
           transition: "all 0.3s ease-in-out",
-          // Hide navbar only on profile page in light mode when not scrolled
           opacity: isProfilePage && !isDarkMode && !scrolled ? 0 : 1,
           visibility:
             isProfilePage && !isDarkMode && !scrolled ? "hidden" : "visible",
@@ -454,8 +545,9 @@ export default function Navbar() {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              py: scrolled ? 0.5 : 1, // Shrink navbar on scroll
+              py: scrolled ? 0.5 : 1,
               transition: "padding 0.3s ease",
+              px: { xs: 2, sm: 3, md: 4 },
             }}
           >
             <Box
@@ -467,13 +559,13 @@ export default function Navbar() {
             >
               <FlightTakeoffIcon
                 sx={{
-                  mr: 1.5,
+                  mr: { xs: 1, sm: 1.5 },
                   color: scrolled
                     ? "primary.main"
                     : isDarkMode
                     ? "white"
                     : "white",
-                  fontSize: { xs: 24, md: 28 },
+                  fontSize: { xs: 20, sm: 24, md: 28 },
                   transition: "color 0.3s ease",
                 }}
               />
@@ -490,7 +582,7 @@ export default function Navbar() {
                     : isDarkMode
                     ? "white"
                     : "white",
-                  fontSize: { xs: "1.2rem", sm: "1.4rem" },
+                  fontSize: { xs: "1rem", sm: "1.2rem", md: "1.4rem" },
                   textShadow: scrolled
                     ? "none"
                     : isDarkMode
@@ -503,7 +595,7 @@ export default function Navbar() {
               </Typography>
             </Box>
 
-            <Box sx={{ display: { xs: "none", md: "flex" }, ml: 2 }}>
+            <Box sx={{ display: { xs: "none", md: "flex" }, ml: 2, gap: 1 }}>
               {navItems.map((item) => (
                 <motion.div
                   key={item.name}
@@ -514,7 +606,7 @@ export default function Navbar() {
                     onClick={() => handleNavClick(item.href)}
                     sx={{
                       my: 1,
-                      mx: 1.2,
+                      mx: { md: 0.5, lg: 1.2 },
                       color: scrolled
                         ? isDarkMode
                           ? "rgba(255, 255, 255, 0.9)"
@@ -522,10 +614,10 @@ export default function Navbar() {
                         : isDarkMode
                         ? "white"
                         : "white",
-                      fontSize: "0.9rem",
+                      fontSize: { md: "0.85rem", lg: "0.9rem" },
                       fontWeight: 500,
                       position: "relative",
-                      padding: "8px 16px",
+                      padding: { md: "6px 12px", lg: "8px 16px" },
                       borderRadius: "8px",
                       textTransform: "none",
                       transition: "all 0.3s ease",
@@ -543,7 +635,7 @@ export default function Navbar() {
                       sx={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 0.8,
+                        gap: { md: 0.5, lg: 0.8 },
                         position: "relative",
                         "&::after": {
                           content: "''",
@@ -587,7 +679,13 @@ export default function Navbar() {
               ))}
             </Box>
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: { xs: 1, sm: 2 },
+              }}
+            >
               <Tooltip title={isDarkMode ? "Light Mode" : "Dark Mode"} arrow>
                 <IconButton
                   onClick={toggleTheme}
@@ -603,6 +701,7 @@ export default function Navbar() {
                       : scrolled
                       ? "primary.main"
                       : "white",
+                    fontSize: { xs: "1.2rem", sm: "1.5rem" },
                   }}
                 >
                   {isDarkMode ? (
@@ -620,11 +719,13 @@ export default function Navbar() {
                   style={{ display: "flex" }}
                 >
                   <IconButton
+                    onClick={handleFavoritesClick}
                     sx={{
                       display: "flex",
                       alignItems: "center",
                       color: scrolled ? "primary.main" : "white",
                       transition: "color 0.3s ease",
+                      fontSize: { xs: "1.2rem", sm: "1.5rem" },
                     }}
                   >
                     <Badge
@@ -697,8 +798,8 @@ export default function Navbar() {
                 >
                   <Avatar
                     sx={{
-                      width: 36,
-                      height: 36,
+                      width: { xs: 32, sm: 36 },
+                      height: { xs: 32, sm: 36 },
                       bgcolor:
                         pathname === "/profile"
                           ? "primary.dark"
@@ -730,6 +831,7 @@ export default function Navbar() {
                     ? "rgba(70, 70, 75, 1)"
                     : "rgba(235,235,240,1)",
                 },
+                ml: 1,
               }}
             >
               <MenuIcon />
@@ -745,7 +847,7 @@ export default function Navbar() {
             style: { backgroundColor: "rgba(0,0,0,0.3)" },
           }}
           ModalProps={{
-            keepMounted: true, // Better mobile performance
+            keepMounted: true,
           }}
           sx={{
             display: { xs: "block", sm: "none" },
@@ -756,6 +858,7 @@ export default function Navbar() {
               borderTopLeftRadius: "20px",
               borderTopRightRadius: "20px",
               boxShadow: "0 -5px 25px rgba(0,0,0,0.1)",
+              px: { xs: 2, sm: 3 },
             },
           }}
         >
@@ -763,7 +866,7 @@ export default function Navbar() {
         </Drawer>
       </AppBar>
 
-      {/* Loading Backdrop */}
+      {/* Loading Backdrop for Profile */}
       <Backdrop
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
@@ -945,6 +1048,159 @@ export default function Navbar() {
               }}
             >
               Memuat Profil Anda
+            </motion.span>
+
+            <motion.span
+              animate={{
+                opacity: [0, 1, 0],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 1.5,
+                ease: "easeInOut",
+                repeatDelay: 0.5,
+              }}
+            >
+              ...
+            </motion.span>
+          </Typography>
+        </Box>
+      </Backdrop>
+
+      {/* Loading Backdrop for Favorites */}
+      <Backdrop
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: isDarkMode
+            ? "rgba(0, 0, 0, 0.7)"
+            : "rgba(255, 255, 255, 0.85)",
+          backdropFilter: "blur(12px)",
+        }}
+        open={loadingFavorites}
+      >
+        <Box
+          component={motion.div}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 3,
+            maxWidth: "90%",
+            textAlign: "center",
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              width: 120,
+              height: 120,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {/* Pulsing heart animation */}
+            <Box
+              component={motion.div}
+              animate={{
+                scale: [1, 1.2, 1],
+                rotate: [0, 10, -10, 0],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 2,
+                ease: "easeInOut",
+              }}
+              sx={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <FavoriteIcon
+                sx={{
+                  fontSize: 48,
+                  color: "primary.main",
+                  filter: "drop-shadow(0 0 8px rgba(25, 118, 210, 0.5))",
+                }}
+              />
+            </Box>
+
+            {/* Center point */}
+            <Box
+              component={motion.div}
+              animate={{
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 1.5,
+                ease: "easeInOut",
+              }}
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                backgroundColor: isDarkMode
+                  ? "rgba(25, 118, 210, 0.8)"
+                  : "rgba(25, 118, 210, 0.7)",
+                boxShadow: "0 0 20px rgba(25, 118, 210, 0.6)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 2,
+              }}
+            >
+              <Typography
+                component={motion.div}
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 1.5,
+                  ease: "easeInOut",
+                }}
+                sx={{
+                  fontWeight: 900,
+                  fontSize: "1.5rem",
+                  color: "white",
+                }}
+              >
+                ♥
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Animated text */}
+          <Typography
+            variant="body1"
+            component={motion.div}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+            sx={{
+              fontWeight: 500,
+              color: isDarkMode ? "white" : "text.primary",
+              mt: 2,
+              fontSize: "1.1rem",
+              letterSpacing: "0.5px",
+            }}
+          >
+            <motion.span
+              animate={{ opacity: [1, 0.5, 1] }}
+              transition={{
+                repeat: Infinity,
+                duration: 2,
+                ease: "easeInOut",
+              }}
+            >
+              Memuat Favorit Anda
             </motion.span>
 
             <motion.span

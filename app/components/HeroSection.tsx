@@ -40,7 +40,7 @@ export default function HeroSection() {
       id="hero"
       sx={{
         position: "relative",
-        height: { xs: "90vh", md: "100vh" },
+        height: { xs: "90vh", sm: "95vh", md: "100vh" },
         background: `linear-gradient(rgba(0,0,0,${
           isDarkMode ? "0.6" : "0.4"
         }), rgba(0,0,0,${
@@ -48,12 +48,22 @@ export default function HeroSection() {
         })), url('/images/borobudur.jpg')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         display: "flex",
         alignItems: "center",
         overflow: "hidden",
+        "@media (max-width: 600px)": {
+          backgroundPosition: "center center",
+        },
       }}
     >
-      <Container maxWidth="xl">
+      <Container
+        maxWidth="xl"
+        sx={{
+          px: { xs: 2, sm: 3, md: 4 },
+          py: { xs: 4, sm: 6, md: 8 },
+        }}
+      >
         <Box
           component={motion.div}
           initial={{ y: 50, opacity: 0 }}
@@ -65,15 +75,15 @@ export default function HeroSection() {
             ease: [0.22, 1, 0.36, 1],
           }}
           sx={{
-            maxWidth: { xs: "100%", md: "80%" },
+            maxWidth: { xs: "100%", sm: "90%", md: "80%", lg: "70%" },
             mx: "auto",
             textAlign: "center",
             color: "white",
             textShadow: isDarkMode
               ? "0 2px 10px rgba(0,0,0,0.5)"
               : "0 2px 10px rgba(0,0,0,0.3)",
-            mb: { xs: 4, md: 8 },
-            p: 3,
+            mb: { xs: 2, sm: 4, md: 6 },
+            p: { xs: 2, sm: 3, md: 4 },
             borderRadius: "16px",
           }}
         >
@@ -91,9 +101,14 @@ export default function HeroSection() {
               variant="h1"
               sx={{
                 fontWeight: 800,
-                fontSize: { xs: "2.5rem", sm: "4rem", md: "5rem" },
-                mb: 2,
-                lineHeight: 1.1,
+                fontSize: {
+                  xs: "2rem",
+                  sm: "3rem",
+                  md: "4rem",
+                  lg: "5rem",
+                },
+                mb: { xs: 1, sm: 2, md: 3 },
+                lineHeight: { xs: 1.2, sm: 1.1 },
                 letterSpacing: "-0.02em",
                 position: "relative",
                 overflow: "hidden",
@@ -133,10 +148,10 @@ export default function HeroSection() {
                   "&::after": {
                     content: '""',
                     position: "absolute",
-                    width: "30%",
-                    height: "3px",
-                    bottom: "15px",
-                    left: "5px",
+                    width: { xs: "20%", sm: "25%", md: "30%" },
+                    height: { xs: "2px", sm: "2.5px", md: "3px" },
+                    bottom: { xs: "8px", sm: "12px", md: "15px" },
+                    left: { xs: "3px", sm: "4px", md: "5px" },
                     background:
                       "linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0))",
                     borderRadius: "2px",
@@ -177,10 +192,10 @@ export default function HeroSection() {
                   "&::after": {
                     content: '""',
                     position: "absolute",
-                    width: "100%",
-                    height: "3px",
-                    bottom: "15px",
-                    left: "0",
+                    width: { xs: "80%", sm: "90%", md: "100%" },
+                    height: { xs: "2px", sm: "2.5px", md: "3px" },
+                    bottom: { xs: "8px", sm: "12px", md: "15px" },
+                    left: { xs: "0", sm: "0", md: "0" },
                     background:
                       "linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0))",
                     borderRadius: "2px",
@@ -206,15 +221,21 @@ export default function HeroSection() {
               variant="h5"
               sx={{
                 fontWeight: 400,
-                mb: 4,
-                maxWidth: "90%",
+                mb: { xs: 3, sm: 4, md: 5 },
+                maxWidth: { xs: "100%", sm: "90%", md: "80%" },
                 mx: "auto",
-                fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
+                fontSize: {
+                  xs: "0.875rem",
+                  sm: "1rem",
+                  md: "1.25rem",
+                  lg: "1.5rem",
+                },
                 opacity: 1,
                 color: "#FFFFFF",
                 textShadow: "0 2px 8px rgba(0,0,0,0.5)",
                 letterSpacing: "0.02em",
-                lineHeight: 1.6,
+                lineHeight: { xs: 1.5, sm: 1.6 },
+                px: { xs: 1, sm: 2 },
               }}
             >
               Temukan pengalaman perjalanan terbaik dan kenangan tak terlupakan
@@ -238,7 +259,7 @@ export default function HeroSection() {
       <Box
         sx={{
           position: "absolute",
-          bottom: { xs: "10vh", md: "5vh" },
+          bottom: { xs: "5vh", sm: "7vh", md: "5vh" },
           left: "50%",
           transform: "translateX(-50%)",
           zIndex: 20,
@@ -259,7 +280,7 @@ export default function HeroSection() {
             color: "white",
             bgcolor: "rgba(255,255,255,0.15)",
             backdropFilter: "blur(4px)",
-            p: 2,
+            p: { xs: 1.5, sm: 2 },
             "&:hover": {
               bgcolor: "rgba(255,255,255,0.25)",
               transform: "scale(1.1)",
