@@ -3,6 +3,7 @@
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { Inter } from "next/font/google";
 import { responsiveFontSizes } from "@mui/material/styles";
+import { FavoritesProvider } from "./context/FavoritesContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -94,7 +95,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {children}
+      <FavoritesProvider>{children}</FavoritesProvider>
     </ThemeProvider>
   );
 }
