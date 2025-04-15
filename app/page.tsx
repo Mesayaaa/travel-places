@@ -32,6 +32,7 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import SendIcon from "@mui/icons-material/Send";
 import Link from "@mui/material/Link";
 import { useTrip } from "./context/TripContext";
+import { useTheme } from "./context/ThemeContext";
 
 const container = {
   hidden: { opacity: 0 },
@@ -54,6 +55,8 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [tripPlansRefreshKey, setTripPlansRefreshKey] = useState(0);
   const { openTripPlanModal, setOpenTripPlanModal } = useTrip();
+  const { mode } = useTheme();
+  const isDarkMode = mode === "dark";
   const destinationsRef = useRef(null);
   const planSectionRef = useRef(null);
   const isDestinationsInView = useInView(destinationsRef, {
@@ -100,7 +103,9 @@ export default function Home() {
   return (
     <Box
       sx={{
-        background: "linear-gradient(to bottom, #f8f9fa, #e9ecef)",
+        background: isDarkMode
+          ? "linear-gradient(to bottom, #121212, #1a1a1a)"
+          : "linear-gradient(to bottom, #f8f9fa, #e9ecef)",
       }}
     >
       <Navbar />
@@ -114,7 +119,9 @@ export default function Home() {
         ref={destinationsRef}
         sx={{
           py: { xs: 5, md: 0 },
-          background: "linear-gradient(to bottom, #f8f9fa, #f0f2f5)",
+          background: isDarkMode
+            ? "linear-gradient(to bottom, #121212, #1e1e1e)"
+            : "linear-gradient(to bottom, #f8f9fa, #f0f2f5)",
         }}
       >
         <Container maxWidth="xl">
@@ -190,79 +197,136 @@ export default function Home() {
         id="plan"
         ref={planSectionRef}
         sx={{
-          py: { xs: 8, md: 12 },
-          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-          borderTop: "1px solid rgba(0,0,0,0.05)",
-          borderBottom: "1px solid rgba(0,0,0,0.05)",
+          py: { xs: 6, md: 8 },
+          background: isDarkMode
+            ? "linear-gradient(135deg, #121212 0%, #1d1d1d 100%)"
+            : "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+          borderTop: isDarkMode
+            ? "1px solid rgba(255,255,255,0.05)"
+            : "1px solid rgba(0,0,0,0.05)",
+          borderBottom: isDarkMode
+            ? "1px solid rgba(255,255,255,0.05)"
+            : "1px solid rgba(0,0,0,0.05)",
         }}
       >
         <Container maxWidth="xl">
-          <Box
-            component={motion.div}
-            initial={{ opacity: 0, y: 30 }}
-            animate={
-              isPlanSectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }
-            }
-            transition={{ duration: 0.8 }}
-            sx={{ textAlign: "center", mb: { xs: 5, md: 6 } }}
-          >
-            <Typography
-              variant="h3"
-              component="h2"
-              sx={{
-                fontWeight: 700,
-                mb: 2,
-                fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" },
-                background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                color: "transparent",
-                display: "inline-block",
-              }}
+          {useTrip().placesInTrip.length > 0 ? (
+            <Box
+              component={motion.div}
+              initial={{ opacity: 0, y: 30 }}
+              animate={
+                isPlanSectionInView
+                  ? { opacity: 1, y: 0 }
+                  : { opacity: 0, y: 30 }
+              }
+              transition={{ duration: 0.8 }}
+              sx={{ textAlign: "center", mb: { xs: 5, md: 6 } }}
             >
-              Rencanakan Perjalanan Bersama
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                maxWidth: "800px",
-                mx: "auto",
-                color: "text.secondary",
-                mb: 5,
-                fontSize: { xs: "1rem", md: "1.1rem" },
-              }}
+              <Typography
+                variant="h3"
+                component="h2"
+                sx={{
+                  fontWeight: 700,
+                  mb: 2,
+                  fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" },
+                  background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  color: "transparent",
+                  display: "inline-block",
+                }}
+              >
+                Rencanakan Perjalanan Bersama
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  maxWidth: "800px",
+                  mx: "auto",
+                  color: "text.secondary",
+                  mb: 5,
+                  fontSize: { xs: "1rem", md: "1.1rem" },
+                }}
+              >
+                Buat rencana perjalanan dengan mudah dan nikmati momen spesial
+                bersama orang tersayang. Pilih destinasi favorit dan mulai
+                petualangan Anda sekarang!
+              </Typography>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<AddIcon />}
+                onClick={() => setOpenTripPlanModal(true)}
+                sx={{
+                  py: 1.5,
+                  px: 4,
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
+                  transition: "all 0.3s",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                  textTransform: "none",
+                  fontSize: "1.1rem",
+                  "&:hover": {
+                    transform: "translateY(-3px)",
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                  },
+                }}
+              >
+                Buat Rencana Perjalanan
+              </Button>
+            </Box>
+          ) : (
+            <Box
+              component={motion.div}
+              initial={{ opacity: 0, y: 30 }}
+              animate={
+                isPlanSectionInView
+                  ? { opacity: 1, y: 0 }
+                  : { opacity: 0, y: 30 }
+              }
+              transition={{ duration: 0.8 }}
+              sx={{ textAlign: "center", mb: { xs: 5, md: 6 } }}
             >
-              Buat rencana perjalanan dengan mudah dan nikmati momen spesial
-              bersama orang tersayang. Pilih destinasi favorit dan mulai
-              petualangan Anda sekarang!
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<AddIcon />}
-              onClick={() => setOpenTripPlanModal(true)}
-              sx={{
-                py: 1.5,
-                px: 4,
-                borderRadius: "8px",
-                fontWeight: 600,
-                background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
-                transition: "all 0.3s",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                textTransform: "none",
-                fontSize: "1.1rem",
-                "&:hover": {
-                  transform: "translateY(-3px)",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                },
-              }}
-            >
-              Buat Rencana Perjalanan
-            </Button>
-          </Box>
+              <Typography
+                variant="h3"
+                component="h2"
+                sx={{
+                  fontWeight: 700,
+                  mb: 2,
+                  fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" },
+                  background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  color: "transparent",
+                  display: "inline-block",
+                }}
+              >
+                Tambahkan Tempat ke Trip Anda
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  maxWidth: "800px",
+                  mx: "auto",
+                  color: "text.secondary",
+                  mb: 2,
+                  fontSize: { xs: "1rem", md: "1.1rem" },
+                }}
+              >
+                Anda perlu menambahkan tempat ke trip sebelum dapat membuat
+                rencana perjalanan. Jelajahi destinasi dan tekan "Tambahkan ke
+                Trip" pada tempat yang ingin dikunjungi.
+              </Typography>
+            </Box>
+          )}
 
           {/* Trip Plans List */}
-          <TripPlansList key={tripPlansRefreshKey} />
+          {useTrip().placesInTrip.length > 0 ? (
+            <TripPlansList key={tripPlansRefreshKey} />
+          ) : (
+            <Box sx={{ textAlign: "center", py: 1 }}></Box>
+          )}
 
           {/* Trip Plan Modal */}
           <TripPlanModal
@@ -275,11 +339,13 @@ export default function Home() {
       <Box
         component="footer"
         sx={{
-          py: { xs: 5, md: 7 },
-          bgcolor: "#2b2d42",
-          color: "white",
-          borderTop: "4px solid",
-          borderImage: "linear-gradient(45deg, #FF6B6B, #4ECDC4) 1",
+          py: 6,
+          background: isDarkMode
+            ? "linear-gradient(to bottom, #0e0e0e, #161616)"
+            : "linear-gradient(to bottom, #e9ecef, #dee2e6)",
+          borderTop: isDarkMode
+            ? "1px solid rgba(255,255,255,0.05)"
+            : "1px solid rgba(0,0,0,0.05)",
         }}
       >
         <Container maxWidth="xl">
@@ -301,7 +367,12 @@ export default function Home() {
               </Typography>
               <Typography
                 variant="body2"
-                sx={{ mb: 3, opacity: 0.9, maxWidth: "90%" }}
+                sx={{
+                  mb: 3,
+                  opacity: 0.9,
+                  maxWidth: "90%",
+                  color: isDarkMode ? "rgba(255,255,255,0.8)" : "text.primary",
+                }}
               >
                 Temukan tempat-tempat indah untuk dikunjungi bersama orang
                 tersayang dan ciptakan kenangan yang tak terlupakan.
@@ -312,12 +383,13 @@ export default function Home() {
                   href="https://instagram.com"
                   target="_blank"
                   sx={{
-                    color: "white",
+                    color: isDarkMode ? "rgba(255,255,255,0.8)" : "#555",
                     borderRadius: "8px",
                     transition: "all 0.3s",
                     "&:hover": {
                       background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
                       transform: "translateY(-2px)",
+                      color: "white",
                     },
                   }}
                 >
@@ -328,12 +400,13 @@ export default function Home() {
                   href="https://twitter.com"
                   target="_blank"
                   sx={{
-                    color: "white",
+                    color: isDarkMode ? "rgba(255,255,255,0.8)" : "#555",
                     borderRadius: "8px",
                     transition: "all 0.3s",
                     "&:hover": {
                       background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
                       transform: "translateY(-2px)",
+                      color: "white",
                     },
                   }}
                 >
@@ -344,12 +417,13 @@ export default function Home() {
                   href="https://facebook.com"
                   target="_blank"
                   sx={{
-                    color: "white",
+                    color: isDarkMode ? "rgba(255,255,255,0.8)" : "#555",
                     borderRadius: "8px",
                     transition: "all 0.3s",
                     "&:hover": {
                       background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
                       transform: "translateY(-2px)",
+                      color: "white",
                     },
                   }}
                 >
@@ -360,12 +434,13 @@ export default function Home() {
                   href="https://youtube.com"
                   target="_blank"
                   sx={{
-                    color: "white",
+                    color: isDarkMode ? "rgba(255,255,255,0.8)" : "#555",
                     borderRadius: "8px",
                     transition: "all 0.3s",
                     "&:hover": {
                       background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
                       transform: "translateY(-2px)",
+                      color: "white",
                     },
                   }}
                 >
@@ -381,6 +456,7 @@ export default function Home() {
                   fontWeight: 700,
                   mb: 2,
                   position: "relative",
+                  color: isDarkMode ? "rgba(255,255,255,0.9)" : "text.primary",
                   "&:after": {
                     content: '""',
                     position: "absolute",
@@ -429,7 +505,7 @@ export default function Home() {
                   sx={{
                     display: "block",
                     mb: 1.5,
-                    color: "white",
+                    color: isDarkMode ? "rgba(255,255,255,0.7)" : "#555",
                     opacity: 0.8,
                     transition: "all 0.2s",
                     "&:hover": {
@@ -451,6 +527,7 @@ export default function Home() {
                   fontWeight: 700,
                   mb: 2,
                   position: "relative",
+                  color: isDarkMode ? "rgba(255,255,255,0.9)" : "text.primary",
                   "&:after": {
                     content: '""',
                     position: "absolute",
@@ -469,7 +546,13 @@ export default function Home() {
                 <LocationOnIcon
                   sx={{ mr: 1, color: "#FF6B6B", fontSize: 20 }}
                 />
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    opacity: 0.9,
+                    color: isDarkMode ? "rgba(255,255,255,0.7)" : "#555",
+                  }}
+                >
                   Jl. Cinta Abadi No.143, Kota Romantis
                 </Typography>
               </Box>
@@ -478,7 +561,10 @@ export default function Home() {
                 <Link
                   href="mailto:info@travelsayang.id"
                   underline="hover"
-                  sx={{ color: "white", opacity: 0.9 }}
+                  sx={{
+                    color: isDarkMode ? "rgba(255,255,255,0.7)" : "#555",
+                    opacity: 0.9,
+                  }}
                 >
                   <Typography variant="body2">info@travelsayang.id</Typography>
                 </Link>
@@ -488,7 +574,10 @@ export default function Home() {
                 <Link
                   href="tel:+6281234567890"
                   underline="hover"
-                  sx={{ color: "white", opacity: 0.9 }}
+                  sx={{
+                    color: isDarkMode ? "rgba(255,255,255,0.7)" : "#555",
+                    opacity: 0.9,
+                  }}
                 >
                   <Typography variant="body2">+62 812 3456 7890</Typography>
                 </Link>
@@ -498,7 +587,9 @@ export default function Home() {
 
           <Box
             sx={{
-              borderTop: "1px solid rgba(255,255,255,0.1)",
+              borderTop: isDarkMode
+                ? "1px solid rgba(255,255,255,0.1)"
+                : "1px solid rgba(0,0,0,0.1)",
               mt: 5,
               pt: 3,
               display: "flex",
@@ -509,7 +600,13 @@ export default function Home() {
               gap: { xs: 2, sm: 0 },
             }}
           >
-            <Typography variant="body2" sx={{ opacity: 0.7 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                opacity: 0.7,
+                color: isDarkMode ? "rgba(255,255,255,0.7)" : "#555",
+              }}
+            >
               © {new Date().getFullYear()} TravelSayang
             </Typography>
             <Box
@@ -527,7 +624,7 @@ export default function Home() {
                     href="#"
                     underline="hover"
                     sx={{
-                      color: "white",
+                      color: isDarkMode ? "rgba(255,255,255,0.7)" : "#555",
                       opacity: 0.7,
                       fontSize: "0.875rem",
                       transition: "all 0.2s",

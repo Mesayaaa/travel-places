@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import {
   Typography,
@@ -21,6 +23,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import { format, parse } from "date-fns";
 import { Place } from "../data/places";
 import ConfirmationDialog from "./ConfirmationDialog";
+import { useTheme } from "../context/ThemeContext";
 
 interface TripPlan {
   id: number;
@@ -40,6 +43,8 @@ export default function TripPlansList() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [planToDelete, setPlanToDelete] = useState<number | null>(null);
+  const { mode } = useTheme();
+  const isDarkMode = mode === "dark";
 
   const handleRefresh = () => {
     setIsLoading(true);
@@ -143,6 +148,11 @@ export default function TripPlansList() {
     }
   };
 
+  // If there are no plans and not loading, don't render anything
+  if (!isLoading && plans.length === 0) {
+    return null;
+  }
+
   return (
     <Box sx={{ mt: 4 }}>
       {/* Header and refresh button always visible */}
@@ -166,6 +176,14 @@ export default function TripPlansList() {
           onClick={handleRefresh}
           variant="outlined"
           size="small"
+          sx={{
+            borderColor: isDarkMode ? "rgba(255,255,255,0.3)" : undefined,
+            color: isDarkMode ? "rgba(255,255,255,0.8)" : undefined,
+            "&:hover": {
+              borderColor: isDarkMode ? "rgba(255,255,255,0.5)" : undefined,
+              bgcolor: isDarkMode ? "rgba(255,255,255,0.05)" : undefined,
+            },
+          }}
         >
           Refresh
         </Button>
@@ -182,16 +200,14 @@ export default function TripPlansList() {
           }}
         >
           <CircularProgress size={24} sx={{ mr: 1 }} />
-          <Typography>Memuat rencana perjalanan...</Typography>
+          <Typography color="text.secondary">
+            Memuat rencana perjalanan...
+          </Typography>
         </Box>
       ) : (
         <>
           {plans.length === 0 ? (
-            <Box sx={{ textAlign: "center", py: 4 }}>
-              <Typography color="text.secondary">
-                Belum ada rencana perjalanan. Buat rencana baru untuk memulai.
-              </Typography>
-            </Box>
+            <Box sx={{ textAlign: "center", py: 4 }}></Box>
           ) : (
             <Grid container spacing={3}>
               {plans.map((plan) => (
@@ -200,11 +216,17 @@ export default function TripPlansList() {
                     elevation={0}
                     sx={{
                       borderRadius: 2,
-                      border: "1px solid rgba(0,0,0,0.08)",
+                      border: "1px solid",
+                      borderColor: isDarkMode
+                        ? "rgba(255,255,255,0.1)"
+                        : "rgba(0,0,0,0.08)",
+                      bgcolor: isDarkMode ? "#1e1e1e" : "#ffffff",
                       transition: "transform 0.2s, box-shadow 0.2s",
                       "&:hover": {
                         transform: "translateY(-4px)",
-                        boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+                        boxShadow: isDarkMode
+                          ? "0 6px 20px rgba(0,0,0,0.3)"
+                          : "0 6px 20px rgba(0,0,0,0.06)",
                       },
                     }}
                   >
@@ -220,13 +242,26 @@ export default function TripPlansList() {
                           variant="h6"
                           component="h4"
                           sx={{ fontWeight: 600, mb: 1 }}
+                          color="text.primary"
                         >
                           {plan.name}
                         </Typography>
                         <IconButton
                           size="small"
                           onClick={() => handleDeletePlan(plan.id)}
-                          sx={{ color: "text.secondary" }}
+                          sx={{
+                            color: isDarkMode
+                              ? "rgba(255,255,255,0.5)"
+                              : "text.secondary",
+                            "&:hover": {
+                              bgcolor: isDarkMode
+                                ? "rgba(255,255,255,0.05)"
+                                : undefined,
+                              color: isDarkMode
+                                ? "rgba(255,255,255,0.8)"
+                                : undefined,
+                            },
+                          }}
                         >
                           <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
@@ -240,24 +275,48 @@ export default function TripPlansList() {
                       >
                         <CalendarTodayIcon
                           fontSize="small"
-                          sx={{ color: "text.secondary" }}
+                          sx={{
+                            color: isDarkMode
+                              ? "rgba(255,255,255,0.6)"
+                              : "text.secondary",
+                          }}
                         />
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography
+                          variant="body2"
+                          color={
+                            isDarkMode
+                              ? "rgba(255,255,255,0.6)"
+                              : "text.secondary"
+                          }
+                        >
                           {formatDate(plan.startDate)}
                           {plan.endDate ? ` - ${formatDate(plan.endDate)}` : ""}
                         </Typography>
                       </Stack>
 
-                      <Divider sx={{ my: 1.5 }} />
+                      <Divider
+                        sx={{
+                          my: 1.5,
+                          borderColor: isDarkMode
+                            ? "rgba(255,255,255,0.1)"
+                            : undefined,
+                        }}
+                      />
 
                       <Box sx={{ mb: 2 }}>
                         <Typography
                           variant="subtitle2"
                           sx={{ display: "flex", alignItems: "center", mb: 1 }}
+                          color="text.primary"
                         >
                           <PlaceIcon
                             fontSize="small"
-                            sx={{ mr: 1, color: "text.secondary" }}
+                            sx={{
+                              mr: 1,
+                              color: isDarkMode
+                                ? "rgba(255,255,255,0.6)"
+                                : "text.secondary",
+                            }}
                           />
                           Destinasi ({plan.places.length})
                         </Typography>
@@ -268,7 +327,17 @@ export default function TripPlansList() {
                               key={place.id}
                               label={place.name}
                               size="small"
-                              sx={{ m: 0.5, ml: 0, mt: 0 }}
+                              sx={{
+                                m: 0.5,
+                                ml: 0,
+                                mt: 0,
+                                color: isDarkMode
+                                  ? "rgba(255,255,255,0.9)"
+                                  : undefined,
+                                borderColor: isDarkMode
+                                  ? "rgba(255,255,255,0.2)"
+                                  : undefined,
+                              }}
                               variant="outlined"
                             />
                           ))}
@@ -284,10 +353,16 @@ export default function TripPlansList() {
                               alignItems: "center",
                               mb: 1,
                             }}
+                            color="text.primary"
                           >
                             <PeopleIcon
                               fontSize="small"
-                              sx={{ mr: 1, color: "text.secondary" }}
+                              sx={{
+                                mr: 1,
+                                color: isDarkMode
+                                  ? "rgba(255,255,255,0.6)"
+                                  : "text.secondary",
+                              }}
                             />
                             Bersama
                           </Typography>
@@ -297,7 +372,17 @@ export default function TripPlansList() {
                                 key={companion}
                                 label={companion}
                                 size="small"
-                                sx={{ m: 0.5, ml: 0, mt: 0 }}
+                                sx={{
+                                  m: 0.5,
+                                  ml: 0,
+                                  mt: 0,
+                                  color: isDarkMode
+                                    ? "rgba(255,255,255,0.9)"
+                                    : undefined,
+                                  bgcolor: isDarkMode
+                                    ? "rgba(255,255,255,0.06)"
+                                    : undefined,
+                                }}
                               />
                             ))}
                           </Box>
@@ -309,15 +394,27 @@ export default function TripPlansList() {
                           <Typography
                             variant="subtitle2"
                             sx={{ display: "flex", alignItems: "center" }}
+                            color="text.primary"
                           >
                             <AccountBalanceWalletIcon
                               fontSize="small"
-                              sx={{ mr: 1, color: "text.secondary" }}
+                              sx={{
+                                mr: 1,
+                                color: isDarkMode
+                                  ? "rgba(255,255,255,0.6)"
+                                  : "text.secondary",
+                              }}
                             />
                             Budget:{" "}
                             <Box
                               component="span"
-                              sx={{ ml: 1, fontWeight: "normal" }}
+                              sx={{
+                                ml: 1,
+                                fontWeight: "normal",
+                                color: isDarkMode
+                                  ? "rgba(255,255,255,0.7)"
+                                  : undefined,
+                              }}
                             >
                               Rp {plan.budget}
                             </Box>
@@ -329,12 +426,21 @@ export default function TripPlansList() {
                         <Box
                           sx={{
                             mt: 2,
-                            bgcolor: "rgba(0,0,0,0.02)",
+                            bgcolor: isDarkMode
+                              ? "rgba(255,255,255,0.03)"
+                              : "rgba(0,0,0,0.02)",
                             p: 1.5,
                             borderRadius: 1,
                           }}
                         >
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography
+                            variant="body2"
+                            color={
+                              isDarkMode
+                                ? "rgba(255,255,255,0.7)"
+                                : "text.secondary"
+                            }
+                          >
                             {plan.notes}
                           </Typography>
                         </Box>

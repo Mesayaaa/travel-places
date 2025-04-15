@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -22,6 +24,7 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { Place, places } from "../data/places";
 import { useForm, Controller } from "react-hook-form";
 import { useTrip } from "../context/TripContext";
+import { useTheme } from "../context/ThemeContext";
 
 interface TripPlanModalProps {
   open: boolean;
@@ -52,14 +55,23 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
     },
   });
 
-  const { placesInTrip, tripName, setTripName, clearCurrentTrip } = useTrip();
+  const {
+    placesInTrip,
+    tripName,
+    setTripName,
+    clearCurrentTrip,
+    removePlaceFromTrip,
+  } = useTrip();
+
+  const { mode } = useTheme();
+  const isDarkMode = mode === "dark";
 
   const [companions, setCompanions] = useState<string[]>([]);
   const [newCompanion, setNewCompanion] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const handleRemovePlace = (placeId: number) => {
-    return;
+    removePlaceFromTrip(placeId);
   };
 
   const handleAddCompanion = () => {
@@ -138,10 +150,26 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
             maxWidth: "900px",
             maxHeight: "90vh",
             overflowY: "auto",
-            bgcolor: "background.paper",
+            bgcolor: isDarkMode ? "#1e1e1e" : "background.paper",
             borderRadius: 2,
-            boxShadow: 24,
+            boxShadow: isDarkMode
+              ? "0 10px 40px rgba(0,0,0,0.5)"
+              : "0 10px 40px rgba(0,0,0,0.2)",
             p: { xs: 2, sm: 3, md: 4 },
+            "&::-webkit-scrollbar": {
+              width: "8px",
+            },
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: isDarkMode ? "#333" : "#f1f1f1",
+              borderRadius: "4px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: isDarkMode ? "#666" : "#888",
+              borderRadius: "4px",
+              "&:hover": {
+                backgroundColor: isDarkMode ? "#888" : "#555",
+              },
+            },
           }}
         >
           <Box
@@ -161,7 +189,16 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
             >
               Buat Rencana Perjalanan
             </Typography>
-            <IconButton onClick={onClose} size="small">
+            <IconButton
+              onClick={onClose}
+              size="small"
+              sx={{
+                color: isDarkMode ? "rgba(255,255,255,0.7)" : undefined,
+                "&:hover": {
+                  bgcolor: isDarkMode ? "rgba(255,255,255,0.1)" : undefined,
+                },
+              }}
+            >
               <CloseIcon />
             </IconButton>
           </Box>
@@ -190,6 +227,39 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
                       variant="outlined"
                       error={!!errors.tripName}
                       helperText={errors.tripName?.message}
+                      InputLabelProps={{
+                        sx: {
+                          color: isDarkMode
+                            ? "rgba(255,255,255,0.7)"
+                            : undefined,
+                        },
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          "& fieldset": {
+                            borderColor: isDarkMode
+                              ? "rgba(255,255,255,0.2)"
+                              : undefined,
+                          },
+                          "&:hover fieldset": {
+                            borderColor: isDarkMode
+                              ? "rgba(255,255,255,0.3)"
+                              : undefined,
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: isDarkMode
+                            ? "rgba(255,255,255,0.9)"
+                            : undefined,
+                        },
+                        "& .MuiFormHelperText-root": {
+                          color: errors.tripName
+                            ? undefined
+                            : isDarkMode
+                            ? "rgba(255,255,255,0.5)"
+                            : undefined,
+                        },
+                      }}
                     />
                   )}
                 />
@@ -206,16 +276,56 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
                       fullWidth
                       label="Tanggal Mulai"
                       type="date"
-                      InputLabelProps={{ shrink: true }}
+                      InputLabelProps={{
+                        shrink: true,
+                        sx: {
+                          color: isDarkMode
+                            ? "rgba(255,255,255,0.7)"
+                            : undefined,
+                        },
+                      }}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <CalendarTodayIcon fontSize="small" />
+                            <CalendarTodayIcon
+                              fontSize="small"
+                              sx={{
+                                color: isDarkMode
+                                  ? "rgba(255,255,255,0.7)"
+                                  : undefined,
+                              }}
+                            />
                           </InputAdornment>
                         ),
                       }}
                       error={!!errors.startDate}
                       helperText={errors.startDate?.message}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          "& fieldset": {
+                            borderColor: isDarkMode
+                              ? "rgba(255,255,255,0.2)"
+                              : undefined,
+                          },
+                          "&:hover fieldset": {
+                            borderColor: isDarkMode
+                              ? "rgba(255,255,255,0.3)"
+                              : undefined,
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: isDarkMode
+                            ? "rgba(255,255,255,0.9)"
+                            : undefined,
+                        },
+                        "& .MuiFormHelperText-root": {
+                          color: errors.startDate
+                            ? undefined
+                            : isDarkMode
+                            ? "rgba(255,255,255,0.5)"
+                            : undefined,
+                        },
+                      }}
                     />
                   )}
                 />
@@ -247,7 +357,8 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
               <Grid item xs={12}>
                 <Typography
                   variant="subtitle1"
-                  sx={{ mb: 1, fontWeight: 600, color: "black" }}
+                  sx={{ mb: 1, fontWeight: 600 }}
+                  color="text.primary"
                 >
                   Destinasi Perjalanan
                 </Typography>
@@ -256,9 +367,16 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
                     <Chip
                       key={place.id}
                       label={place.name}
-                      sx={{ m: 0.5 }}
+                      sx={{
+                        m: 0.5,
+                        color: isDarkMode ? "rgba(255,255,255,0.9)" : undefined,
+                        borderColor: isDarkMode
+                          ? "rgba(255,255,255,0.3)"
+                          : undefined,
+                      }}
                       color="primary"
                       variant="outlined"
+                      onDelete={() => handleRemovePlace(place.id)}
                     />
                   ))}
                   {placesInTrip.length === 0 && (
@@ -273,7 +391,8 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
               <Grid item xs={12}>
                 <Typography
                   variant="subtitle1"
-                  sx={{ mb: 1, fontWeight: 600, color: "black" }}
+                  sx={{ mb: 1, fontWeight: 600 }}
+                  color="text.primary"
                 >
                   Dengan Siapa?
                 </Typography>
@@ -361,7 +480,17 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
               <Button
                 variant="outlined"
                 onClick={() => resetForm()}
-                sx={{ mr: 2 }}
+                sx={{
+                  mr: 2,
+                  borderColor: isDarkMode ? "rgba(255,255,255,0.3)" : undefined,
+                  color: isDarkMode ? "rgba(255,255,255,0.8)" : undefined,
+                  "&:hover": {
+                    borderColor: isDarkMode
+                      ? "rgba(255,255,255,0.5)"
+                      : undefined,
+                    bgcolor: isDarkMode ? "rgba(255,255,255,0.05)" : undefined,
+                  },
+                }}
               >
                 Reset
               </Button>
@@ -370,8 +499,13 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
                 type="submit"
                 sx={{
                   background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
+                  color: "#ffffff",
+                  fontWeight: "bold",
                   "&:hover": {
                     background: "linear-gradient(45deg, #FF5252, #3AA99E)",
+                    boxShadow: isDarkMode
+                      ? "0 4px 20px rgba(78, 205, 196, 0.5)"
+                      : "0 4px 20px rgba(78, 205, 196, 0.3)",
                   },
                 }}
               >
@@ -393,6 +527,11 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
           onClose={handleCloseSnackbar}
           severity="success"
           variant="filled"
+          sx={{
+            boxShadow: isDarkMode
+              ? "0 4px 20px rgba(0,0,0,0.5)"
+              : "0 4px 20px rgba(0,0,0,0.2)",
+          }}
         >
           Rencana perjalanan berhasil dibuat!
         </Alert>

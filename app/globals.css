@@ -65,6 +65,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --transition-speed: 0.3s;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -102,4 +103,16 @@ body {
 
 .scroll-animate {
   animation: fadeSlideUp linear;
+}
+
+* {
+  transition: background-color var(--transition-speed) ease,
+    border-color var(--transition-speed) ease,
+    color var(--transition-speed) ease,
+    box-shadow var(--transition-speed) ease;
+}
+
+/* Dark mode adjustments for any specific elements */
+.dark-mode img:not([src*=".svg"]) {
+  filter: brightness(0.8) contrast(1.2);
 }

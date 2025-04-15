@@ -4,12 +4,15 @@ import { Box, Container, Typography, IconButton } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 
 export default function HeroSection() {
   const [searchValue, setSearchValue] = useState("");
   const [selectedDestinations, setSelectedDestinations] = useState<string[]>(
     []
   );
+  const { mode } = useTheme();
+  const isDarkMode = mode === "dark";
 
   const scrollToCategories = () => {
     const categoriesSection = document.getElementById("categories");
@@ -38,8 +41,11 @@ export default function HeroSection() {
       sx={{
         position: "relative",
         height: { xs: "90vh", md: "100vh" },
-        background:
-          "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.5)), url('/images/borobudur.jpg')",
+        background: `linear-gradient(rgba(0,0,0,${
+          isDarkMode ? "0.6" : "0.4"
+        }), rgba(0,0,0,${
+          isDarkMode ? "0.7" : "0.5"
+        })), url('/images/borobudur.jpg')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",
@@ -63,7 +69,9 @@ export default function HeroSection() {
             mx: "auto",
             textAlign: "center",
             color: "white",
-            textShadow: "0 2px 10px rgba(0,0,0,0.3)",
+            textShadow: isDarkMode
+              ? "0 2px 10px rgba(0,0,0,0.5)"
+              : "0 2px 10px rgba(0,0,0,0.3)",
             mb: { xs: 4, md: 8 },
             p: 3,
             borderRadius: "16px",
@@ -90,7 +98,9 @@ export default function HeroSection() {
                 position: "relative",
                 overflow: "hidden",
                 color: "#FFFFFF",
-                textShadow: "0 3px 10px rgba(0,0,0,0.5)",
+                textShadow: isDarkMode
+                  ? "0 3px 10px rgba(0,0,0,0.7)"
+                  : "0 3px 10px rgba(0,0,0,0.5)",
                 "& span": {
                   display: "inline-block",
                 },
@@ -228,53 +238,39 @@ export default function HeroSection() {
       <Box
         sx={{
           position: "absolute",
-          bottom: { xs: 20, md: 30 },
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "center",
+          bottom: { xs: "10vh", md: "5vh" },
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 20,
         }}
       >
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
+        <IconButton
+          onClick={scrollToCategories}
+          aria-label="Scroll to destinations"
+          component={motion.button}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, y: [0, 10, 0] }}
           transition={{
-            duration: 0.6,
-            delay: 1.2,
-            ease: "easeOut",
+            duration: 2,
+            repeat: Infinity,
+            repeatType: "loop",
           }}
-          whileTap={{ scale: 0.95 }}
+          sx={{
+            color: "white",
+            bgcolor: "rgba(255,255,255,0.15)",
+            backdropFilter: "blur(4px)",
+            p: 2,
+            "&:hover": {
+              bgcolor: "rgba(255,255,255,0.25)",
+              transform: "scale(1.1)",
+            },
+            boxShadow: isDarkMode
+              ? "0 4px 20px rgba(0,0,0,0.4)"
+              : "0 4px 20px rgba(0,0,0,0.2)",
+          }}
         >
-          <motion.div
-            animate={{
-              y: [0, 10, 0],
-            }}
-            transition={{
-              duration: 1.8,
-              ease: "easeInOut",
-              repeat: Infinity,
-              repeatType: "loop",
-            }}
-          >
-            <IconButton
-              onClick={scrollToCategories}
-              aria-label="Lihat kategori"
-              sx={{
-                color: "white",
-                background: "rgba(255, 77, 109, 0.85)",
-                border: "2px solid rgba(255, 255, 255, 0.8)",
-                p: 1.5,
-                "&:hover": {
-                  background: "rgba(79, 204, 187, 0.85)",
-                  borderColor: "#FFFFFF",
-                },
-              }}
-            >
-              <KeyboardArrowDownIcon fontSize="large" />
-            </IconButton>
-          </motion.div>
-        </motion.div>
+          <KeyboardArrowDownIcon fontSize="large" />
+        </IconButton>
       </Box>
     </Box>
   );
