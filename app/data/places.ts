@@ -13,6 +13,7 @@ export interface Place {
   priceRange: string;
   openingHours?: string;
   address?: string;
+  featured?: boolean;
 }
 
 export const places: Place[] = [
@@ -28,7 +29,8 @@ export const places: Place[] = [
     features: ["Outdoor", "Family Friendly", "Food Court", "Shopping"],
     priceRange: "Rp. 120.000",
     openingHours: "10:00 - 22:00",
-    address: "BSD City, Tangerang Selatan"
+    address: "BSD City, Tangerang Selatan",
+    featured: true
   },
   {
     id: 2,
@@ -56,7 +58,8 @@ export const places: Place[] = [
     features: ["Instagramable", "Outdoor Seating", "Wifi", "Coffee Specialist"],
     priceRange: "Rp. 120.000",
     openingHours: "08:00 - 22:00",
-    address: "Jl. Bintaro Utama, Jakarta Selatan"
+    address: "Jl. Bintaro Utama, Jakarta Selatan",
+    featured: true
   },
   {
     id: 4,

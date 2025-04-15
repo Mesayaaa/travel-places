@@ -15,6 +15,11 @@ import {
   Skeleton,
   Tooltip,
   Badge,
+  Stack,
+  useMediaQuery,
+  CircularProgress,
+  Paper,
+  Snackbar,
 } from "@mui/material";
 import MapIcon from "@mui/icons-material/Map";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -30,13 +35,16 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShareIcon from "@mui/icons-material/Share";
 import DirectionsIcon from "@mui/icons-material/Directions";
-import AddIcon from "@mui/icons-material/Add";
+import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
+import BookmarkAddedIcon from "@mui/icons-material/BookmarkAdded";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import { Place } from "../data/places";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@mui/material/styles";
 import { useFavorites } from "../context/FavoritesContext";
-import { SxProps, Theme } from "@mui/material/styles";
+import { useTrip } from "../context/TripContext";
+import { SxProps, Theme, alpha } from "@mui/material/styles";
 
 interface PlaceCardProps {
   place: Place;
@@ -44,6 +52,56 @@ interface PlaceCardProps {
 }
 
 const MotionCard = motion(Card);
+const MotionBox = motion(Box);
+
+// Loading skeleton component
+const PlaceCardSkeleton = ({ sx }: { sx?: SxProps<Theme> }) => (
+  <Card
+    sx={{
+      position: "relative",
+      height: {
+        xs: 220,
+        sm: 300,
+        md: 380,
+      },
+      borderRadius: {
+        xs: "20px",
+        sm: "24px",
+        md: "28px",
+      },
+      overflow: "hidden",
+      ...sx,
+    }}
+  >
+    <Skeleton
+      variant="rectangular"
+      width="100%"
+      height="100%"
+      animation="wave"
+    />
+    <Box
+      sx={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 2,
+      }}
+    >
+      <Skeleton variant="text" width="70%" height={32} />
+      <Skeleton variant="text" width="40%" height={24} />
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+        <Skeleton
+          variant="rectangular"
+          width="40%"
+          height={32}
+          sx={{ borderRadius: 1 }}
+        />
+        <Skeleton variant="circular" width={32} height={32} />
+      </Box>
+    </Box>
+  </Card>
+);
 
 // Helper function to get category icon
 const getCategoryIcon = (category: string) => {
@@ -85,11 +143,17 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [isAddedToTrip, setIsAddedToTrip] = useState(false);
+  const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const modalRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { toggleFavorite, isFavorite } = useFavorites();
+  const { addPlaceToTrip, removePlaceFromTrip, isInCurrentTrip } = useTrip();
   const favoriteStatus = isFavorite(place.id);
+  const inTripStatus = isInCurrentTrip(place.id);
 
   // Focus trap for modal
   useEffect(() => {
@@ -97,6 +161,29 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
       modalRef.current.focus();
     }
   }, [isModalOpen]);
+
+  // Intersection observer for card entrance animation
+  useEffect(() => {
+    if (!cardRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(cardRef.current);
+
+    return () => {
+      if (cardRef.current) observer.unobserve(cardRef.current);
+    };
+  }, []);
 
   const handleMapClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -113,15 +200,23 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
   };
 
   const handleAddToTrip = () => {
-    setIsAddedToTrip(!isAddedToTrip);
-    // Here you would add the actual functionality to add to trip
+    if (inTripStatus) {
+      removePlaceFromTrip(place.id);
+      setSnackbarMessage(`${place.name} dihapus dari trip`);
+    } else {
+      addPlaceToTrip(place);
+      setSnackbarMessage(`${place.name} ditambahkan ke trip`);
+    }
+    setSnackbarOpen(true);
+    setIsModalOpen(false);
   };
 
   const handleImageLoad = () => {
     setIsImageLoaded(true);
   };
 
-  const handleShareClick = () => {
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (navigator.share) {
       navigator
         .share({
@@ -130,22 +225,41 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
           url: place.mapsLink,
         })
         .catch((error) => console.log("Error sharing", error));
+    } else {
+      // Fallback for browsers that don't support navigator.share
+      setIsShareMenuOpen(true);
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+
   const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0 },
+    hover: {
+      y: -8,
+      transition: { duration: 0.3, ease: [0.2, 0.65, 0.3, 0.9] },
+    },
+  };
+
+  const imageVariants = {
+    hover: {
+      scale: 1.07,
+      transition: { duration: 0.7, ease: [0.2, 0.65, 0.3, 0.9] },
+    },
   };
 
   const favoriteVariants = {
     unfavorited: { scale: 1 },
-    favorited: { scale: [1, 1.2, 1], transition: { duration: 0.3 } },
+    favorited: { scale: [1, 1.3, 1], transition: { duration: 0.4 } },
   };
 
   return (
     <>
       <MotionCard
+        ref={cardRef}
         onClick={handleCardClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -153,7 +267,11 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
         animate="visible"
         whileHover="hover"
         variants={cardVariants}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+        transition={{
+          duration: 0.5,
+          ease: [0.2, 0.65, 0.3, 0.9],
+          delay: 0.05,
+        }}
         sx={{
           position: "relative",
           height: {
@@ -170,15 +288,21 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
           },
           backgroundColor: "#ffffff",
           boxShadow: isHovered
-            ? (theme) => `0 20px 50px ${getCategoryColor(place.category)}66`
-            : "0 10px 30px rgba(0,0,0,0.12)",
-          transition: "all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)",
+            ? (theme) =>
+                `0 22px 45px ${alpha(getCategoryColor(place.category), 0.45)}`
+            : "0 10px 25px rgba(0,0,0,0.09)",
+          transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
+          transformOrigin: "center bottom",
+          "&.in-view": {
+            opacity: 1,
+            transform: "translateY(0)",
+          },
+          "&:not(.in-view)": {
+            opacity: 0,
+            transform: "translateY(30px)",
+          },
           "&:hover": {
-            "& .MuiCardMedia-root": {
-              transform: "scale(1.1)",
-            },
             "& .overlay": {
-              opacity: 1,
               background: (theme) =>
                 `linear-gradient(to top, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.4) 100%)`,
             },
@@ -197,26 +321,48 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
         aria-label={"View details of " + place.name}
       >
         {!isImageLoaded && (
-          <Skeleton
-            variant="rectangular"
-            width="100%"
-            height="100%"
-            animation="wave"
-            sx={{ position: "absolute", top: 0, left: 0, zIndex: 1 }}
-          />
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "rgba(0,0,0,0.03)",
+              zIndex: 1,
+            }}
+          >
+            <CircularProgress
+              size={40}
+              thickness={4}
+              sx={{
+                color: getCategoryColor(place.category),
+              }}
+            />
+          </Box>
         )}
 
-        <CardMedia
-          component="img"
-          height="100%"
-          image={place.image}
-          alt={place.name}
-          onLoad={handleImageLoad}
-          sx={{
-            transition: "transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1)",
-            opacity: isImageLoaded ? 1 : 0,
-          }}
-        />
+        <MotionBox
+          variants={imageVariants}
+          sx={{ height: "100%", width: "100%" }}
+        >
+          <CardMedia
+            component="img"
+            height="100%"
+            image={place.image}
+            alt={place.name}
+            onLoad={handleImageLoad}
+            sx={{
+              height: "100%",
+              width: "100%",
+              objectFit: "cover",
+              opacity: isImageLoaded ? 1 : 0,
+            }}
+          />
+        </MotionBox>
 
         <Box
           className="overlay"
@@ -227,7 +373,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
             right: 0,
             bottom: 0,
             background: (theme) =>
-              `linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 40%, rgba(0, 0, 0, 0.2) 100%)`,
+              `linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 40%, rgba(0, 0, 0, 0.2) 100%)`,
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
@@ -243,34 +389,41 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
           <Box
             sx={{
               position: "absolute",
-              top: { xs: 6, md: 10 },
+              top: { xs: 8, md: 12 },
               left: { xs: 10, md: 18 },
             }}
           >
-            <Chip
-              icon={getCategoryIcon(place.category)}
-              label={
-                place.category.charAt(0).toUpperCase() + place.category.slice(1)
-              }
-              size="small"
-              sx={{
-                bgcolor: "rgba(255, 255, 255, 0.95)",
-                fontWeight: 600,
-                backdropFilter: "blur(8px)",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.15)",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                },
-              }}
-            />
+            <MotionBox
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+            >
+              <Chip
+                icon={getCategoryIcon(place.category)}
+                label={
+                  place.category.charAt(0).toUpperCase() +
+                  place.category.slice(1)
+                }
+                size="small"
+                sx={{
+                  bgcolor: "rgba(255, 255, 255, 0.95)",
+                  fontWeight: 600,
+                  backdropFilter: "blur(8px)",
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.15)",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                  },
+                }}
+              />
+            </MotionBox>
           </Box>
 
-          <motion.div
-            initial={false}
+          <MotionBox
+            initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
           >
             <Typography
               className="place-name"
@@ -291,111 +444,143 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
               }}
             >
               {place.name}
+              {place.featured && (
+                <VerifiedIcon
+                  sx={{
+                    ml: 0.7,
+                    fontSize: "0.9em",
+                    color: "#90caf9",
+                    verticalAlign: "middle",
+                  }}
+                />
+              )}
             </Typography>
-          </motion.div>
+          </MotionBox>
 
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              mb: { xs: 1.2, sm: 1.8 },
-            }}
+          <MotionBox
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Rating
-              value={place.rating}
-              precision={0.5}
-              readOnly
-              size="small"
-              icon={<StarIcon fontSize="inherit" sx={{ color: "#FFD700" }} />}
-            />
-            <Typography
-              variant="body2"
+            <Box
               sx={{
-                color: "rgba(255,255,255,0.9)",
-                fontWeight: 500,
-                textShadow: "0px 1px 4px rgba(0,0,0,0.5)",
-              }}
-            >
-              {place.rating} ({place.reviewCount})
-            </Typography>
-          </Box>
-
-          {place.address && (
-            <Typography
-              variant="body2"
-              sx={{
-                color: "rgba(255,255,255,0.9)",
-                mb: 1.8,
                 display: "flex",
                 alignItems: "center",
-                gap: 0.8,
-                textShadow: "0px 1px 4px rgba(0,0,0,0.5)",
-                fontSize: {
-                  xs: "0.75rem",
-                  sm: "0.8rem",
-                  md: "0.875rem",
-                },
+                gap: 1,
+                mb: { xs: 1.2, sm: 1.8 },
               }}
             >
-              <LocationOnIcon sx={{ fontSize: "0.9rem" }} />
-              {place.address}
-            </Typography>
-          )}
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <Tooltip title="Lihat di Google Maps" arrow>
-              <Button
-                onClick={handleMapClick}
-                startIcon={<MapIcon />}
-                variant="contained"
+              <Rating
+                value={place.rating}
+                precision={0.5}
+                readOnly
                 size="small"
+                icon={<StarIcon fontSize="inherit" sx={{ color: "#FFD700" }} />}
+              />
+              <Typography
+                variant="body2"
                 sx={{
-                  bgcolor: "rgba(255, 255, 255, 0.15)",
-                  backdropFilter: "blur(10px)",
-                  color: "white",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: "12px",
-                  fontWeight: 600,
-                  textTransform: "none",
-                  "&:hover": {
-                    bgcolor: "rgba(255, 255, 255, 0.25)",
-                    transform: "translateY(-3px)",
-                    boxShadow: "0 6px 12px rgba(0,0,0,0.2)",
-                  },
-                  transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
-                  px: 1.5,
+                  color: "rgba(255,255,255,0.9)",
+                  fontWeight: 500,
+                  textShadow: "0px 1px 4px rgba(0,0,0,0.5)",
                 }}
               >
-                Lihat Lokasi
-              </Button>
-            </Tooltip>
+                {place.rating} ({place.reviewCount})
+              </Typography>
+            </Box>
+          </MotionBox>
 
-            <Chip
-              label={place.priceRange}
-              size="small"
+          {place.address && (
+            <MotionBox
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "rgba(255,255,255,0.9)",
+                  mb: 1.8,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.8,
+                  textShadow: "0px 1px 4px rgba(0,0,0,0.5)",
+                  fontSize: {
+                    xs: "0.75rem",
+                    sm: "0.8rem",
+                    md: "0.875rem",
+                  },
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: "100%",
+                }}
+              >
+                <LocationOnIcon sx={{ fontSize: "0.9rem" }} />
+                {place.address}
+              </Typography>
+            </MotionBox>
+          )}
+
+          <MotionBox
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <Box
               sx={{
-                bgcolor: "rgba(255, 255, 255, 0.15)",
-                color: "white",
-                backdropFilter: "blur(10px)",
-                fontWeight: 600,
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                textShadow: "0px 1px 3px rgba(0,0,0,0.4)",
-                transition: "all 0.25s ease",
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                  bgcolor: "rgba(255, 255, 255, 0.2)",
-                },
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 1,
               }}
-            />
-          </Box>
+            >
+              <Tooltip title="Lihat di Google Maps" arrow>
+                <Button
+                  onClick={handleMapClick}
+                  startIcon={<MapIcon />}
+                  variant="contained"
+                  size="small"
+                  sx={{
+                    bgcolor: alpha("#ffffff", 0.18),
+                    backdropFilter: "blur(10px)",
+                    color: "white",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    borderRadius: "12px",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    "&:hover": {
+                      bgcolor: alpha("#ffffff", 0.28),
+                      transform: "translateY(-3px)",
+                      boxShadow: "0 6px 12px rgba(0,0,0,0.2)",
+                    },
+                    transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    px: 1.5,
+                  }}
+                >
+                  Lihat Lokasi
+                </Button>
+              </Tooltip>
+
+              <Chip
+                label={place.priceRange}
+                size="small"
+                sx={{
+                  bgcolor: alpha("#ffffff", 0.18),
+                  color: "white",
+                  backdropFilter: "blur(10px)",
+                  fontWeight: 600,
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  textShadow: "0px 1px 3px rgba(0,0,0,0.4)",
+                  transition: "all 0.25s ease",
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                    bgcolor: alpha("#ffffff", 0.22),
+                  },
+                }}
+              />
+            </Box>
+          </MotionBox>
         </Box>
 
         <Tooltip
@@ -415,8 +600,8 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
               top: { xs: 10, md: 18 },
               right: { xs: 10, md: 18 },
               background: favoriteStatus
-                ? theme.palette.primary.main
-                : theme.palette.primary.main,
+                ? alpha(theme.palette.primary.main, 0.9)
+                : alpha(theme.palette.primary.main, 0.8),
               backdropFilter: "blur(8px)",
               padding: { xs: "6px", sm: "8px" },
               cursor: "pointer",
@@ -425,7 +610,10 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                   ? theme.palette.primary.dark
                   : theme.palette.primary.dark,
                 transform: "scale(1.15)",
-                boxShadow: "0 6px 20px rgba(25, 118, 210, 0.6)",
+                boxShadow: `0 6px 20px ${alpha(
+                  theme.palette.primary.main,
+                  0.6
+                )}`,
               },
               "&:focus-visible": {
                 outline: "2px solid white",
@@ -466,7 +654,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
               alignItems: "center",
               justifyContent: "center",
               p: { xs: 1, sm: 2, md: 3 },
-              backdropFilter: "blur(5px)",
+              backdropFilter: "blur(8px)",
             }}
           >
             <Box
@@ -499,25 +687,27 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                 },
               }}
             >
-              <IconButton
-                onClick={() => setIsModalOpen(false)}
-                aria-label="close modal"
-                sx={{
-                  position: "absolute",
-                  top: 12,
-                  right: 12,
-                  bgcolor: "rgba(0, 0, 0, 0.5)",
-                  color: "white",
-                  zIndex: 10,
-                  "&:hover": {
-                    bgcolor: "rgba(0, 0, 0, 0.7)",
-                    transform: "scale(1.1)",
-                  },
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
+              <Tooltip title="Close" arrow placement="left">
+                <IconButton
+                  onClick={() => setIsModalOpen(false)}
+                  aria-label="close modal"
+                  sx={{
+                    position: "absolute",
+                    top: 16,
+                    right: 16,
+                    bgcolor: "rgba(0, 0, 0, 0.5)",
+                    color: "white",
+                    zIndex: 10,
+                    "&:hover": {
+                      bgcolor: "rgba(0, 0, 0, 0.7)",
+                      transform: "scale(1.1) rotate(90deg)",
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
 
               <Grid container>
                 <Grid item xs={12} md={6}>
@@ -525,16 +715,13 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                     sx={{
                       position: "relative",
                       height: { xs: "40vh", md: "100%" },
-                      backgroundImage: "url(" + place.image + ")",
+                      backgroundImage: `url(${place.image})`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                       borderTopLeftRadius: { md: "28px" },
                       borderTopRightRadius: { xs: "28px", md: 0 },
                       borderBottomLeftRadius: { xs: 0, md: "28px" },
                       transition: "all 0.5s ease",
-                      "&:hover": {
-                        // Removed transform and filter effects
-                      },
                       transformOrigin: "center",
                       overflow: "hidden",
                     }}
@@ -549,23 +736,29 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                         gap: 1,
                       }}
                     >
-                      <Chip
-                        icon={getCategoryIcon(place.category)}
-                        label={
-                          place.category.charAt(0).toUpperCase() +
-                          place.category.slice(1)
-                        }
-                        sx={{
-                          bgcolor: "white",
-                          fontWeight: 600,
-                          boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            transform: "translateY(-2px)",
-                            boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
-                          },
-                        }}
-                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <Chip
+                          icon={getCategoryIcon(place.category)}
+                          label={
+                            place.category.charAt(0).toUpperCase() +
+                            place.category.slice(1)
+                          }
+                          sx={{
+                            bgcolor: "white",
+                            fontWeight: 600,
+                            boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              transform: "translateY(-2px)",
+                              boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
+                            },
+                          }}
+                        />
+                      </motion.div>
                     </Box>
 
                     <Box
@@ -578,23 +771,42 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                         gap: 1,
                       }}
                     >
-                      <Tooltip title="Share" arrow>
-                        <IconButton
-                          onClick={handleShareClick}
-                          sx={{
-                            bgcolor: "rgba(255, 255, 255, 0.2)",
-                            backdropFilter: "blur(10px)",
-                            color: "white",
-                            "&:hover": {
-                              bgcolor: "rgba(255, 255, 255, 0.3)",
-                              transform: "translateY(-2px)",
-                            },
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          <ShareIcon />
-                        </IconButton>
-                      </Tooltip>
+                      <Stack direction="row" spacing={1}>
+                        <Tooltip title="Share" arrow>
+                          <IconButton
+                            onClick={handleShareClick}
+                            sx={{
+                              bgcolor: "rgba(255, 255, 255, 0.2)",
+                              backdropFilter: "blur(10px)",
+                              color: "white",
+                              "&:hover": {
+                                bgcolor: "rgba(255, 255, 255, 0.3)",
+                                transform: "translateY(-2px)",
+                              },
+                              transition: "all 0.2s ease",
+                            }}
+                          >
+                            <ShareIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Get Directions" arrow>
+                          <IconButton
+                            onClick={handleMapClick}
+                            sx={{
+                              bgcolor: "rgba(255, 255, 255, 0.2)",
+                              backdropFilter: "blur(10px)",
+                              color: "white",
+                              "&:hover": {
+                                bgcolor: "rgba(255, 255, 255, 0.3)",
+                                transform: "translateY(-2px)",
+                              },
+                              transition: "all 0.2s ease",
+                            }}
+                          >
+                            <DirectionsIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
                     </Box>
                   </Box>
                 </Grid>
@@ -604,250 +816,338 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                     <Box
                       sx={{
                         display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
+                        flexDirection: "column",
                         mb: 1.5,
                       }}
                     >
-                      <Typography
-                        variant="h4"
-                        component="h2"
-                        id={"modal-" + place.id + "-title"}
-                        sx={{
-                          fontWeight: 700,
-                          lineHeight: 1.2,
-                          fontSize: { xs: "1.8rem", md: "2.2rem" },
-                          letterSpacing: "-0.02em",
-                          color: "#000000",
-                        }}
+                      <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 }}
                       >
-                        {place.name}
-                      </Typography>
-                      <Tooltip
-                        title={
-                          favoriteStatus
-                            ? "Hapus dari favorit"
-                            : "Tambah ke favorit"
-                        }
-                        arrow
-                      >
-                        <IconButton
-                          onClick={handleFavoriteToggle}
-                          color="primary"
-                          aria-label={
-                            favoriteStatus
-                              ? "Remove from favorites"
-                              : "Add to favorites"
-                          }
-                          component={motion.button}
-                          variants={favoriteVariants}
-                          animate={favoriteStatus ? "favorited" : "unfavorited"}
+                        <Box
                           sx={{
-                            p: 1,
-                            "&:hover": {
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.2s ease",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                            mb: 1,
                           }}
                         >
-                          {favoriteStatus ? (
-                            <FavoriteIcon
+                          <Typography
+                            variant="h4"
+                            component="h2"
+                            id={"modal-" + place.id + "-title"}
+                            sx={{
+                              fontWeight: 700,
+                              lineHeight: 1.2,
+                              fontSize: { xs: "1.8rem", md: "2.2rem" },
+                              letterSpacing: "-0.02em",
+                              color: "#000000",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            {place.name}
+                            {place.featured && (
+                              <Tooltip title="Featured Place" arrow>
+                                <VerifiedIcon
+                                  sx={{
+                                    fontSize: "1.2rem",
+                                    color: theme.palette.primary.main,
+                                    verticalAlign: "middle",
+                                  }}
+                                />
+                              </Tooltip>
+                            )}
+                          </Typography>
+
+                          <Tooltip
+                            title={
+                              favoriteStatus
+                                ? "Hapus dari favorit"
+                                : "Tambah ke favorit"
+                            }
+                            arrow
+                          >
+                            <IconButton
+                              onClick={handleFavoriteToggle}
+                              color="primary"
+                              aria-label={
+                                favoriteStatus
+                                  ? "Remove from favorites"
+                                  : "Add to favorites"
+                              }
+                              component={motion.button}
+                              variants={favoriteVariants}
+                              animate={
+                                favoriteStatus ? "favorited" : "unfavorited"
+                              }
                               sx={{
-                                fontSize: { xs: "1.2rem", sm: "1.5rem" },
-                                color: "white",
+                                p: 1,
+                                "&:hover": {
+                                  transform: "scale(1.1)",
+                                },
+                                transition: "all 0.2s ease",
                               }}
-                            />
-                          ) : (
-                            <FavoriteBorderIcon
-                              sx={{
-                                fontSize: { xs: "1.2rem", sm: "1.5rem" },
-                                color: "white",
-                              }}
-                            />
-                          )}
-                        </IconButton>
-                      </Tooltip>
+                            >
+                              {favoriteStatus ? (
+                                <FavoriteIcon color="error" fontSize="medium" />
+                              ) : (
+                                <FavoriteBorderIcon fontSize="medium" />
+                              )}
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </motion.div>
                     </Box>
 
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        mb: 2.5,
-                      }}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
                     >
-                      <Rating
-                        value={place.rating}
-                        precision={0.5}
-                        readOnly
-                        size="small"
-                        sx={{
-                          "& .MuiRating-iconFilled": {
-                            color: theme.palette.secondary.main,
-                          },
-                        }}
-                      />
-                      <Typography variant="body2" color="text.secondary">
-                        {place.rating} ({place.reviewCount} ulasan)
-                      </Typography>
-                      <Chip
-                        label={place.priceRange}
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          fontWeight: 600,
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            transform: "translateY(-2px)",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                          },
-                        }}
-                      />
-                    </Box>
-
-                    {place.address && (
                       <Box
                         sx={{
                           display: "flex",
-                          alignItems: "flex-start",
-                          gap: 1.2,
+                          alignItems: "center",
+                          gap: 1,
                           mb: 2.5,
                         }}
                       >
-                        <LocationOnIcon color="action" sx={{ mt: 0.3 }} />
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ lineHeight: 1.5 }}
-                        >
-                          {place.address}
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {place.openingHours && (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "flex-start",
-                          gap: 1.2,
-                          mb: 3.5,
-                        }}
-                      >
-                        <AccessTimeIcon color="action" sx={{ mt: 0.3 }} />
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ lineHeight: 1.5 }}
-                        >
-                          {place.openingHours}
-                        </Typography>
-                      </Box>
-                    )}
-
-                    <Divider sx={{ mb: 3.5 }} />
-
-                    <Typography
-                      variant="body1"
-                      paragraph
-                      id={"modal-" + place.id + "-description"}
-                      sx={{
-                        lineHeight: 1.7,
-                        color: "text.primary",
-                        mb: 3,
-                      }}
-                    >
-                      {place.description}
-                    </Typography>
-
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: 600,
-                        mb: 1.5,
-                        color: "text.primary",
-                      }}
-                    >
-                      Fasilitas:
-                    </Typography>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 1,
-                        mb: 4.5,
-                      }}
-                    >
-                      {place.features.map((feature, index) => (
-                        <Chip
-                          key={index}
-                          label={feature}
+                        <Rating
+                          value={place.rating}
+                          precision={0.5}
+                          readOnly
                           size="small"
                           sx={{
-                            bgcolor: "rgba(0,0,0,0.05)",
+                            "& .MuiRating-iconFilled": {
+                              color: theme.palette.secondary.main,
+                            },
+                          }}
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                          {place.rating} ({place.reviewCount} ulasan)
+                        </Typography>
+                        <Chip
+                          label={place.priceRange}
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            fontWeight: 600,
+                            borderRadius: "8px",
                             transition: "all 0.2s ease",
                             "&:hover": {
                               transform: "translateY(-2px)",
-                              bgcolor: "rgba(0,0,0,0.08)",
                               boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
                             },
                           }}
                         />
-                      ))}
-                    </Box>
+                      </Box>
+                    </motion.div>
 
-                    <Box sx={{ display: "flex", gap: 2 }}>
-                      <Button
-                        variant="contained"
-                        fullWidth
-                        startIcon={<DirectionsIcon />}
-                        onClick={handleMapClick}
+                    {place.address && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 1.2,
+                            mb: 2.5,
+                            p: 1.5,
+                            bgcolor: alpha(theme.palette.primary.main, 0.05),
+                            borderRadius: "12px",
+                          }}
+                        >
+                          <LocationOnIcon color="primary" sx={{ mt: 0.3 }} />
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ lineHeight: 1.5 }}
+                          >
+                            {place.address}
+                          </Typography>
+                        </Paper>
+                      </motion.div>
+                    )}
+
+                    {place.openingHours && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 1.2,
+                            mb: 3.5,
+                            p: 1.5,
+                            bgcolor: alpha(theme.palette.primary.main, 0.05),
+                            borderRadius: "12px",
+                          }}
+                        >
+                          <AccessTimeIcon color="primary" sx={{ mt: 0.3 }} />
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ lineHeight: 1.5 }}
+                          >
+                            {place.openingHours}
+                          </Typography>
+                        </Paper>
+                      </motion.div>
+                    )}
+
+                    <Divider sx={{ mb: 3.5 }} />
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      <Typography
+                        variant="body1"
+                        paragraph
+                        id={"modal-" + place.id + "-description"}
                         sx={{
-                          py: 1.8,
-                          borderRadius: "14px",
-                          fontWeight: 600,
-                          background:
-                            "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
-                          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                          textTransform: "none",
-                          "&:hover": {
-                            boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                            transform: "translateY(-3px)",
-                          },
-                          transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
-                          fontSize: "1rem",
+                          lineHeight: 1.7,
+                          color: "text.primary",
+                          mb: 3,
                         }}
                       >
-                        Lihat Lokasi
-                      </Button>
-                      <Button
-                        variant={isAddedToTrip ? "contained" : "outlined"}
-                        color={isAddedToTrip ? "secondary" : "primary"}
-                        fullWidth
-                        startIcon={isAddedToTrip ? null : <AddIcon />}
-                        onClick={handleAddToTrip}
+                        {place.description}
+                      </Typography>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                    >
+                      <Typography
+                        variant="subtitle1"
                         sx={{
-                          py: 1.8,
-                          borderRadius: "14px",
                           fontWeight: 600,
-                          borderWidth: 2,
-                          textTransform: "none",
-                          "&:hover": {
-                            borderWidth: isAddedToTrip ? 0 : 2,
-                            transform: "translateY(-3px)",
-                            boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
-                          },
-                          transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
-                          fontSize: "1rem",
+                          mb: 1.5,
+                          color: "text.primary",
                         }}
                       >
-                        {isAddedToTrip
-                          ? "Ditambahkan ke Trip"
-                          : "Tambahkan ke Trip"}
-                      </Button>
-                    </Box>
+                        Fasilitas:
+                      </Typography>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: 1,
+                          mb: 4.5,
+                        }}
+                      >
+                        {place.features.map((feature, index) => (
+                          <Chip
+                            key={index}
+                            label={feature}
+                            size="small"
+                            sx={{
+                              bgcolor: alpha(theme.palette.primary.main, 0.08),
+                              borderRadius: "8px",
+                              transition: "all 0.2s ease",
+                              "&:hover": {
+                                transform: "translateY(-2px)",
+                                bgcolor: alpha(
+                                  theme.palette.primary.main,
+                                  0.12
+                                ),
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                              },
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.7 }}
+                    >
+                      <Box sx={{ display: "flex", gap: 2 }}>
+                        <Button
+                          variant="contained"
+                          fullWidth
+                          startIcon={<DirectionsIcon />}
+                          onClick={handleMapClick}
+                          sx={{
+                            py: 1.8,
+                            borderRadius: "14px",
+                            fontWeight: 600,
+                            background: `linear-gradient(45deg, ${getCategoryColor(
+                              place.category
+                            )}, ${alpha(
+                              getCategoryColor(place.category),
+                              0.7
+                            )})`,
+                            boxShadow: `0 4px 20px ${alpha(
+                              getCategoryColor(place.category),
+                              0.3
+                            )}`,
+                            textTransform: "none",
+                            "&:hover": {
+                              boxShadow: `0 8px 25px ${alpha(
+                                getCategoryColor(place.category),
+                                0.5
+                              )}`,
+                              transform: "translateY(-3px)",
+                            },
+                            transition:
+                              "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                            fontSize: "1rem",
+                          }}
+                        >
+                          Lihat Lokasi
+                        </Button>
+                        <Button
+                          variant={inTripStatus ? "contained" : "outlined"}
+                          color="primary"
+                          fullWidth
+                          startIcon={
+                            inTripStatus ? (
+                              <BookmarkAddedIcon />
+                            ) : (
+                              <BookmarkAddIcon />
+                            )
+                          }
+                          onClick={handleAddToTrip}
+                          sx={{
+                            py: 1.8,
+                            borderRadius: "14px",
+                            fontWeight: 600,
+                            borderWidth: 2,
+                            textTransform: "none",
+                            "&:hover": {
+                              borderWidth: inTripStatus ? 0 : 2,
+                              transform: "translateY(-3px)",
+                              boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                            },
+                            transition:
+                              "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                            fontSize: "1rem",
+                          }}
+                        >
+                          {inTripStatus
+                            ? "Ditambahkan ke Trip"
+                            : "Tambahkan ke Trip"}
+                        </Button>
+                      </Box>
+                    </motion.div>
                   </Box>
                 </Grid>
               </Grid>
@@ -855,6 +1155,22 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
           </Modal>
         )}
       </AnimatePresence>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        sx={{
+          "& .MuiSnackbarContent-root": {
+            bgcolor: theme.palette.primary.main,
+            fontWeight: 500,
+            borderRadius: "12px",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+          },
+        }}
+      />
     </>
   );
 }

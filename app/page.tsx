@@ -31,6 +31,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SendIcon from "@mui/icons-material/Send";
 import Link from "@mui/material/Link";
+import { useTrip } from "./context/TripContext";
 
 const container = {
   hidden: { opacity: 0 },
@@ -51,8 +52,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [filteredPlaces, setFilteredPlaces] = useState(places);
   const [activeCategory, setActiveCategory] = useState("all");
-  const [isTripPlanModalOpen, setIsTripPlanModalOpen] = useState(false);
   const [tripPlansRefreshKey, setTripPlansRefreshKey] = useState(0);
+  const { openTripPlanModal, setOpenTripPlanModal } = useTrip();
   const destinationsRef = useRef(null);
   const planSectionRef = useRef(null);
   const isDestinationsInView = useInView(destinationsRef, {
@@ -91,7 +92,7 @@ export default function Home() {
 
   // Handle trip plan modal close and trigger refresh
   const handleTripPlanModalClose = () => {
-    setIsTripPlanModalOpen(false);
+    setOpenTripPlanModal(false);
     // Refresh the trip plans list
     setTripPlansRefreshKey((prev) => prev + 1);
   };
@@ -109,7 +110,7 @@ export default function Home() {
 
       <Box
         component="section"
-        id="destinations"
+        id="destination-list"
         ref={destinationsRef}
         sx={{
           py: { xs: 5, md: 0 },
@@ -239,7 +240,7 @@ export default function Home() {
               variant="contained"
               size="large"
               startIcon={<AddIcon />}
-              onClick={() => setIsTripPlanModalOpen(true)}
+              onClick={() => setOpenTripPlanModal(true)}
               sx={{
                 py: 1.5,
                 px: 4,
@@ -265,7 +266,7 @@ export default function Home() {
 
           {/* Trip Plan Modal */}
           <TripPlanModal
-            open={isTripPlanModalOpen}
+            open={openTripPlanModal}
             onClose={handleTripPlanModalClose}
           />
         </Container>
@@ -402,10 +403,10 @@ export default function Home() {
                 },
                 {
                   name: "Destinasi",
-                  href: "#destinations",
+                  href: "#categories",
                   scroll: () =>
                     document
-                      .getElementById("destinations")
+                      .getElementById("categories")
                       ?.scrollIntoView({ behavior: "smooth" }),
                 },
                 {
@@ -509,8 +510,7 @@ export default function Home() {
             }}
           >
             <Typography variant="body2" sx={{ opacity: 0.7 }}>
-              © {new Date().getFullYear()} TravelSayang - Dibuat dengan ❤️ untuk
-              Tersayang
+              © {new Date().getFullYear()} TravelSayang
             </Typography>
             <Box
               sx={{

@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { Inter } from "next/font/google";
 import { responsiveFontSizes } from "@mui/material/styles";
 import { FavoritesProvider } from "./context/FavoritesContext";
+import { TripProvider } from "./context/TripContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -95,7 +96,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <FavoritesProvider>{children}</FavoritesProvider>
+      <FavoritesProvider>
+        <TripProvider>{children}</TripProvider>
+      </FavoritesProvider>
     </ThemeProvider>
   );
 }

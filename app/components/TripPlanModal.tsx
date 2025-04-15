@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   Box,
@@ -21,6 +21,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { Place, places } from "../data/places";
 import { useForm, Controller } from "react-hook-form";
+import { useTrip } from "../context/TripContext";
 
 interface TripPlanModalProps {
   open: boolean;
@@ -51,19 +52,14 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
     },
   });
 
-  const [selectedPlaces, setSelectedPlaces] = useState<Place[]>([]);
+  const { placesInTrip, tripName, setTripName, clearCurrentTrip } = useTrip();
+
   const [companions, setCompanions] = useState<string[]>([]);
   const [newCompanion, setNewCompanion] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const handleAddPlace = (place: Place | null) => {
-    if (place && !selectedPlaces.find((p) => p.id === place.id)) {
-      setSelectedPlaces([...selectedPlaces, place]);
-    }
-  };
-
   const handleRemovePlace = (placeId: number) => {
-    setSelectedPlaces(selectedPlaces.filter((place) => place.id !== placeId));
+    return;
   };
 
   const handleAddCompanion = () => {
@@ -78,45 +74,52 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
   };
 
   const onSubmit = (data: FormData) => {
-    // Create the trip plan object
     const tripPlan = {
       id: Date.now(),
       name: data.tripName,
       startDate: data.startDate,
       endDate: data.endDate,
-      places: selectedPlaces,
+      places: placesInTrip,
       companions,
       budget: data.budget,
       notes: data.notes,
       createdAt: new Date(),
     };
 
-    // In a real application, you would save this to a database or local storage
-    console.log("Trip plan saved:", tripPlan);
     localStorage.setItem(`tripPlan_${tripPlan.id}`, JSON.stringify(tripPlan));
 
-    // Reset form and close modal
     resetForm();
+    clearCurrentTrip();
     onClose();
 
-    // Show success notification
     setSnackbarOpen(true);
   };
 
   const resetForm = () => {
     reset();
-    setSelectedPlaces([]);
     setCompanions([]);
     setNewCompanion("");
   };
 
   const isFormValid = (formData: FormData) => {
-    return formData.tripName && formData.startDate && selectedPlaces.length > 0;
+    return formData.tripName && formData.startDate && placesInTrip.length > 0;
   };
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
+
+  useEffect(() => {
+    if (open) {
+      reset({
+        tripName: tripName,
+        startDate: "",
+        endDate: "",
+        budget: "",
+        notes: "",
+      });
+    }
+  }, [open, reset, tripName]);
 
   return (
     <>
@@ -246,36 +249,22 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
                   variant="subtitle1"
                   sx={{ mb: 1, fontWeight: 600, color: "black" }}
                 >
-                  Pilih Destinasi
+                  Destinasi Perjalanan
                 </Typography>
-                <Autocomplete
-                  options={places}
-                  getOptionLabel={(option) => option.name}
-                  onChange={(_event, value) => handleAddPlace(value)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Cari tempat"
-                      placeholder="Ketik untuk mencari tempat"
-                      variant="outlined"
-                    />
-                  )}
-                />
-
                 <Box sx={{ mt: 2 }}>
-                  {selectedPlaces.map((place) => (
+                  {placesInTrip.map((place) => (
                     <Chip
                       key={place.id}
                       label={place.name}
-                      onDelete={() => handleRemovePlace(place.id)}
                       sx={{ m: 0.5 }}
                       color="primary"
                       variant="outlined"
                     />
                   ))}
-                  {selectedPlaces.length === 0 && (
+                  {placesInTrip.length === 0 && (
                     <Typography variant="body2" color="text.secondary">
-                      Belum ada tempat yang dipilih
+                      Belum ada tempat yang dipilih. Tambahkan destinasi dari
+                      halaman utama.
                     </Typography>
                   )}
                 </Box>
