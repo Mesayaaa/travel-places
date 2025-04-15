@@ -16,6 +16,8 @@ import {
   Avatar,
   Tooltip,
   Badge,
+  Backdrop,
+  CircularProgress,
 } from "@mui/material";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -29,7 +31,7 @@ import { useFavorites } from "../context/FavoritesContext";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { useTrip } from "../context/TripContext";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import { useTheme } from "../context/ThemeContext";
@@ -75,9 +77,11 @@ export default function Navbar() {
   const { favoritesCount } = useFavorites();
   const { placesInTrip, openTripPlanModal, setOpenTripPlanModal } = useTrip();
   const router = useRouter();
+  const pathname = usePathname();
   const { mode, toggleTheme } = useTheme();
   const isDarkMode = mode === "dark";
   const [isProfilePage, setIsProfilePage] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Helper function to check if an item should be active
   const isItemActive = (href: string) => {
@@ -111,7 +115,8 @@ export default function Navbar() {
         const element = document.querySelector(section);
         if (element) {
           const rect = element.getBoundingClientRect();
-          if (rect.top <= 100 && rect.bottom >= 100) {
+          // Make this more accurate by checking if it's closer to the center
+          if (rect.top <= 150 && rect.bottom >= 50) {
             setActiveSection(section);
             break;
           }
@@ -132,6 +137,18 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, [scrolled, navItems]);
+
+  // Clear loading when we've navigated to profile page
+  useEffect(() => {
+    if (pathname === "/profile" && loading) {
+      // Add a small delay to ensure the page has loaded
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [pathname, loading]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -179,6 +196,30 @@ export default function Navbar() {
     } else {
       // For any other paths, use router
       router.push(href);
+    }
+  };
+
+  const handleProfileClick = () => {
+    // If already on profile page, do nothing
+    if (pathname === "/profile") {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Set timeout to ensure loading state is visible before navigation
+      setTimeout(() => {
+        router.push("/profile");
+
+        // Set a fallback timeout to clear loading state in case navigation fails
+        setTimeout(() => {
+          if (loading) setLoading(false);
+        }, 3000);
+      }, 300);
+    } catch (error) {
+      console.error("Navigation error:", error);
+      setLoading(false);
     }
   };
 
@@ -291,310 +332,637 @@ export default function Navbar() {
             />
           </ListItem>
         ))}
+
+        {/* Profile Button */}
+        <ListItem
+          button
+          onClick={() => {
+            handleDrawerToggle();
+            handleProfileClick();
+          }}
+          sx={{
+            textAlign: "center",
+            py: 2,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 1.5,
+            borderRadius: "10px",
+            mx: 2,
+            my: 1.5,
+            backgroundColor: isProfilePage
+              ? "rgba(25, 118, 210, 0.08)"
+              : "transparent",
+            transition: "all 0.2s ease",
+            "&:hover": {
+              backgroundColor: "rgba(25, 118, 210, 0.15)",
+            },
+            border: isProfilePage
+              ? "1px solid rgba(25, 118, 210, 0.3)"
+              : "none",
+          }}
+        >
+          <Box
+            sx={{
+              color: "primary.main",
+              display: "flex",
+              position: "relative",
+            }}
+          >
+            {isProfilePage && (
+              <Box
+                component={motion.div}
+                animate={{
+                  scale: [1, 1.4, 1],
+                  opacity: [0.7, 0, 0.7],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2,
+                  ease: "easeInOut",
+                }}
+                sx={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  border: "2px solid",
+                  borderColor: "primary.main",
+                }}
+              />
+            )}
+            <Avatar
+              sx={{
+                width: 24,
+                height: 24,
+                bgcolor: isProfilePage ? "primary.dark" : "primary.main",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+              }}
+            >
+              <AccountCircleIcon sx={{ fontSize: 16 }} />
+            </Avatar>
+          </Box>
+          <ListItemText
+            primary="Profil Saya"
+            primaryTypographyProps={{
+              fontWeight: isProfilePage ? 600 : 500,
+              fontSize: "1rem",
+              color: isProfilePage ? "primary.main" : "text.primary",
+            }}
+          />
+        </ListItem>
       </List>
     </Box>
   );
 
   return (
-    <AppBar
-      position="fixed"
-      sx={{
-        backdropFilter: scrolled ? "blur(10px)" : "none",
-        backgroundColor: isDarkMode
-          ? scrolled
-            ? "rgba(18, 18, 18, 0.8)"
-            : "transparent"
-          : scrolled
-          ? "rgba(255, 255, 255, 0.8)"
-          : "transparent",
-        boxShadow: scrolled ? "0 4px 30px rgba(0, 0, 0, 0.1)" : "none",
-        position: "fixed",
-        width: "100%",
-        zIndex: 1000,
-        transition: "all 0.3s ease-in-out",
-        // Hide navbar only on profile page in light mode when not scrolled
-        opacity: isProfilePage && !isDarkMode && !scrolled ? 0 : 1,
-        visibility:
-          isProfilePage && !isDarkMode && !scrolled ? "hidden" : "visible",
-        transform:
-          isProfilePage && !isDarkMode && !scrolled
-            ? "translateY(-100%)"
-            : "translateY(0)",
-      }}
-    >
-      <Container maxWidth="xl">
-        <Toolbar
-          disableGutters
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Box
-            component={motion.div}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-            sx={{ display: "flex", alignItems: "center" }}
+    <>
+      <AppBar
+        position="fixed"
+        component={motion.div}
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        sx={{
+          backdropFilter: scrolled ? "blur(10px)" : "none",
+          backgroundColor: isDarkMode
+            ? scrolled
+              ? "rgba(18, 18, 18, 0.85)"
+              : "transparent"
+            : scrolled
+            ? "rgba(255, 255, 255, 0.85)"
+            : "transparent",
+          boxShadow: scrolled ? "0 4px 30px rgba(0, 0, 0, 0.1)" : "none",
+          position: "fixed",
+          width: "100%",
+          zIndex: 1000,
+          transition: "all 0.3s ease-in-out",
+          // Hide navbar only on profile page in light mode when not scrolled
+          opacity: isProfilePage && !isDarkMode && !scrolled ? 0 : 1,
+          visibility:
+            isProfilePage && !isDarkMode && !scrolled ? "hidden" : "visible",
+          transform:
+            isProfilePage && !isDarkMode && !scrolled
+              ? "translateY(-100%)"
+              : "translateY(0)",
+        }}
+      >
+        <Container maxWidth="xl">
+          <Toolbar
+            disableGutters
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              py: scrolled ? 0.5 : 1, // Shrink navbar on scroll
+              transition: "padding 0.3s ease",
+            }}
           >
-            <FlightTakeoffIcon
-              sx={{
-                mr: 1.5,
-                color: scrolled
-                  ? "primary.main"
-                  : isDarkMode
-                  ? "white"
-                  : "white",
-                fontSize: { xs: 24, md: 28 },
-                transition: "color 0.3s ease",
-              }}
-            />
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              sx={{
-                fontWeight: "bold",
-                color: scrolled
-                  ? isDarkMode
-                    ? "text.primary"
-                    : "text.primary"
-                  : isDarkMode
-                  ? "white"
-                  : "white",
-                fontSize: { xs: "1.2rem", sm: "1.4rem" },
-                textShadow: scrolled
-                  ? "none"
-                  : isDarkMode
-                  ? "0 2px 10px rgba(0,0,0,0.3)"
-                  : "0 2px 10px rgba(0,0,0,0.2)",
-                transition: "color 0.3s ease, text-shadow 0.3s ease",
-              }}
+            <Box
+              component={motion.div}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
+              sx={{ display: "flex", alignItems: "center" }}
             >
-              TravelSayang
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: { xs: "none", md: "flex" }, ml: 2 }}>
-            {navItems.map((item) => (
-              <Button
-                key={item.name}
-                onClick={() => handleNavClick(item.href)}
+              <FlightTakeoffIcon
                 sx={{
-                  my: 1,
-                  mx: 1.2,
+                  mr: 1.5,
+                  color: scrolled
+                    ? "primary.main"
+                    : isDarkMode
+                    ? "white"
+                    : "white",
+                  fontSize: { xs: 24, md: 28 },
+                  transition: "color 0.3s ease",
+                }}
+              />
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                sx={{
+                  fontWeight: "bold",
                   color: scrolled
                     ? isDarkMode
-                      ? "rgba(255, 255, 255, 0.9)"
+                      ? "text.primary"
                       : "text.primary"
                     : isDarkMode
                     ? "white"
                     : "white",
-                  fontSize: "0.9rem",
-                  fontWeight: 500,
-                  position: "relative",
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  textTransform: "none",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    backgroundColor: scrolled
-                      ? isDarkMode
-                        ? "rgba(255, 255, 255, 0.1)"
-                        : "rgba(25, 118, 210, 0.08)"
-                      : "rgba(255, 255, 255, 0.2)",
-                    transform: "translateY(-2px)",
-                  },
+                  fontSize: { xs: "1.2rem", sm: "1.4rem" },
+                  textShadow: scrolled
+                    ? "none"
+                    : isDarkMode
+                    ? "0 2px 10px rgba(0,0,0,0.3)"
+                    : "0 2px 10px rgba(0,0,0,0.2)",
+                  transition: "color 0.3s ease, text-shadow 0.3s ease",
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.8,
-                    position: "relative",
-                    "&::after": {
-                      content: "''",
-                      position: "absolute",
-                      width: isItemActive(item.href) ? "100%" : "0%",
-                      height: "3px",
-                      bottom: "-6px",
-                      left: 0,
-                      backgroundColor: scrolled ? "primary.main" : "white",
-                      transition: "width 0.3s ease",
+                TravelSayang
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: { xs: "none", md: "flex" }, ml: 2 }}>
+              {navItems.map((item) => (
+                <motion.div
+                  key={item.name}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    onClick={() => handleNavClick(item.href)}
+                    sx={{
+                      my: 1,
+                      mx: 1.2,
+                      color: scrolled
+                        ? isDarkMode
+                          ? "rgba(255, 255, 255, 0.9)"
+                          : "text.primary"
+                        : isDarkMode
+                        ? "white"
+                        : "white",
+                      fontSize: "0.9rem",
+                      fontWeight: 500,
+                      position: "relative",
+                      padding: "8px 16px",
                       borderRadius: "8px",
-                    },
-                  }}
-                >
-                  {item.icon && (
-                    <Box sx={{ lineHeight: 0 }}>
-                      {item.badge ? (
-                        <Badge
-                          badgeContent={item.badge}
-                          color="error"
-                          sx={{
-                            "& .MuiBadge-badge": {
-                              fontSize: "0.6rem",
-                              fontWeight: "bold",
-                              minWidth: "16px",
-                              height: "16px",
-                            },
-                          }}
-                        >
-                          {item.icon}
-                        </Badge>
-                      ) : (
-                        item.icon
+                      textTransform: "none",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        backgroundColor: scrolled
+                          ? isDarkMode
+                            ? "rgba(255, 255, 255, 0.1)"
+                            : "rgba(25, 118, 210, 0.08)"
+                          : "rgba(255, 255, 255, 0.2)",
+                        transform: "translateY(-2px)",
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.8,
+                        position: "relative",
+                        "&::after": {
+                          content: "''",
+                          position: "absolute",
+                          width: isItemActive(item.href) ? "100%" : "0%",
+                          height: "3px",
+                          bottom: "-6px",
+                          left: 0,
+                          backgroundColor: scrolled ? "primary.main" : "white",
+                          transition: "width 0.3s ease",
+                          borderRadius: "8px",
+                        },
+                      }}
+                    >
+                      {item.icon && (
+                        <Box sx={{ lineHeight: 0 }}>
+                          {item.badge ? (
+                            <Badge
+                              badgeContent={item.badge}
+                              color="error"
+                              sx={{
+                                "& .MuiBadge-badge": {
+                                  fontSize: "0.6rem",
+                                  fontWeight: "bold",
+                                  minWidth: "16px",
+                                  height: "16px",
+                                },
+                              }}
+                            >
+                              {item.icon}
+                            </Badge>
+                          ) : (
+                            item.icon
+                          )}
+                        </Box>
                       )}
+                      {item.name}
                     </Box>
-                  )}
-                  {item.name}
-                </Box>
-              </Button>
-            ))}
-          </Box>
+                  </Button>
+                </motion.div>
+              ))}
+            </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Tooltip title={isDarkMode ? "Light Mode" : "Dark Mode"} arrow>
-              <IconButton
-                onClick={toggleTheme}
-                component={motion.button}
-                whileHover={{ scale: 1.1, rotate: isDarkMode ? 180 : 0 }}
-                whileTap={{ scale: 0.9 }}
-                initial={{ rotate: isDarkMode ? 180 : 0 }}
-                animate={{ rotate: isDarkMode ? 180 : 0 }}
-                transition={{ duration: 0.5 }}
-                sx={{
-                  bgcolor: scrolled
-                    ? isDarkMode
-                      ? "rgba(255, 255, 255, 0.15)"
-                      : "rgba(0, 0, 0, 0.05)"
-                    : "rgba(255, 255, 255, 0.25)",
-                  p: 1.2,
-                  color: isDarkMode
-                    ? "orange"
-                    : scrolled
-                    ? "primary.main"
-                    : "white",
-                  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                  "&:hover": {
-                    bgcolor: isDarkMode
-                      ? "rgba(255, 255, 255, 0.25)"
-                      : "rgba(0, 0, 0, 0.1)",
-                  },
-                }}
-              >
-                {isDarkMode ? (
-                  <LightModeOutlinedIcon fontSize="small" />
-                ) : (
-                  <DarkModeOutlinedIcon fontSize="small" />
-                )}
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Favorit Saya" arrow>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  color: scrolled ? "primary.main" : "white",
-                  transition: "color 0.3s ease",
-                }}
-              >
-                <Badge
-                  badgeContent={favoritesCount}
-                  color="error"
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Tooltip title={isDarkMode ? "Light Mode" : "Dark Mode"} arrow>
+                <IconButton
+                  onClick={toggleTheme}
+                  component={motion.button}
+                  whileHover={{ scale: 1.1, rotate: isDarkMode ? 180 : 0 }}
+                  whileTap={{ scale: 0.9 }}
+                  initial={{ rotate: isDarkMode ? 180 : 0 }}
+                  animate={{ rotate: isDarkMode ? 180 : 0 }}
+                  transition={{ duration: 0.5 }}
                   sx={{
-                    "& .MuiBadge-badge": {
-                      fontSize: "0.6rem",
-                      fontWeight: "bold",
-                      minWidth: "16px",
-                      height: "16px",
+                    color: isDarkMode
+                      ? "orange"
+                      : scrolled
+                      ? "primary.main"
+                      : "white",
+                  }}
+                >
+                  {isDarkMode ? (
+                    <LightModeOutlinedIcon fontSize="small" />
+                  ) : (
+                    <DarkModeOutlinedIcon fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Favorit Saya" arrow>
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{ display: "flex" }}
+                >
+                  <IconButton
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      color: scrolled ? "primary.main" : "white",
+                      transition: "color 0.3s ease",
+                    }}
+                  >
+                    <Badge
+                      badgeContent={favoritesCount}
+                      color="error"
+                      sx={{
+                        "& .MuiBadge-badge": {
+                          fontSize: "0.6rem",
+                          fontWeight: "bold",
+                          minWidth: "16px",
+                          height: "16px",
+                          boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+                        },
+                      }}
+                    >
+                      <FavoriteIcon
+                        sx={{
+                          color: "inherit",
+                          filter: scrolled
+                            ? "none"
+                            : "drop-shadow(0 2px 3px rgba(0,0,0,0.2))",
+                        }}
+                      />
+                    </Badge>
+                  </IconButton>
+                </motion.div>
+              </Tooltip>
+
+              <Tooltip title="Profil Saya" arrow>
+                <IconButton
+                  color="primary"
+                  sx={{
+                    transition: "transform 0.2s ease",
+                    "&:hover": { transform: "scale(1.1)" },
+                    "&:active": { transform: "scale(0.95)" },
+                    position: "relative",
+                    "&::after":
+                      pathname === "/profile"
+                        ? {
+                            content: '""',
+                            position: "absolute",
+                            width: "100%",
+                            height: "100%",
+                            borderRadius: "50%",
+                            border: "2px solid",
+                            borderColor: "primary.main",
+                            animation: "pulse 1.5s infinite",
+                            opacity: 0.6,
+                          }
+                        : {},
+                    "@keyframes pulse": {
+                      "0%": {
+                        transform: "scale(1)",
+                        opacity: 0.6,
+                      },
+                      "70%": {
+                        transform: "scale(1.2)",
+                        opacity: 0,
+                      },
+                      "100%": {
+                        transform: "scale(1.2)",
+                        opacity: 0,
+                      },
                     },
                   }}
+                  component={motion.button}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleProfileClick}
                 >
-                  <FavoriteIcon sx={{ color: "inherit" }} />
-                </Badge>
-              </Box>
-            </Tooltip>
+                  <Avatar
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      bgcolor:
+                        pathname === "/profile"
+                          ? "primary.dark"
+                          : "primary.main",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <AccountCircleIcon />
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
+            </Box>
 
-            <Tooltip title="Profil Saya" arrow>
-              <IconButton
-                color="primary"
-                sx={{
-                  transition: "transform 0.2s ease",
-                  "&:hover": { transform: "scale(1.1)" },
-                  "&:active": { transform: "scale(0.95)" },
-                }}
-                component={motion.button}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => router.push("/profile")}
-              >
-                <Avatar
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    bgcolor: "primary.main",
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                  }}
-                >
-                  <AccountCircleIcon />
-                </Avatar>
-              </IconButton>
-            </Tooltip>
-          </Box>
-
-          <IconButton
-            aria-label="open drawer"
-            edge="end"
-            onClick={handleDrawerToggle}
-            component={motion.button}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            sx={{
-              display: { sm: "none" },
-              color: "primary.main",
-              background: isDarkMode
-                ? "rgba(50, 50, 55, 0.8)"
-                : "rgba(245,245,247,0.8)",
-              "&:hover": {
+            <IconButton
+              aria-label="open drawer"
+              edge="end"
+              onClick={handleDrawerToggle}
+              component={motion.button}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              sx={{
+                display: { sm: "none" },
+                color: "primary.main",
                 background: isDarkMode
-                  ? "rgba(70, 70, 75, 1)"
-                  : "rgba(235,235,240,1)",
-              },
+                  ? "rgba(50, 50, 55, 0.8)"
+                  : "rgba(245,245,247,0.8)",
+                "&:hover": {
+                  background: isDarkMode
+                    ? "rgba(70, 70, 75, 1)"
+                    : "rgba(235,235,240,1)",
+                },
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Toolbar>
+        </Container>
+
+        <Drawer
+          anchor={isMobile ? "bottom" : "right"}
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          BackdropProps={{
+            style: { backgroundColor: "rgba(0,0,0,0.3)" },
+          }}
+          ModalProps={{
+            keepMounted: true, // Better mobile performance
+          }}
+          sx={{
+            display: { xs: "block", sm: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: "100%",
+              maxHeight: "85vh",
+              borderTopLeftRadius: "20px",
+              borderTopRightRadius: "20px",
+              boxShadow: "0 -5px 25px rgba(0,0,0,0.1)",
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
+      </AppBar>
+
+      {/* Loading Backdrop */}
+      <Backdrop
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: isDarkMode
+            ? "rgba(0, 0, 0, 0.7)"
+            : "rgba(255, 255, 255, 0.85)",
+          backdropFilter: "blur(12px)",
+        }}
+        open={loading}
+      >
+        <Box
+          component={motion.div}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 3,
+            maxWidth: "90%",
+            textAlign: "center",
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              width: 120,
+              height: 120,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            <MenuIcon />
-          </IconButton>
-        </Toolbar>
-      </Container>
+            {/* Pulsing circle behind icon */}
+            <Box
+              component={motion.div}
+              initial={{ scale: 0.8, opacity: 0.2 }}
+              animate={{
+                scale: [0.8, 1.2, 0.8],
+                opacity: [0.2, 0.5, 0.2],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 2,
+                ease: "easeInOut",
+              }}
+              sx={{
+                position: "absolute",
+                width: 100,
+                height: 100,
+                borderRadius: "50%",
+                background: isDarkMode
+                  ? "radial-gradient(circle, rgba(25, 118, 210, 0.6) 0%, rgba(25, 118, 210, 0) 70%)"
+                  : "radial-gradient(circle, rgba(25, 118, 210, 0.3) 0%, rgba(25, 118, 210, 0) 70%)",
+              }}
+            />
 
-      <Drawer
-        anchor={isMobile ? "bottom" : "right"}
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
-        BackdropProps={{
-          style: { backgroundColor: "rgba(0,0,0,0.3)" },
-        }}
-        ModalProps={{
-          keepMounted: true, // Better mobile performance
-        }}
-        sx={{
-          display: { xs: "block", sm: "none" },
-          "& .MuiDrawer-paper": {
-            boxSizing: "border-box",
-            width: "100%",
-            maxHeight: "85vh",
-            borderTopLeftRadius: "20px",
-            borderTopRightRadius: "20px",
-            boxShadow: "0 -5px 25px rgba(0,0,0,0.1)",
-          },
-        }}
-      >
-        {drawer}
-      </Drawer>
-    </AppBar>
+            {/* Rotating path for airplane */}
+            <Box
+              component={motion.div}
+              animate={{ rotate: 360 }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              sx={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {/* Path orbit visual */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  border: `2px dashed ${
+                    isDarkMode ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)"
+                  }`,
+                }}
+              />
+
+              {/* Airplane positioned on the path */}
+              <Box
+                component={motion.div}
+                animate={{
+                  rotateZ: 45,
+                }}
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                }}
+              >
+                <FlightTakeoffIcon
+                  sx={{
+                    fontSize: 32,
+                    color: "primary.main",
+                    filter: "drop-shadow(0 0 8px rgba(25, 118, 210, 0.5))",
+                  }}
+                />
+              </Box>
+            </Box>
+
+            {/* Center point */}
+            <Box
+              component={motion.div}
+              animate={{
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 1.5,
+                ease: "easeInOut",
+              }}
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                backgroundColor: isDarkMode
+                  ? "rgba(25, 118, 210, 0.8)"
+                  : "rgba(25, 118, 210, 0.7)",
+                boxShadow: "0 0 20px rgba(25, 118, 210, 0.6)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 2,
+              }}
+            >
+              <Typography
+                component={motion.div}
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 1.5,
+                  ease: "easeInOut",
+                }}
+                sx={{
+                  fontWeight: 900,
+                  fontSize: "1.5rem",
+                  color: "white",
+                }}
+              >
+                ~
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Animated text */}
+          <Typography
+            variant="body1"
+            component={motion.div}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+            sx={{
+              fontWeight: 500,
+              color: isDarkMode ? "white" : "text.primary",
+              mt: 2,
+              fontSize: "1.1rem",
+              letterSpacing: "0.5px",
+            }}
+          >
+            <motion.span
+              animate={{ opacity: [1, 0.5, 1] }}
+              transition={{
+                repeat: Infinity,
+                duration: 2,
+                ease: "easeInOut",
+              }}
+            >
+              Memuat Profil Anda
+            </motion.span>
+
+            <motion.span
+              animate={{
+                opacity: [0, 1, 0],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 1.5,
+                ease: "easeInOut",
+                repeatDelay: 0.5,
+              }}
+            >
+              ...
+            </motion.span>
+          </Typography>
+        </Box>
+      </Backdrop>
+    </>
   );
 }

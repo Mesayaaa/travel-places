@@ -46,7 +46,15 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 12,
+    },
+  },
 };
 
 export default function Home() {
@@ -106,19 +114,28 @@ export default function Home() {
         background: isDarkMode
           ? "linear-gradient(to bottom, #121212, #1a1a1a)"
           : "linear-gradient(to bottom, #f8f9fa, #e9ecef)",
+        overflowX: "hidden", // Prevent horizontal scroll during animations
       }}
     >
       <Navbar />
       <HeroSection />
 
-      <CategoryFilter onCategoryChange={handleCategoryChange} />
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6 }}
+      >
+        <CategoryFilter onCategoryChange={handleCategoryChange} />
+      </motion.div>
 
       <Box
         component="section"
-        id="destination-list"
+        id="categories"
         ref={destinationsRef}
         sx={{
-          py: { xs: 5, md: 0 },
+          pt: { xs: 0, md: 1 },
+          pb: { xs: 2, md: 4 },
           background: isDarkMode
             ? "linear-gradient(to bottom, #121212, #1e1e1e)"
             : "linear-gradient(to bottom, #f8f9fa, #f0f2f5)",
@@ -157,7 +174,23 @@ export default function Home() {
                       variants={item}
                       custom={index}
                     >
-                      <PlaceCard place={place} sx={{ my: 1 }} />
+                      <motion.div
+                        whileHover={{
+                          scale: 1.03,
+                          boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 17,
+                        }}
+                        style={{
+                          borderRadius: "28px",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <PlaceCard place={place} />
+                      </motion.div>
                     </Grid>
                   ))}
             </Grid>
@@ -165,14 +198,27 @@ export default function Home() {
 
           {!isLoading && filteredPlaces.length === 0 && (
             <Box
+              component={motion.div}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
               sx={{
                 textAlign: "center",
                 py: 8,
                 px: 2,
+                borderRadius: "16px",
+                background: isDarkMode
+                  ? "rgba(30,30,30,0.6)"
+                  : "rgba(255,255,255,0.7)",
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 5px 15px rgba(0,0,0,0.08)",
+                maxWidth: "700px",
+                mx: "auto",
+                mt: 4,
               }}
             >
               <EmojiEmotionsIcon
-                sx={{ fontSize: 60, color: "text.disabled", mb: 2 }}
+                sx={{ fontSize: 70, color: "text.disabled", mb: 2 }}
               />
               <Typography
                 variant="h5"
@@ -187,6 +233,23 @@ export default function Home() {
               <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
                 Coba pilih kategori lain atau cari tempat baru
               </Typography>
+              <Button
+                variant="outlined"
+                onClick={() => handleCategoryChange("all")}
+                sx={{
+                  borderRadius: "8px",
+                  textTransform: "none",
+                  px: 3,
+                  py: 1,
+                  borderWidth: "2px",
+                  "&:hover": {
+                    borderWidth: "2px",
+                    transform: "translateY(-2px)",
+                  },
+                }}
+              >
+                Tampilkan Semua Tempat
+              </Button>
             </Box>
           )}
         </Container>
@@ -197,7 +260,7 @@ export default function Home() {
         id="plan"
         ref={planSectionRef}
         sx={{
-          py: { xs: 6, md: 8 },
+          py: { xs: 8, md: 10 },
           background: isDarkMode
             ? "linear-gradient(135deg, #121212 0%, #1d1d1d 100%)"
             : "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
@@ -207,26 +270,39 @@ export default function Home() {
           borderBottom: isDarkMode
             ? "1px solid rgba(255,255,255,0.05)"
             : "1px solid rgba(0,0,0,0.05)",
+          position: "relative",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "100px",
+            background: isDarkMode
+              ? "linear-gradient(to bottom, rgba(18,18,18,0.5), transparent)"
+              : "linear-gradient(to bottom, rgba(248,249,250,0.5), transparent)",
+            pointerEvents: "none",
+          },
         }}
       >
         <Container maxWidth="xl">
           {useTrip().placesInTrip.length > 0 ? (
             <Box
               component={motion.div}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={
                 isPlanSectionInView
                   ? { opacity: 1, y: 0 }
-                  : { opacity: 0, y: 30 }
+                  : { opacity: 0, y: 40 }
               }
               transition={{ duration: 0.8 }}
-              sx={{ textAlign: "center", mb: { xs: 5, md: 6 } }}
+              sx={{ textAlign: "center", mb: { xs: 6, md: 8 } }}
             >
               <Typography
                 variant="h3"
                 component="h2"
                 sx={{
-                  fontWeight: 700,
+                  fontWeight: 800,
                   mb: 2,
                   fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" },
                   background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
@@ -234,6 +310,9 @@ export default function Home() {
                   WebkitBackgroundClip: "text",
                   color: "transparent",
                   display: "inline-block",
+                  textShadow: isDarkMode
+                    ? "0 2px 15px rgba(78,205,196,0.3)"
+                    : "none",
                 }}
               >
                 Rencanakan Perjalanan Bersama
@@ -252,47 +331,65 @@ export default function Home() {
                 bersama orang tersayang. Pilih destinasi favorit dan mulai
                 petualangan Anda sekarang!
               </Typography>
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenTripPlanModal(true)}
-                sx={{
-                  py: 1.5,
-                  px: 4,
-                  borderRadius: "8px",
-                  fontWeight: 600,
-                  background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
-                  transition: "all 0.3s",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  textTransform: "none",
-                  fontSize: "1.1rem",
-                  "&:hover": {
-                    transform: "translateY(-3px)",
-                    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                  },
-                }}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
               >
-                Buat Rencana Perjalanan
-              </Button>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<AddIcon />}
+                  onClick={() => setOpenTripPlanModal(true)}
+                  sx={{
+                    py: 1.5,
+                    px: 4,
+                    borderRadius: "12px",
+                    fontWeight: 600,
+                    background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
+                    transition: "all 0.3s",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                    textTransform: "none",
+                    fontSize: "1.1rem",
+                    "&:hover": {
+                      transform: "translateY(-3px)",
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
+                      background: "linear-gradient(45deg, #FF5A5A, #3DBCB3)",
+                    },
+                  }}
+                >
+                  Buat Rencana Perjalanan
+                </Button>
+              </motion.div>
             </Box>
           ) : (
             <Box
               component={motion.div}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={
                 isPlanSectionInView
                   ? { opacity: 1, y: 0 }
-                  : { opacity: 0, y: 30 }
+                  : { opacity: 0, y: 40 }
               }
               transition={{ duration: 0.8 }}
-              sx={{ textAlign: "center", mb: { xs: 5, md: 6 } }}
+              sx={{
+                textAlign: "center",
+                mb: { xs: 5, md: 6 },
+                p: 4,
+                borderRadius: "16px",
+                background: isDarkMode
+                  ? "rgba(30,30,30,0.5)"
+                  : "rgba(255,255,255,0.6)",
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
+                maxWidth: "900px",
+                mx: "auto",
+              }}
             >
               <Typography
                 variant="h3"
                 component="h2"
                 sx={{
-                  fontWeight: 700,
+                  fontWeight: 800,
                   mb: 2,
                   fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" },
                   background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
@@ -300,6 +397,9 @@ export default function Home() {
                   WebkitBackgroundClip: "text",
                   color: "transparent",
                   display: "inline-block",
+                  textShadow: isDarkMode
+                    ? "0 2px 15px rgba(78,205,196,0.3)"
+                    : "none",
                 }}
               >
                 Tambahkan Tempat ke Trip Anda
@@ -310,7 +410,7 @@ export default function Home() {
                   maxWidth: "800px",
                   mx: "auto",
                   color: "text.secondary",
-                  mb: 2,
+                  mb: 4,
                   fontSize: { xs: "1rem", md: "1.1rem" },
                 }}
               >
@@ -318,12 +418,46 @@ export default function Home() {
                 rencana perjalanan. Jelajahi destinasi dan tekan "Tambahkan ke
                 Trip" pada tempat yang ingin dikunjungi.
               </Typography>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+              >
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() =>
+                    document
+                      .getElementById("categories")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
+                  sx={{
+                    borderRadius: "8px",
+                    textTransform: "none",
+                    px: 3,
+                    py: 1.2,
+                    borderWidth: "2px",
+                    "&:hover": {
+                      borderWidth: "2px",
+                      transform: "translateY(-2px)",
+                    },
+                  }}
+                >
+                  Lihat Destinasi
+                </Button>
+              </motion.div>
             </Box>
           )}
 
           {/* Trip Plans List */}
           {useTrip().placesInTrip.length > 0 ? (
-            <TripPlansList key={tripPlansRefreshKey} />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+            >
+              <TripPlansList key={tripPlansRefreshKey} />
+            </motion.div>
           ) : (
             <Box sx={{ textAlign: "center", py: 1 }}></Box>
           )}
@@ -339,114 +473,102 @@ export default function Home() {
       <Box
         component="footer"
         sx={{
-          py: 6,
+          pt: 8,
+          pb: 4,
           background: isDarkMode
             ? "linear-gradient(to bottom, #0e0e0e, #161616)"
             : "linear-gradient(to bottom, #e9ecef, #dee2e6)",
           borderTop: isDarkMode
             ? "1px solid rgba(255,255,255,0.05)"
             : "1px solid rgba(0,0,0,0.05)",
+          position: "relative",
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundImage: isDarkMode
+              ? "radial-gradient(circle at 20% 30%, rgba(78, 205, 196, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(255, 107, 107, 0.05) 0%, transparent 50%)"
+              : "radial-gradient(circle at 20% 30%, rgba(78, 205, 196, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(255, 107, 107, 0.1) 0%, transparent 50%)",
+            pointerEvents: "none",
+          },
         }}
       >
         <Container maxWidth="xl">
           <Grid container spacing={4}>
             <Grid item xs={12} sm={6} md={4}>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 700,
-                  mb: 2,
-                  background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  color: "transparent",
-                  display: "inline-block",
-                }}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
               >
-                TravelSayang
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  mb: 3,
-                  opacity: 0.9,
-                  maxWidth: "90%",
-                  color: isDarkMode ? "rgba(255,255,255,0.8)" : "text.primary",
-                }}
-              >
-                Temukan tempat-tempat indah untuk dikunjungi bersama orang
-                tersayang dan ciptakan kenangan yang tak terlupakan.
-              </Typography>
-              <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-                <IconButton
-                  component={Link}
-                  href="https://instagram.com"
-                  target="_blank"
+                <Typography
+                  variant="h5"
                   sx={{
-                    color: isDarkMode ? "rgba(255,255,255,0.8)" : "#555",
-                    borderRadius: "8px",
-                    transition: "all 0.3s",
-                    "&:hover": {
-                      background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
-                      transform: "translateY(-2px)",
-                      color: "white",
-                    },
+                    fontWeight: 700,
+                    mb: 2,
+                    background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    color: "transparent",
+                    display: "inline-block",
                   }}
                 >
-                  <InstagramIcon />
-                </IconButton>
-                <IconButton
-                  component={Link}
-                  href="https://twitter.com"
-                  target="_blank"
+                  TravelSayang
+                </Typography>
+                <Typography
+                  variant="body2"
                   sx={{
-                    color: isDarkMode ? "rgba(255,255,255,0.8)" : "#555",
-                    borderRadius: "8px",
-                    transition: "all 0.3s",
-                    "&:hover": {
-                      background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
-                      transform: "translateY(-2px)",
-                      color: "white",
-                    },
+                    mb: 3,
+                    opacity: 0.9,
+                    maxWidth: "90%",
+                    color: isDarkMode
+                      ? "rgba(255,255,255,0.8)"
+                      : "text.primary",
+                    lineHeight: 1.7,
                   }}
                 >
-                  <TwitterIcon />
-                </IconButton>
-                <IconButton
-                  component={Link}
-                  href="https://facebook.com"
-                  target="_blank"
-                  sx={{
-                    color: isDarkMode ? "rgba(255,255,255,0.8)" : "#555",
-                    borderRadius: "8px",
-                    transition: "all 0.3s",
-                    "&:hover": {
-                      background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
-                      transform: "translateY(-2px)",
-                      color: "white",
-                    },
-                  }}
-                >
-                  <FacebookIcon />
-                </IconButton>
-                <IconButton
-                  component={Link}
-                  href="https://youtube.com"
-                  target="_blank"
-                  sx={{
-                    color: isDarkMode ? "rgba(255,255,255,0.8)" : "#555",
-                    borderRadius: "8px",
-                    transition: "all 0.3s",
-                    "&:hover": {
-                      background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
-                      transform: "translateY(-2px)",
-                      color: "white",
-                    },
-                  }}
-                >
-                  <YouTubeIcon />
-                </IconButton>
-              </Box>
+                  Temukan tempat-tempat indah untuk dikunjungi bersama orang
+                  tersayang dan ciptakan kenangan yang tak terlupakan.
+                </Typography>
+                <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+                  {[
+                    { icon: <InstagramIcon />, url: "https://instagram.com" },
+                    { icon: <TwitterIcon />, url: "https://twitter.com" },
+                    { icon: <FacebookIcon />, url: "https://facebook.com" },
+                    { icon: <YouTubeIcon />, url: "https://youtube.com" },
+                  ].map((social, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.15, rotate: 5 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <IconButton
+                        component={Link}
+                        href={social.url}
+                        target="_blank"
+                        sx={{
+                          color: isDarkMode ? "rgba(255,255,255,0.8)" : "#555",
+                          borderRadius: "8px",
+                          transition: "all 0.3s",
+                          "&:hover": {
+                            background:
+                              "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
+                            transform: "translateY(-2px)",
+                            color: "white",
+                          },
+                        }}
+                      >
+                        {social.icon}
+                      </IconButton>
+                    </motion.div>
+                  ))}
+                </Box>
+              </motion.div>
             </Grid>
 
             <Grid item xs={12} sm={6} md={3}>

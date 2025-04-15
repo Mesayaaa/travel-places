@@ -20,6 +20,7 @@ import {
   CircularProgress,
   Paper,
   Snackbar,
+  Alert,
 } from "@mui/material";
 import MapIcon from "@mui/icons-material/Map";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -38,6 +39,7 @@ import DirectionsIcon from "@mui/icons-material/Directions";
 import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import BookmarkAddedIcon from "@mui/icons-material/BookmarkAdded";
 import VerifiedIcon from "@mui/icons-material/Verified";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { Place } from "../data/places";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -147,6 +149,9 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
   const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
   const modalRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const muiTheme = useMuiTheme();
@@ -206,9 +211,11 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
     if (inTripStatus) {
       removePlaceFromTrip(place.id);
       setSnackbarMessage(`${place.name} dihapus dari trip`);
+      setSnackbarSeverity("error");
     } else {
       addPlaceToTrip(place);
       setSnackbarMessage(`${place.name} ditambahkan ke trip`);
+      setSnackbarSeverity("success");
     }
     setSnackbarOpen(true);
     setIsModalOpen(false);
@@ -259,7 +266,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
     <>
       <MotionCard
         ref={cardRef}
-        whileHover={{ y: -10 }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
@@ -267,6 +273,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className="scroll-animate"
+        elevation={0}
         sx={{
           position: "relative",
           height: {
@@ -281,15 +288,18 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
           },
           overflow: "hidden",
           cursor: "pointer",
+          bgcolor: "transparent",
+          background: "none",
+          backdropFilter: "none",
+          transform: isHovered ? "translateY(-10px)" : "translateY(0)",
           boxShadow: isDarkMode
-            ? "0 8px 20px rgba(0,0,0,0.4)"
+            ? isHovered
+              ? "0 12px 40px rgba(0,0,0,0.6)"
+              : "0 8px 20px rgba(0,0,0,0.4)"
+            : isHovered
+            ? "0 12px 40px rgba(0,0,0,0.2)"
             : "0 8px 20px rgba(0,0,0,0.1)",
           transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
-          "&:hover": {
-            boxShadow: isDarkMode
-              ? "0 12px 40px rgba(0,0,0,0.6)"
-              : "0 12px 40px rgba(0,0,0,0.2)",
-          },
           ...sx,
         }}
       >
@@ -660,19 +670,13 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                 maxHeight: "90vh",
                 overflowY: "auto",
                 borderRadius: "20px",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
                 "&::-webkit-scrollbar": {
-                  width: "8px",
+                  display: "none",
                 },
-                "&::-webkit-scrollbar-track": {
-                  backgroundColor: isDarkMode ? "#333" : "#f1f1f1",
-                  borderRadius: "4px",
-                },
-                "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: isDarkMode ? "#666" : "#888",
-                  borderRadius: "4px",
-                  "&:hover": {
-                    backgroundColor: isDarkMode ? "#888" : "#555",
-                  },
+                "&:focus": {
+                  outline: "none",
                 },
               }}
             >
@@ -1279,7 +1283,9 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                               boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
                               bgcolor: inTripStatus
                                 ? muiTheme.palette.primary.dark
-                                : alpha(muiTheme.palette.primary.main, 0.04),
+                                : isDarkMode
+                                ? alpha(muiTheme.palette.primary.main, 0.04)
+                                : "#B02A37",
                             },
                             transition:
                               "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
@@ -1301,20 +1307,48 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
 
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={3000}
+        autoHideDuration={2500}
         onClose={handleCloseSnackbar}
-        message={snackbarMessage}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
         sx={{
-          "& .MuiSnackbarContent-root": {
-            bgcolor: isDarkMode ? "#333" : "#fff",
-            color: isDarkMode ? "#fff" : "#333",
+          mt: 2,
+          maxWidth: "95%",
+          "& .MuiPaper-root": {
+            borderRadius: "12px",
             boxShadow: isDarkMode
-              ? "0 4px 20px rgba(0,0,0,0.5)"
-              : "0 4px 20px rgba(0,0,0,0.1)",
+              ? "0 8px 32px rgba(0,0,0,0.4)"
+              : "0 8px 32px rgba(0,0,0,0.08)",
           },
         }}
-      />
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          variant="filled"
+          icon={<CheckCircleOutlineIcon />}
+          sx={{
+            width: "100%",
+            alignItems: "center",
+            "& .MuiAlert-icon": {
+              fontSize: "1.2rem",
+              mr: 1,
+              my: 0,
+              opacity: 0.9,
+            },
+            "& .MuiAlert-message": {
+              fontSize: "0.9rem",
+              fontWeight: 500,
+            },
+            bgcolor:
+              snackbarSeverity === "success"
+                ? getCategoryColor(place.category)
+                : undefined,
+            py: 0.8,
+          }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

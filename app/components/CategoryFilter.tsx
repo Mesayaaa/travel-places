@@ -92,7 +92,8 @@ export default function CategoryFilter({
       component="section"
       id="categories"
       sx={{
-        py: 6,
+        py: 1,
+        pb: 0,
         background: isDarkMode
           ? "linear-gradient(to bottom, #1a1a1a, #121212)"
           : "linear-gradient(to bottom, #ffffff, #f8f9fa)",

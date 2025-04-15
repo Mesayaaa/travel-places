@@ -37,7 +37,7 @@ import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import ShareIcon from "@mui/icons-material/Share";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFavorites } from "../context/FavoritesContext";
 import { useTrip } from "../context/TripContext";
 import { useTheme } from "../context/ThemeContext";
@@ -191,15 +191,24 @@ const RecentTrips = ({ trips }: { trips: Trip[] }) => {
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
   const { mode } = useTheme();
   const isDarkMode = mode === "dark";
+  const [renderedTrips, setRenderedTrips] = useState<Trip[]>([]);
+
+  // Handle trip list changes with animation
+  useEffect(() => {
+    setRenderedTrips(trips);
+  }, [trips]);
 
   return (
     <List disablePadding>
-      {trips.map((trip, index) => (
+      {renderedTrips.map((trip, index) => (
         <motion.div
-          key={index}
+          key={trip.destination + trip.date} // Use unique key based on content
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4, delay: index * 0.1 }}
+          transition={{
+            duration: 0.4,
+            delay: Math.min(index * 0.1, 1), // Cap the maximum delay to 1 second
+          }}
         >
           <Card
             variant="outlined"
@@ -345,6 +354,7 @@ export default function ProfilePage() {
   const isDarkMode = mode === "dark";
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+  const [showAllTrips, setShowAllTrips] = useState(false);
 
   useEffect(() => {
     // Simulate data loading
@@ -357,11 +367,16 @@ export default function ProfilePage() {
   // Get completed trips from localStorage or use default
   const [completedTrips, setCompletedTrips] = useState<Trip[]>([]);
 
+  // Force button to be shown initially for demonstration
   useEffect(() => {
+    console.log("Initial completedTrips length:", completedTrips.length);
+
     const storedTrips = localStorage.getItem("completedTrips");
     if (storedTrips) {
       try {
-        setCompletedTrips(JSON.parse(storedTrips));
+        const parsedTrips = JSON.parse(storedTrips);
+        console.log("Loaded trips from localStorage:", parsedTrips.length);
+        setCompletedTrips(parsedTrips);
       } catch (error) {
         console.error("Error parsing completed trips from localStorage", error);
         // Set default trips if parsing fails
@@ -369,6 +384,7 @@ export default function ProfilePage() {
       }
     } else {
       // Set default trips if none exist
+      console.log("No trips in localStorage, setting defaults");
       setDefaultCompletedTrips();
     }
   }, []);
@@ -388,8 +404,21 @@ export default function ProfilePage() {
         destination: "Raja Ampat",
         date: "Oktober 2023",
       },
+      {
+        destination: "Gunung Bromo",
+        date: "Juli 2023",
+      },
+      {
+        destination: "Bali",
+        date: "Mei 2023",
+      },
+      {
+        destination: "Labuan Bajo",
+        date: "Februari 2023",
+      },
     ];
 
+    console.log("Setting default trips:", defaultTrips.length);
     setCompletedTrips(defaultTrips);
     localStorage.setItem("completedTrips", JSON.stringify(defaultTrips));
   };
@@ -1050,7 +1079,7 @@ export default function ProfilePage() {
 
                       <Box sx={{ mt: 4 }}>
                         <Link
-                          href="/explore"
+                          href="/#categories"
                           passHref
                           style={{ textDecoration: "none" }}
                         >
@@ -1170,7 +1199,13 @@ export default function ProfilePage() {
                       />
 
                       {completedTrips.length > 0 ? (
-                        <RecentTrips trips={completedTrips} />
+                        <RecentTrips
+                          trips={
+                            showAllTrips
+                              ? completedTrips.slice(0, 6)
+                              : completedTrips.slice(0, 3)
+                          }
+                        />
                       ) : (
                         <Box sx={{ py: 4, textAlign: "center" }}>
                           <Typography
@@ -1187,34 +1222,45 @@ export default function ProfilePage() {
                         </Box>
                       )}
 
-                      <Box sx={{ textAlign: "center", mt: 3 }}>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          sx={{
-                            borderRadius: 8,
-                            px: 3,
-                            py: 1.2,
-                            boxShadow: isDarkMode
-                              ? "0 4px 10px rgba(140,158,255,0.3)"
-                              : "0 4px 10px rgba(66,99,235,0.2)",
-                            textTransform: "none",
-                            fontWeight: "bold",
-                            bgcolor: isDarkMode ? "#8c9eff" : "#4263eb",
-                            color: isDarkMode ? "#1a1a2a" : "#ffffff",
-                            transition: "all 0.3s ease",
-                            "&:hover": {
-                              transform: "translateY(-3px)",
-                              bgcolor: isDarkMode ? "#a5b4ff" : "#3651d4",
+                      {/* Always render the button if there are at least 4 trips */}
+                      {completedTrips.length >= 4 && (
+                        <Box sx={{ textAlign: "center", mt: 3 }}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => {
+                              console.log(
+                                "Button clicked, toggling showAllTrips"
+                              );
+                              setShowAllTrips(!showAllTrips);
+                            }}
+                            sx={{
+                              borderRadius: 8,
+                              px: 3,
+                              py: 1.2,
                               boxShadow: isDarkMode
-                                ? "0 6px 15px rgba(140,158,255,0.4)"
-                                : "0 6px 15px rgba(66,99,235,0.3)",
-                            },
-                          }}
-                        >
-                          Lihat Semua Trip
-                        </Button>
-                      </Box>
+                                ? "0 4px 10px rgba(140,158,255,0.3)"
+                                : "0 4px 10px rgba(66,99,235,0.2)",
+                              textTransform: "none",
+                              fontWeight: "bold",
+                              bgcolor: isDarkMode ? "#8c9eff" : "#4263eb",
+                              color: isDarkMode ? "#1a1a2a" : "#ffffff",
+                              transition: "all 0.3s ease",
+                              "&:hover": {
+                                transform: "translateY(-3px)",
+                                bgcolor: isDarkMode ? "#a5b4ff" : "#3651d4",
+                                boxShadow: isDarkMode
+                                  ? "0 6px 15px rgba(140,158,255,0.4)"
+                                  : "0 6px 15px rgba(66,99,235,0.3)",
+                              },
+                            }}
+                          >
+                            {showAllTrips
+                              ? "Tampilkan Lebih Sedikit"
+                              : "Lihat Semua Trip"}
+                          </Button>
+                        </Box>
+                      )}
                     </Paper>
                   </motion.div>
 
@@ -1280,7 +1326,7 @@ export default function ProfilePage() {
                             Anda belum menambahkan destinasi favorit
                           </Typography>
                           <Link
-                            href="/explore"
+                            href="/#categories"
                             passHref
                             style={{ textDecoration: "none" }}
                           >
