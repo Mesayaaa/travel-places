@@ -49,6 +49,7 @@ import AccessibilityIcon from "@mui/icons-material/Accessibility";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import { useRouter } from "next/navigation";
 
 // Trip type definition
 interface Trip {
@@ -318,6 +319,7 @@ export default function ProfilePage() {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
   const [showAllTrips, setShowAllTrips] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     // Simulate data loading
@@ -427,6 +429,18 @@ export default function ProfilePage() {
       opacity: 1,
       transition: { duration: 0.5 },
     },
+  };
+
+  const navigateToHome = () => {
+    router.push("/");
+  };
+
+  const navigateToCategories = () => {
+    router.push("/#categories");
+  };
+
+  const navigateToFavorites = () => {
+    router.push("/favorites");
   };
 
   return (
@@ -1041,42 +1055,37 @@ export default function ProfilePage() {
                       </List>
 
                       <Box sx={{ mt: 4 }}>
-                        <Link
-                          href="/#categories"
-                          passHref
-                          style={{ textDecoration: "none" }}
-                        >
-                          <Button
-                            variant="outlined"
-                            fullWidth
-                            startIcon={<MapIcon />}
-                            sx={{
-                              borderRadius: 8,
-                              textTransform: "none",
-                              py: 1.2,
-                              mb: 2,
+                        <Button
+                          variant="outlined"
+                          fullWidth
+                          startIcon={<MapIcon />}
+                          onClick={navigateToCategories}
+                          sx={{
+                            borderRadius: 8,
+                            textTransform: "none",
+                            py: 1.2,
+                            mb: 2,
+                            borderWidth: 2,
+                            fontWeight: 600,
+                            color: isDarkMode ? "#8c9eff" : "#4263eb",
+                            borderColor: isDarkMode ? "#8c9eff" : "#4263eb",
+                            transition: "all 0.3s ease",
+                            "&:hover": {
                               borderWidth: 2,
-                              fontWeight: 600,
-                              color: isDarkMode ? "#8c9eff" : "#4263eb",
-                              borderColor: isDarkMode ? "#8c9eff" : "#4263eb",
-                              transition: "all 0.3s ease",
-                              "&:hover": {
-                                borderWidth: 2,
-                                borderColor: isDarkMode ? "#a5b4ff" : "#3651d4",
-                                color: isDarkMode ? "#a5b4ff" : "#3651d4",
-                                transform: "translateY(-3px)",
-                                bgcolor: isDarkMode
-                                  ? "rgba(140,158,255,0.05)"
-                                  : "rgba(66,99,235,0.05)",
-                                boxShadow: isDarkMode
-                                  ? "0 6px 15px rgba(140,158,255,0.2)"
-                                  : "0 6px 15px rgba(66,99,235,0.15)",
-                              },
-                            }}
-                          >
-                            Eksplorasi Destinasi Baru
-                          </Button>
-                        </Link>
+                              borderColor: isDarkMode ? "#a5b4ff" : "#3651d4",
+                              color: isDarkMode ? "#a5b4ff" : "#3651d4",
+                              transform: "translateY(-3px)",
+                              bgcolor: isDarkMode
+                                ? "rgba(140,158,255,0.05)"
+                                : "rgba(66,99,235,0.05)",
+                              boxShadow: isDarkMode
+                                ? "0 6px 15px rgba(140,158,255,0.2)"
+                                : "0 6px 15px rgba(66,99,235,0.15)",
+                            },
+                          }}
+                        >
+                          Eksplorasi Destinasi Baru
+                        </Button>
                         <Button
                           variant="outlined"
                           fullWidth
@@ -1288,43 +1297,36 @@ export default function ProfilePage() {
                           >
                             Anda belum menambahkan destinasi favorit
                           </Typography>
-                          <Link
-                            href="/#categories"
-                            passHref
-                            style={{ textDecoration: "none" }}
-                          >
-                            <Button
-                              variant="outlined"
-                              color="primary"
-                              startIcon={<FavoriteIcon />}
-                              sx={{
-                                borderRadius: 8,
-                                textTransform: "none",
-                                py: 1.2,
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            startIcon={<FavoriteIcon />}
+                            onClick={navigateToCategories}
+                            sx={{
+                              borderRadius: 8,
+                              textTransform: "none",
+                              py: 1.2,
+                              borderWidth: 2,
+                              fontWeight: 600,
+                              color: isDarkMode ? "#8c9eff" : "#4263eb",
+                              borderColor: isDarkMode ? "#8c9eff" : "#4263eb",
+                              transition: "all 0.3s ease",
+                              "&:hover": {
                                 borderWidth: 2,
-                                fontWeight: 600,
-                                color: isDarkMode ? "#8c9eff" : "#4263eb",
-                                borderColor: isDarkMode ? "#8c9eff" : "#4263eb",
-                                transition: "all 0.3s ease",
-                                "&:hover": {
-                                  borderWidth: 2,
-                                  borderColor: isDarkMode
-                                    ? "#a5b4ff"
-                                    : "#3651d4",
-                                  color: isDarkMode ? "#a5b4ff" : "#3651d4",
-                                  transform: "translateY(-3px)",
-                                  bgcolor: isDarkMode
-                                    ? "rgba(140,158,255,0.05)"
-                                    : "rgba(66,99,235,0.05)",
-                                  boxShadow: isDarkMode
-                                    ? "0 6px 15px rgba(140,158,255,0.2)"
-                                    : "0 6px 15px rgba(66,99,235,0.15)",
-                                },
-                              }}
-                            >
-                              Jelajahi Destinasi
-                            </Button>
-                          </Link>
+                                borderColor: isDarkMode ? "#a5b4ff" : "#3651d4",
+                                color: isDarkMode ? "#a5b4ff" : "#3651d4",
+                                transform: "translateY(-3px)",
+                                bgcolor: isDarkMode
+                                  ? "rgba(140,158,255,0.05)"
+                                  : "rgba(66,99,235,0.05)",
+                                boxShadow: isDarkMode
+                                  ? "0 6px 15px rgba(140,158,255,0.2)"
+                                  : "0 6px 15px rgba(66,99,235,0.15)",
+                              },
+                            }}
+                          >
+                            Jelajahi Destinasi
+                          </Button>
                         </Box>
                       )}
 
@@ -1333,6 +1335,7 @@ export default function ProfilePage() {
                           <Button
                             variant="outlined"
                             color="primary"
+                            onClick={navigateToFavorites}
                             sx={{
                               borderRadius: 8,
                               px: 3,

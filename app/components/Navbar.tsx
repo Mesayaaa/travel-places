@@ -174,15 +174,11 @@ export default function Navbar() {
 
     setActiveSection(href);
 
-    // Get the base path for GitHub Pages
-    const basePath =
-      process.env.NODE_ENV === "production" ? "/travel-places" : "";
-
     // Handle Home link to scroll to top
     if (href === "/") {
       if (pathname !== "/") {
-        // If not on homepage, navigate to root with basePath
-        router.push(basePath + "/");
+        // If not on homepage, navigate to root
+        router.push("/");
       } else {
         // If already on homepage, just scroll to top
         window.scrollTo({
@@ -197,7 +193,7 @@ export default function Navbar() {
     if (href.startsWith("#")) {
       if (pathname !== "/") {
         // If not on homepage, navigate to homepage with hash
-        router.push(`${basePath}/${href}`);
+        router.push(`/${href}`);
       } else {
         // If on homepage, scroll to section
         const element = document.querySelector(href);
@@ -213,8 +209,8 @@ export default function Navbar() {
         }
       }
     } else {
-      // For any other paths, use router with basePath
-      router.push(basePath + href);
+      // For any other paths, use router
+      router.push(href);
     }
   };
 
@@ -226,14 +222,10 @@ export default function Navbar() {
 
     setLoading(true);
 
-    // Get the base path for GitHub Pages
-    const basePath =
-      process.env.NODE_ENV === "production" ? "/travel-places" : "";
-
     try {
       // Set timeout to ensure loading state is visible before navigation
       setTimeout(() => {
-        router.push(`${basePath}/profile`);
+        router.push("/profile");
 
         // Set a fallback timeout to clear loading state in case navigation fails
         setTimeout(() => {
@@ -254,14 +246,10 @@ export default function Navbar() {
 
     setLoadingFavorites(true);
 
-    // Get the base path for GitHub Pages
-    const basePath =
-      process.env.NODE_ENV === "production" ? "/travel-places" : "";
-
     try {
       // Set timeout to ensure loading state is visible before navigation
       setTimeout(() => {
-        router.push(`${basePath}/favorites`);
+        router.push("/favorites");
 
         // Set a fallback timeout to clear loading state in case navigation fails
         setTimeout(() => {
