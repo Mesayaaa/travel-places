@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && touch out/.nojekyll",
+    "build": "next build && node -e \"require('fs').writeFileSync('out/.nojekyll', '')\"",
     "start": "next start",
     "lint": "next lint",
     "optimize-images": "node scripts/optimize-images.js"
@@ -16,6 +16,7 @@
     "@mui/icons-material": "^5.16.14",
     "@mui/material": "^5.16.14",
     "@mui/x-date-pickers": "^7.28.3",
+    "critters": "^0.0.23",
     "date-fns": "^2.30.0",
     "framer-motion": "^11.18.2",
     "next": "14.1.0",
