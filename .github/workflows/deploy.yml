@@ -37,9 +37,10 @@ jobs:
         run: npm install critters@0.0.20
 
       - name: Build with Next.js
-        run: npm run build
+        run: npm run build:custom
         env:
           NEXT_PUBLIC_BASE_PATH: /travel-places
+          NEXT_DISABLE_OPTIMIZED_CSS: "true"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
