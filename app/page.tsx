@@ -8,8 +8,9 @@ import {
   Button,
   Fade,
   IconButton,
+  useMediaQuery,
 } from "@mui/material";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import PlaceCard from "./components/PlaceCard";
 import LoadingSkeleton from "./components/LoadingSkeleton";
 import { places } from "./data/places";
@@ -34,25 +35,24 @@ import Link from "@mui/material/Link";
 import { useTrip } from "./context/TripContext";
 import { useTheme } from "./context/ThemeContext";
 
+// Simplified animation variants for better mobile performance
 const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
+      staggerChildren: 0.1,
     },
   },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    y: 0,
     transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 12,
+      type: "tween",
+      duration: 0.3,
     },
   },
 };
@@ -65,6 +65,8 @@ export default function Home() {
   const { openTripPlanModal, setOpenTripPlanModal } = useTrip();
   const { mode } = useTheme();
   const isDarkMode = mode === "dark";
+  const isMobile = useMediaQuery("(max-width:768px)");
+  const prefersReducedMotion = useReducedMotion();
   const destinationsRef = useRef(null);
   const planSectionRef = useRef(null);
   const isDestinationsInView = useInView(destinationsRef, {
@@ -87,14 +89,17 @@ export default function Home() {
     }
   }, [activeCategory]);
 
-  // Simulate loading state
+  // Simulate loading state with shorter duration for mobile
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
+    const timer = setTimeout(
+      () => {
+        setIsLoading(false);
+      },
+      isMobile ? 800 : 1500
+    );
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isMobile]);
 
   // Handle category change
   const handleCategoryChange = (category: string) => {
@@ -104,8 +109,25 @@ export default function Home() {
   // Handle trip plan modal close and trigger refresh
   const handleTripPlanModalClose = () => {
     setOpenTripPlanModal(false);
-    // Refresh the trip plans list
     setTripPlansRefreshKey((prev) => prev + 1);
+  };
+
+  // Get animation props based on device and user preferences
+  const getAnimationProps = () => {
+    if (isMobile || prefersReducedMotion) {
+      return {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.3 },
+      };
+    }
+
+    return {
+      initial: { opacity: 0, y: 30 },
+      whileInView: { opacity: 1, y: 0 },
+      viewport: { once: true, amount: 0.2 },
+      transition: { duration: 0.6 },
+    };
   };
 
   return (
@@ -114,18 +136,13 @@ export default function Home() {
         background: isDarkMode
           ? "linear-gradient(to bottom, #121212, #1a1a1a)"
           : "linear-gradient(to bottom, #f8f9fa, #e9ecef)",
-        overflowX: "hidden", // Prevent horizontal scroll during animations
+        overflowX: "hidden",
       }}
     >
       <Navbar />
       <HeroSection />
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6 }}
-      >
+      <motion.div {...getAnimationProps()}>
         <CategoryFilter onCategoryChange={handleCategoryChange} />
       </motion.div>
 
@@ -175,14 +192,17 @@ export default function Home() {
                       custom={index}
                     >
                       <motion.div
-                        whileHover={{
-                          scale: 1.03,
-                          boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-                        }}
+                        whileHover={
+                          !isMobile
+                            ? {
+                                scale: 1.03,
+                                boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+                              }
+                            : undefined
+                        }
                         transition={{
-                          type: "spring",
-                          stiffness: 400,
-                          damping: 17,
+                          type: "tween",
+                          duration: 0.2,
                         }}
                         style={{
                           borderRadius: "28px",
@@ -198,53 +218,33 @@ export default function Home() {
 
           {!isLoading && filteredPlaces.length === 0 && (
             <Box
-              component={motion.div}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
               sx={{
                 textAlign: "center",
-                py: { xs: 4, md: 10 },
-                px: { xs: 2, md: 4 },
-                borderRadius: "16px",
-                background: isDarkMode
-                  ? "rgba(30,30,30,0.6)"
-                  : "rgba(255,255,255,0.7)",
-                backdropFilter: "blur(10px)",
-                boxShadow: "0 5px 15px rgba(0,0,0,0.08)",
-                maxWidth: "700px",
-                mx: "auto",
-                mt: { xs: 6, md: 6 },
+                py: 4,
+                px: 2,
               }}
             >
-              <EmojiEmotionsIcon
-                sx={{
-                  fontSize: { xs: 50, md: 70 },
-                  color: "text.disabled",
-                  mb: { xs: 1, md: 2 },
-                }}
-              />
               <Typography
                 variant="h5"
                 sx={{
-                  mb: { xs: 1, md: 2 },
-                  fontWeight: 600,
-                  color: "text.secondary",
-                  fontSize: { xs: "1.25rem", md: "1.5rem" },
+                  color: isDarkMode ? "text.secondary" : "text.primary",
+                  mb: 2,
                 }}
               >
-                Tidak ada tempat untuk kategori ini
+                Tidak ada tempat yang ditemukan
               </Typography>
-              <Typography
-                variant="body1"
-                color="text.secondary"
+              <Button
+                variant="contained"
+                onClick={() => setActiveCategory("all")}
                 sx={{
-                  mb: { xs: 2, md: 4 },
-                  fontSize: { xs: "0.875rem", md: "1rem" },
+                  bgcolor: isDarkMode ? "primary.dark" : "primary.main",
+                  "&:hover": {
+                    bgcolor: isDarkMode ? "primary.main" : "primary.dark",
+                  },
                 }}
               >
-                Coba pilih kategori lain atau cari tempat baru
-              </Typography>
+                Lihat Semua Tempat
+              </Button>
             </Box>
           )}
         </Container>

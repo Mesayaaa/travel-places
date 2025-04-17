@@ -1,9 +1,15 @@
 "use client";
 
-import { Box, Container, Typography, IconButton } from "@mui/material";
+import {
+  Box,
+  Container,
+  Typography,
+  IconButton,
+  useMediaQuery,
+} from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 
 export default function HeroSection() {
@@ -13,6 +19,21 @@ export default function HeroSection() {
   );
   const { mode } = useTheme();
   const isDarkMode = mode === "dark";
+  const prefersReducedMotion = useReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  // Check for mobile device on client side
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+      setIsSmallScreen(window.innerWidth <= 480);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const scrollToCategories = () => {
     const categoriesSection = document.getElementById("categories");
@@ -34,27 +55,44 @@ export default function HeroSection() {
     setSelectedDestinations(newValue);
   };
 
+  // Simplified animation settings for mobile devices
+  const getAnimationSettings = (delay: number) => {
+    if (prefersReducedMotion || isMobile) {
+      return {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.3, delay },
+      };
+    }
+
+    return {
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.6, delay, ease: "easeInOut" },
+    };
+  };
+
+  // Choose smaller background image for mobile devices
+  const bgImage = isMobile
+    ? "url('/images/borobudur-mobile.jpg')"
+    : "url('/images/borobudur.jpg')";
+
   return (
     <Box
       component="section"
       id="hero"
       sx={{
         position: "relative",
-        height: { xs: "90vh", sm: "95vh", md: "100vh" },
+        height: { xs: "80vh", sm: "85vh", md: "100vh" },
         background: `linear-gradient(rgba(0,0,0,${
           isDarkMode ? "0.6" : "0.4"
-        }), rgba(0,0,0,${
-          isDarkMode ? "0.7" : "0.5"
-        })), url('/images/borobudur.jpg')`,
+        }), rgba(0,0,0,${isDarkMode ? "0.7" : "0.5"})), ${bgImage}`,
         backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundPosition: isMobile ? "center top" : "center",
         backgroundRepeat: "no-repeat",
         display: "flex",
         alignItems: "center",
         overflow: "hidden",
-        "@media (max-width: 600px)": {
-          backgroundPosition: "center center",
-        },
       }}
     >
       <Container
@@ -66,11 +104,10 @@ export default function HeroSection() {
       >
         <Box
           component={motion.div}
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -50, opacity: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{
-            duration: 0.9,
+            duration: isMobile ? 0.5 : 0.9,
             delay: 0.2,
             ease: [0.22, 1, 0.36, 1],
           }}
@@ -87,25 +124,16 @@ export default function HeroSection() {
             borderRadius: "16px",
           }}
         >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{
-              duration: 0.6,
-              delay: 0.3,
-              ease: "easeInOut",
-            }}
-          >
+          <motion.div {...getAnimationSettings(0.3)}>
             <Typography
               variant="h1"
               sx={{
                 fontWeight: 800,
                 fontSize: {
-                  xs: "2rem",
-                  sm: "3rem",
-                  md: "4rem",
-                  lg: "5rem",
+                  xs: "1.75rem",
+                  sm: "2.5rem",
+                  md: "3.5rem",
+                  lg: "4.5rem",
                 },
                 mb: { xs: 1, sm: 2, md: 3 },
                 lineHeight: { xs: 1.2, sm: 1.1 },
@@ -116,85 +144,13 @@ export default function HeroSection() {
                 textShadow: isDarkMode
                   ? "0 3px 10px rgba(0,0,0,0.7)"
                   : "0 3px 10px rgba(0,0,0,0.5)",
-                "& span": {
-                  display: "inline-block",
-                },
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                  top: 0,
-                  left: 0,
-                  zIndex: -1,
-                },
               }}
             >
-              <Box
-                component={motion.span}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{
-                  duration: 0.6,
-                  delay: 0.3,
-                  ease: "easeInOut",
-                }}
-                sx={{
-                  display: "inline-block",
-                  position: "relative",
-                  color: "rgba(255,255,255,0.98)",
-                  textShadow: "0 2px 8px rgba(0,0,0,0.7)",
-                }}
-              >
-                Jelajahi
-              </Box>{" "}
-              <Box
-                component={motion.span}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{
-                  duration: 0.6,
-                  delay: 0.5,
-                  ease: "easeInOut",
-                }}
-              >
-                Tempat Indah{" "}
-              </Box>
-              <Box
-                component={motion.span}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{
-                  duration: 0.6,
-                  delay: 0.7,
-                  ease: "easeInOut",
-                }}
-                sx={{
-                  display: "inline-block",
-                  position: "relative",
-                  color: "rgba(255,255,255,0.98)",
-                  textShadow: "0 2px 8px rgba(0,0,0,0.7)",
-                  transform: "translateY(2px)",
-                }}
-              >
-                Bersamanya
-              </Box>
+              <Box component="span">Jelajahi Tempat Indah Bersamanya</Box>
             </Typography>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{
-              duration: 0.7,
-              delay: 0.4,
-              ease: "easeInOut",
-            }}
-          >
+          <motion.div {...getAnimationSettings(0.4)}>
             <Typography
               variant="h5"
               sx={{
@@ -216,21 +172,11 @@ export default function HeroSection() {
                 px: { xs: 1, sm: 2 },
               }}
             >
-              Temukan pengalaman perjalanan terbaik dan kenangan tak terlupakan
-              bersama orang tersayang. Rencanakan perjalanan Anda sekarang!
+              {isSmallScreen
+                ? "Rencanakan perjalanan Anda sekarang!"
+                : "Temukan pengalaman perjalanan terbaik dan kenangan tak terlupakan bersama orang tersayang. Rencanakan perjalanan Anda sekarang!"}
             </Typography>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{
-              duration: 0.7,
-              delay: 0.6,
-              ease: "easeInOut",
-            }}
-          ></motion.div>
         </Box>
       </Container>
 
@@ -247,50 +193,24 @@ export default function HeroSection() {
           onClick={scrollToCategories}
           aria-label="Scroll to destinations"
           component={motion.button}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{
-            opacity: 1,
-            y: [0, 10, 0],
-            scale: [1, 1.1, 1],
-          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{
-            duration: 2,
-            repeat: Infinity,
-            repeatType: "loop",
-            ease: "easeInOut",
+            duration: 0.5,
+            delay: 0.6,
           }}
-          whileHover={{
-            scale: 1.2,
-            backgroundColor: "rgba(255,255,255,0.3)",
-          }}
-          whileTap={{ scale: 0.95 }}
           sx={{
             color: "white",
-            bgcolor: "rgba(255,255,255,0.15)",
-            backdropFilter: "blur(8px)",
-            p: { xs: 1.5, sm: 2 },
-            border: "1px solid rgba(255,255,255,0.2)",
-            transition: "all 0.3s ease",
+            backgroundColor: "rgba(255,255,255,0.2)",
+            backdropFilter: "blur(10px)",
             "&:hover": {
-              bgcolor: "rgba(255,255,255,0.25)",
-              border: "1px solid rgba(255,255,255,0.4)",
-              boxShadow: isDarkMode
-                ? "0 8px 32px rgba(0,0,0,0.4)"
-                : "0 8px 32px rgba(0,0,0,0.2)",
+              backgroundColor: "rgba(255,255,255,0.3)",
             },
-            boxShadow: isDarkMode
-              ? "0 4px 20px rgba(0,0,0,0.4)"
-              : "0 4px 20px rgba(0,0,0,0.2)",
+            padding: { xs: 1, sm: 1.5 },
           }}
         >
           <KeyboardArrowDownIcon
-            fontSize="large"
-            sx={{
-              transition: "transform 0.3s ease",
-              "&:hover": {
-                transform: "translateY(2px)",
-              },
-            }}
+            sx={{ fontSize: { xs: "1.5rem", sm: "2rem" } }}
           />
         </IconButton>
       </Box>

@@ -4,6 +4,7 @@ export interface Place {
   id: number;
   name: string;
   image: string;
+  imageSmall?: string;
   mapsLink: string;
   category: string;
   description: string;
@@ -21,6 +22,7 @@ export const places: Place[] = [
     id: 1,
     name: "The Breeze BSD",
     image: getImagePath("/images/breeze.jpg"),
+    imageSmall: getImagePath("/images/optimized/breeze-small.jpg"),
     mapsLink: "https://maps.app.goo.gl/HeGoPoKg3dhJuSFXA",
     category: "park",
     description: "Taman hiburan outdoor yang nyaman dengan berbagai aktivitas untuk pasangan dan keluarga. Cocok untuk bersantai dan menikmati suasana.",
@@ -36,6 +38,7 @@ export const places: Place[] = [
     id: 2,
     name: "Happy Puppy Karaoke",
     image: getImagePath("/images/karaoke.jpg"),
+    imageSmall: getImagePath("/images/optimized/karaoke-small.jpg"),
     mapsLink: "https://maps.app.goo.gl/nvWQFFjTdtx5yYxe7",
     category: "karaoke",
     description: "Tempat karaoke keluarga dengan ruangan yang nyaman dan koleksi lagu terlengkap. Nikmati waktu bernyanyi bersama pasangan atau teman.",
@@ -50,6 +53,7 @@ export const places: Place[] = [
     id: 3,
     name: "Nako Cafe",
     image: getImagePath("/images/nako.jpg"),
+    imageSmall: getImagePath("/images/optimized/nako-small.jpg"),
     mapsLink: "https://maps.app.goo.gl/MnxJLDm8wQDUkGY27",
     category: "cafe",
     description: "Cafe dengan suasana cozy yang sempurna untuk kencan. Menyajikan kopi premium dan makanan ringan yang lezat dengan desain interior yang instagramable.",
@@ -65,6 +69,7 @@ export const places: Place[] = [
     id: 4,
     name: "Food Festival",
     image: getImagePath("/images/makan.jpg"),
+    imageSmall: getImagePath("/images/optimized/makan-small.jpg"),
     mapsLink: "https://goo.gl/maps/L4c8Vt8zoQYoUqWb7",
     category: "food",
     description: "Festival kuliner dengan beragam pilihan makanan lokal dan internasional. Tempat yang sempurna untuk mencoba berbagai macam hidangan bersama pasangan.",

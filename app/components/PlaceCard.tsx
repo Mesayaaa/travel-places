@@ -42,7 +42,7 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { Place } from "../data/places";
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import { useFavorites } from "../context/FavoritesContext";
 import { useTrip } from "../context/TripContext";
@@ -158,10 +158,35 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
   const { mode } = useCustomTheme();
   const isDarkMode = mode === "dark";
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
+  const isSmallMobile = useMediaQuery("(max-width:480px)");
+  const prefersReducedMotion = useReducedMotion();
   const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
   const { addPlaceToTrip, removePlaceFromTrip, isInCurrentTrip } = useTrip();
   const favoriteStatus = isFavorite(place.id);
   const inTripStatus = isInCurrentTrip(place.id);
+
+  // Simplified animationProps for better mobile performance
+  const getAnimationProps = () => {
+    // Skip animations for mobile or reduced motion preference
+    if (isMobile || prefersReducedMotion) {
+      return {
+        whileHover: {},
+        transition: { type: "tween", duration: 0.2 },
+      };
+    }
+
+    return {
+      whileHover: {
+        scale: 1.03,
+        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+      },
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 17,
+      },
+    };
+  };
 
   // Focus trap for modal
   useEffect(() => {
@@ -170,9 +195,9 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
     }
   }, [isModalOpen]);
 
-  // Intersection observer for card entrance animation
+  // Less intensive intersection observer for card entrance animation
   useEffect(() => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || isMobile) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -191,7 +216,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
     return () => {
       if (cardRef.current) observer.unobserve(cardRef.current);
     };
-  }, []);
+  }, [isMobile]);
 
   const handleMapClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -204,45 +229,29 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
 
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isFavorite(place.id)) {
-      removeFromFavorites(place.id);
-    } else {
-      addToFavorites(place);
-    }
+    favoriteStatus ? removeFromFavorites(place.id) : addToFavorites(place);
   };
 
   const handleAddToTrip = () => {
-    if (inTripStatus) {
-      removePlaceFromTrip(place.id);
-      setSnackbarMessage(`${place.name} dihapus dari trip`);
-      setSnackbarSeverity("error");
-    } else {
-      addPlaceToTrip(place);
-      setSnackbarMessage(`${place.name} ditambahkan ke trip`);
-      setSnackbarSeverity("success");
-    }
+    inTripStatus ? removePlaceFromTrip(place.id) : addPlaceToTrip(place);
+    handleCloseSnackbar();
+    setSnackbarSeverity("success");
+    setSnackbarMessage(
+      inTripStatus ? "Dihapus dari perjalanan" : "Ditambahkan ke perjalanan"
+    );
     setSnackbarOpen(true);
-    setIsModalOpen(false);
   };
 
   const handleImageLoad = () => {
     setIsImageLoaded(true);
   };
 
-  const handleShareClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (navigator.share) {
-      navigator
-        .share({
-          title: place.name,
-          text: `Check out this place: ${place.name}`,
-          url: place.mapsLink,
-        })
-        .catch((error) => console.log("Error sharing", error));
-    } else {
-      // Fallback for browsers that don't support navigator.share
-      setIsShareMenuOpen(true);
+  // Choose appropriate image size based on device
+  const getImagePath = () => {
+    if (isSmallMobile) {
+      return place.imageSmall || place.image;
     }
+    return place.image;
   };
 
   const handleCloseSnackbar = () => {
@@ -270,42 +279,30 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
     <>
       <MotionCard
         ref={cardRef}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
         onClick={handleCardClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className="scroll-animate"
-        elevation={0}
         sx={{
           position: "relative",
           height: {
             xs: 220,
-            sm: 300,
-            md: 380,
+            sm: 280,
+            md: 320,
           },
           borderRadius: {
-            xs: "20px",
-            sm: "24px",
-            md: "28px",
+            xs: "16px",
+            sm: "20px",
+            md: "24px",
           },
           overflow: "hidden",
           cursor: "pointer",
-          bgcolor: "transparent",
-          background: "none",
-          backdropFilter: "none",
-          transform: isHovered ? "translateY(-10px)" : "translateY(0)",
+          background: isDarkMode ? "#1e1e1e" : "#fff",
           boxShadow: isDarkMode
-            ? isHovered
-              ? "0 12px 40px rgba(0,0,0,0.6)"
-              : "0 8px 20px rgba(0,0,0,0.4)"
-            : isHovered
-            ? "0 12px 40px rgba(0,0,0,0.2)"
-            : "0 8px 20px rgba(0,0,0,0.1)",
-          transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
+            ? "0 4px 15px rgba(0,0,0,0.4)"
+            : "0 4px 15px rgba(0,0,0,0.1)",
           ...sx,
         }}
+        onMouseEnter={() => !isMobile && setIsHovered(true)}
+        onMouseLeave={() => !isMobile && setIsHovered(false)}
+        {...getAnimationProps()}
       >
         {!isImageLoaded && (
           <Box
@@ -339,7 +336,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
           <CardMedia
             component="img"
             height="100%"
-            image={place.image}
+            image={getImagePath()}
             alt={place.name}
             onLoad={handleImageLoad}
             sx={{
@@ -360,14 +357,17 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
             right: 0,
             bottom: 0,
             background: (theme) =>
-              `linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 30%, rgba(0, 0, 0, 0.1) 100%)`,
+              `linear-gradient(to top, ${
+                isDarkMode
+                  ? "rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.1)"
+                  : "rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0)"
+              } 100%)`,
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
             padding: {
-              xs: 2.5,
-              sm: 3,
-              md: 3.5,
+              xs: 1.5,
+              sm: 2,
             },
             opacity: 1,
             transition: "all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)",
@@ -391,7 +391,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                   place.category.charAt(0).toUpperCase() +
                   place.category.slice(1)
                 }
-                size="small"
+                size={isMobile ? "small" : "medium"}
                 sx={{
                   bgcolor: "rgba(255, 255, 255, 0.95)",
                   fontWeight: 600,
@@ -410,7 +410,11 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                   },
                   "& .MuiChip-label": {
                     px: 1,
-                    fontSize: "0.85rem",
+                    fontSize: {
+                      xs: "0.65rem",
+                      sm: "0.7rem",
+                      md: "0.75rem",
+                    },
                     fontWeight: 700,
                     color: "#000000",
                   },
@@ -790,7 +794,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                       <Stack direction="row" spacing={1}>
                         <Tooltip title="Share" arrow>
                           <IconButton
-                            onClick={handleShareClick}
+                            onClick={handleMapClick}
                             sx={{
                               bgcolor: "rgba(255, 255, 255, 0.2)",
                               backdropFilter: "blur(10px)",

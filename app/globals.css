@@ -81,6 +81,38 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animated-title,
+  .float,
+  .pulse,
+  .scroll-animate {
+    animation: none !important;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .animated-title {
+    animation: none;
+  }
+  
+  .float {
+    animation: none;
+  }
+  
+  .pulse {
+    animation: none;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .scroll-animate {
     view-timeline-name: --card;
@@ -115,4 +147,15 @@ body {
 /* Dark mode adjustments for any specific elements */
 .dark-mode img:not([src*=".svg"]) {
   filter: brightness(0.8) contrast(1.2);
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  * {
+    transition: none !important;
+  }
+  
+  .scroll-animate {
+    animation: none !important;
+  }
 }
