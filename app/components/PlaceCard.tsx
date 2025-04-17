@@ -56,8 +56,8 @@ interface PlaceCardProps {
   sx?: SxProps<Theme>;
 }
 
-const MotionCard = motion(Card);
-const MotionBox = motion(Box);
+const MotionCard = motion.create(Card);
+const MotionBox = motion.create(Box);
 
 // Loading skeleton component
 const PlaceCardSkeleton = ({ sx }: { sx?: SxProps<Theme> }) => (

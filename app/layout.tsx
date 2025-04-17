@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
@@ -11,15 +11,20 @@ const inter = Inter({
   fallback: ["Arial", "sans-serif"],
 });
 
-export const metadata: Metadata = {
-  title: "Beautiful Places to Visit",
-  description:
-    "Discover amazing travel destinations and find their locations on Google Maps",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
   ],
+};
+
+export const metadata: Metadata = {
+  title: "Beautiful Places to Visit",
+  description:
+    "Discover amazing travel destinations and find their locations on Google Maps",
   formatDetection: {
     telephone: true,
     date: true,

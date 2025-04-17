@@ -4,7 +4,7 @@ import { Card, Skeleton, Box } from "@mui/material";
 import { motion } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 
-const MotionCard = motion(Card);
+const MotionCard = motion.create(Card);
 
 export default function LoadingSkeleton() {
   const { mode } = useTheme();
