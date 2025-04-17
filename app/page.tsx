@@ -305,7 +305,7 @@ export default function Home() {
                         fontWeight: "bold",
                       }}
                     >
-                      Buat Rencana Perjalanan
+                      Buat Rencana Perjalanan (pilih dahulu destinasi diatas)
                     </Button>
                   </motion.div>
 

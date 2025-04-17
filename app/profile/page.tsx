@@ -45,7 +45,6 @@ import Navbar from "../components/Navbar";
 import Link from "next/link";
 import { Place, places } from "../data/places";
 import ScrollToTopButton from "@/app/components/ScrollToTopButton";
-import AccessibilityIcon from "@mui/icons-material/Accessibility";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
@@ -61,6 +60,7 @@ interface Trip {
 const PlaceCard = ({ place, delay = 0 }: { place: Place; delay?: number }) => {
   const { mode } = useTheme();
   const isDarkMode = mode === "dark";
+  const muiTheme = useMuiTheme();
 
   return (
     <Grid item xs={12} sm={6} md={4} key={place.id}>
@@ -130,7 +130,12 @@ const PlaceCard = ({ place, delay = 0 }: { place: Place; delay?: number }) => {
             >
               <LocationOnIcon
                 fontSize="small"
-                sx={{ mr: 0.5, color: isDarkMode ? "#8c9eff" : "#4263eb" }}
+                sx={{
+                  mr: 0.5,
+                  color: isDarkMode
+                    ? muiTheme.palette.primary.light
+                    : muiTheme.palette.primary.main,
+                }}
               />
               <Typography
                 variant="caption"
@@ -266,6 +271,7 @@ const AchievementBadge = ({
 }) => {
   const { mode } = useTheme();
   const isDarkMode = mode === "dark";
+  const muiTheme = useMuiTheme();
 
   return (
     <Tooltip title={`${title}: ${count}`} arrow placement="top">
@@ -461,7 +467,9 @@ export default function ProfilePage() {
           left: 0,
           right: 0,
           height: "4px",
-          background: isDarkMode ? "#8c9eff" : "#4263eb",
+          background: isDarkMode
+            ? muiTheme.palette.primary.light
+            : muiTheme.palette.primary.main,
           scaleX,
           transformOrigin: "0%",
           zIndex: 1000,
@@ -699,7 +707,9 @@ export default function ProfilePage() {
                         fontWeight="bold"
                         gutterBottom
                         sx={{
-                          color: isDarkMode ? "#8c9eff" : "#4263eb",
+                          color: isDarkMode
+                            ? muiTheme.palette.primary.light
+                            : muiTheme.palette.primary.main,
                           textShadow: isDarkMode
                             ? "0 1px 2px rgba(0,0,0,0.3)"
                             : "0 1px 1px rgba(66,99,235,0.1)",
@@ -711,7 +721,10 @@ export default function ProfilePage() {
                         {user.name}
                         <Tooltip title="Akun Premium" arrow>
                           <CheckCircleIcon
-                            sx={{ color: "#FFD700", fontSize: "0.8em" }}
+                            sx={{
+                              color: muiTheme.palette.warning.main,
+                              fontSize: "0.8em",
+                            }}
                           />
                         </Tooltip>
                       </Typography>
@@ -745,7 +758,9 @@ export default function ProfilePage() {
                           fontSize="small"
                           sx={{
                             mr: 1,
-                            color: isDarkMode ? "#8c9eff" : "#4263eb",
+                            color: isDarkMode
+                              ? muiTheme.palette.primary.light
+                              : muiTheme.palette.primary.main,
                           }}
                         />
                         <Typography
@@ -776,19 +791,31 @@ export default function ProfilePage() {
                           title="Expert Traveler"
                           icon={<EmojiEventsIcon />}
                           count={user.trips}
-                          color={isDarkMode ? "#FFD700" : "#FFB900"}
+                          color={
+                            isDarkMode
+                              ? muiTheme.palette.warning.light
+                              : muiTheme.palette.warning.main
+                          }
                         />
                         <AchievementBadge
                           title="Destination Connoisseur"
                           icon={<FavoriteIcon />}
                           count={user.favoritesCount}
-                          color={isDarkMode ? "#ff8080" : "#e64646"}
+                          color={
+                            isDarkMode
+                              ? muiTheme.palette.error.light
+                              : muiTheme.palette.error.main
+                          }
                         />
                         <AchievementBadge
                           title="Trip Planner"
                           icon={<FlightTakeoffIcon />}
                           count={user.plannedTrips}
-                          color={isDarkMode ? "#80c8ff" : "#0398de"}
+                          color={
+                            isDarkMode
+                              ? muiTheme.palette.info.light
+                              : muiTheme.palette.info.main
+                          }
                         />
                       </Box>
                     </Grid>
@@ -811,12 +838,16 @@ export default function ProfilePage() {
                               : "0 4px 10px rgba(66,99,235,0.2)",
                             textTransform: "none",
                             fontWeight: "bold",
-                            bgcolor: isDarkMode ? "#8c9eff" : "#4263eb",
+                            bgcolor: isDarkMode
+                              ? muiTheme.palette.primary.light
+                              : muiTheme.palette.primary.main,
                             color: isDarkMode ? "#1a1a2a" : "#ffffff",
                             transition: "all 0.3s ease",
                             "&:hover": {
                               transform: "translateY(-3px)",
-                              bgcolor: isDarkMode ? "#a5b4ff" : "#3651d4",
+                              bgcolor: isDarkMode
+                                ? muiTheme.palette.primary.light
+                                : muiTheme.palette.primary.dark,
                               boxShadow: isDarkMode
                                 ? "0 6px 15px rgba(140,158,255,0.4)"
                                 : "0 6px 15px rgba(66,99,235,0.3)",
@@ -835,36 +866,6 @@ export default function ProfilePage() {
                           Edit Profil
                         </Button>
                       </motion.div>
-
-                      <Tooltip
-                        title="Pengaturan Aksesibilitas"
-                        arrow
-                        placement="left"
-                      >
-                        <IconButton
-                          aria-label="Accessibility settings"
-                          sx={{
-                            mt: 2,
-                            bgcolor: isDarkMode
-                              ? "rgba(255,255,255,0.05)"
-                              : "rgba(0,0,0,0.05)",
-                            "&:hover": {
-                              bgcolor: isDarkMode
-                                ? "rgba(255,255,255,0.1)"
-                                : "rgba(0,0,0,0.08)",
-                            },
-                          }}
-                        >
-                          <AccessibilityIcon
-                            fontSize="small"
-                            sx={{
-                              color: isDarkMode
-                                ? "rgba(255,255,255,0.7)"
-                                : "rgba(0,0,0,0.7)",
-                            }}
-                          />
-                        </IconButton>
-                      </Tooltip>
                     </Grid>
                   </Grid>
                 </Paper>
