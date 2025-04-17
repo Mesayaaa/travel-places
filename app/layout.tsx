@@ -15,6 +15,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  minimumScale: 1,
+  userScalable: true,
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
@@ -104,15 +107,24 @@ export default function RootLayout({
                 if (navigator.deviceMemory && navigator.deviceMemory <= 2) {
                   document.documentElement.classList.add('low-memory');
                 }
+                
+                // Improve touch response on mobile devices
+                document.addEventListener('touchstart', function() {}, {passive: true});
+                
+                // Fix 300ms tap delay on mobile browsers
+                document.documentElement.style.touchAction = 'manipulation';
               })();
             `,
           }}
         />
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=5.0"
+          content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, viewport-fit=cover, user-scalable=yes"
         />
         <meta name="theme-color" content="#FF5A5F" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-touch-fullscreen" content="yes" />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={inter.className}>
@@ -130,6 +142,27 @@ export default function RootLayout({
                   });
               });
             }
+          `}
+        </Script>
+        <Script id="responsive-fixes" strategy="afterInteractive">
+          {`
+            // Fix iOS height issues with viewport
+            function setVH() {
+              let vh = window.innerHeight * 0.01;
+              document.documentElement.style.setProperty('--vh', \`\${vh}px\`);
+            }
+            
+            // Set initial viewport height
+            setVH();
+            
+            // Update on resize and orientation change
+            window.addEventListener('resize', setVH);
+            window.addEventListener('orientationchange', setVH);
+            
+            // Fix for better responsive handling on iOS devices
+            document.documentElement.addEventListener('gesturestart', function(e) {
+              e.preventDefault();
+            });
           `}
         </Script>
       </body>

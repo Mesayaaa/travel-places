@@ -17,6 +17,8 @@ interface ResponsiveImageProps {
   onLoad?: () => void;
   quality?: number;
   loading?: "eager" | "lazy";
+  objectFit?: "cover" | "contain" | "fill" | "none" | "scale-down";
+  objectPosition?: string;
 }
 
 /**
@@ -35,6 +37,8 @@ export default function ResponsiveImage({
   onLoad,
   quality = 75,
   loading: defaultLoading,
+  objectFit = "cover",
+  objectPosition = "center",
 }: ResponsiveImageProps) {
   const isMobile = useMediaQuery("(max-width:768px)");
   const [imageSrc, setImageSrc] = useState(src);
@@ -87,13 +91,16 @@ export default function ResponsiveImage({
         className={`${className} ${!isLoaded ? "opacity-0" : "opacity-100"}`}
         style={{
           transition: "opacity 0.3s ease-in-out",
+          objectFit: objectFit,
+          objectPosition: objectPosition,
           ...style,
         }}
         onLoad={handleImageLoad}
         onError={handleImageError}
         loading={imgLoading}
-        sizes={isMobile ? "100vw" : "50vw"}
+        sizes={isMobile ? "100vw" : "100vw"}
         quality={quality}
+        unoptimized={false}
       />
     </>
   );

@@ -22,6 +22,8 @@ import {
   Divider,
   Paper,
   SwipeableDrawer,
+  BottomNavigation,
+  BottomNavigationAction,
 } from "@mui/material";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -45,7 +47,40 @@ import MapIcon from "@mui/icons-material/Map";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import React from "react";
+import {
+  AccountCircleOutlined,
+  ArrowBackRounded,
+  AttractionsOutlined,
+  AutoAwesomeOutlined,
+  ChevronLeftRounded,
+  CloseRounded,
+  Diversity3Outlined,
+  FavoriteBorderOutlined,
+  FavoriteOutlined,
+  FilterListRounded,
+  FlightOutlined,
+  HotelOutlined,
+  InfoOutlined,
+  KeyboardArrowLeftRounded,
+  KeyboardArrowRightRounded,
+  LanguageOutlined,
+  MenuRounded,
+  NightlifeOutlined,
+  NotificationsNoneOutlined,
+  PersonOutlineOutlined,
+  RestaurantOutlined,
+  SearchRounded,
+  Settings,
+  SettingsOutlined,
+  SportsBarOutlined,
+  StarOutlineRounded,
+  StarRounded,
+  Translate,
+  TravelExploreOutlined,
+  WhatshotOutlined,
+} from "@mui/icons-material";
 
 interface Props {
   window?: () => Window;
@@ -79,6 +114,33 @@ const navItems: NavItem[] = [
   { name: "Trip Planner", href: "#trip-plans", icon: <MapOutlinedIcon /> },
 ];
 
+const navigationItems = [
+  {
+    name: "home",
+    label: "Home",
+    path: "/",
+    icon: <HomeOutlinedIcon />,
+  },
+  {
+    name: "explore",
+    label: "Explore",
+    path: "/explore",
+    icon: <ExploreOutlinedIcon />,
+  },
+  {
+    name: "favorites",
+    label: "Favorites",
+    path: "/favorites",
+    icon: <FavoriteBorderOutlined />,
+  },
+  {
+    name: "profile",
+    label: "Profile",
+    path: "/profile",
+    icon: <PersonOutlineOutlined />,
+  },
+];
+
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -95,6 +157,7 @@ export default function Navbar() {
   const { mode, toggleTheme } = useTheme();
   const isDarkMode = mode === "dark";
   const [isProfilePage, setIsProfilePage] = useState(false);
+  const [mobileNavValue, setMobileNavValue] = useState("/");
 
   // Helper function to check if an item should be active
   const isItemActive = (href: string) => {
@@ -162,6 +225,11 @@ export default function Navbar() {
       return () => clearTimeout(timer);
     }
   }, [pathname, loading]);
+
+  // Update the mobileNavValue when activeSection changes
+  useEffect(() => {
+    setMobileNavValue(activeSection);
+  }, [activeSection]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -260,6 +328,15 @@ export default function Navbar() {
       console.error("Navigation error:", error);
       setLoadingFavorites(false);
     }
+  };
+
+  // Handle mobile navigation change
+  const handleMobileNavChange = (
+    event: React.SyntheticEvent,
+    newValue: string
+  ) => {
+    setMobileNavValue(newValue);
+    handleNavClick(newValue);
   };
 
   const drawer = (
@@ -627,6 +704,23 @@ export default function Navbar() {
             isProfilePage && !isDarkMode && !scrolled
               ? "translateY(-100%)"
               : "translateY(0)",
+          [muiTheme.breakpoints.down("sm")]: {
+            backgroundColor: isDarkMode
+              ? scrolled
+                ? "rgba(30, 30, 40, 0.95)"
+                : "rgba(25, 25, 35, 0.9)"
+              : scrolled
+              ? "rgba(255, 255, 255, 0.95)"
+              : "rgba(25, 118, 210, 0.95)",
+            boxShadow: isDarkMode
+              ? "0 2px 12px rgba(0, 0, 0, 0.3)"
+              : "0 2px 12px rgba(0, 0, 0, 0.15)",
+            borderBottom: isDarkMode
+              ? "1px solid rgba(255, 255, 255, 0.08)"
+              : scrolled
+              ? "1px solid rgba(0, 0, 0, 0.05)"
+              : "none",
+          },
         }}
       >
         <Container maxWidth="xl">
@@ -639,6 +733,10 @@ export default function Navbar() {
               py: scrolled ? 0.5 : 1,
               transition: "padding 0.3s ease",
               px: { xs: 2, sm: 3, md: 4 },
+              [muiTheme.breakpoints.down("sm")]: {
+                py: 1.5,
+                minHeight: "67px",
+              },
             }}
           >
             <Box
@@ -658,6 +756,13 @@ export default function Navbar() {
                     : "white",
                   fontSize: { xs: 20, sm: 24, md: 28 },
                   transition: "color 0.3s ease",
+                  [muiTheme.breakpoints.down("sm")]: {
+                    color: isDarkMode || !scrolled ? "white" : "primary.main",
+                    filter:
+                      !isDarkMode && !scrolled
+                        ? "drop-shadow(0 1px 2px rgba(0,0,0,0.3))"
+                        : "none",
+                  },
                 }}
               />
               <Typography
@@ -680,6 +785,14 @@ export default function Navbar() {
                     ? "0 2px 10px rgba(0,0,0,0.3)"
                     : "0 2px 10px rgba(0,0,0,0.2)",
                   transition: "color 0.3s ease, text-shadow 0.3s ease",
+                  [muiTheme.breakpoints.down("sm")]: {
+                    color: isDarkMode || !scrolled ? "white" : "#333",
+                    textShadow:
+                      !isDarkMode && !scrolled
+                        ? "0 1px 3px rgba(0,0,0,0.3)"
+                        : "none",
+                    letterSpacing: "0.02em",
+                  },
                 }}
               >
                 TravelSayang
@@ -793,6 +906,20 @@ export default function Navbar() {
                       ? "primary.main"
                       : "white",
                     fontSize: { xs: "1.2rem", sm: "1.5rem" },
+                    [muiTheme.breakpoints.down("sm")]: {
+                      color: isDarkMode
+                        ? "orange"
+                        : scrolled
+                        ? "primary.main"
+                        : "white",
+                      backgroundColor: isDarkMode
+                        ? "rgba(255, 255, 255, 0.1)"
+                        : scrolled
+                        ? "rgba(0, 0, 0, 0.05)"
+                        : "rgba(255, 255, 255, 0.2)",
+                      p: 1,
+                      borderRadius: "10px",
+                    },
                   }}
                 >
                   {isDarkMode ? (
@@ -881,6 +1008,15 @@ export default function Navbar() {
                         opacity: 0,
                       },
                     },
+                    [muiTheme.breakpoints.down("sm")]: {
+                      backgroundColor: isDarkMode
+                        ? "rgba(255, 255, 255, 0.1)"
+                        : scrolled
+                        ? "rgba(0, 0, 0, 0.05)"
+                        : "rgba(255, 255, 255, 0.2)",
+                      p: 0.5,
+                      borderRadius: "10px",
+                    },
                   }}
                   component={motion.button}
                   whileHover={{ scale: 1.1 }}
@@ -913,16 +1049,26 @@ export default function Navbar() {
               whileTap={{ scale: 0.9 }}
               sx={{
                 display: { sm: "none" },
-                color: "primary.main",
-                background: isDarkMode
-                  ? "rgba(50, 50, 55, 0.8)"
-                  : "rgba(245,245,247,0.8)",
+                ml: 1,
+                color: scrolled
+                  ? isDarkMode
+                    ? "white"
+                    : "primary.main"
+                  : "white",
+                backgroundColor: isDarkMode
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : scrolled
+                  ? "rgba(0, 0, 0, 0.05)"
+                  : "rgba(255, 255, 255, 0.2)",
+                backdropFilter: "blur(8px)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                borderRadius: "10px",
+                p: 1,
                 "&:hover": {
                   background: isDarkMode
                     ? "rgba(70, 70, 75, 1)"
                     : "rgba(235,235,240,1)",
                 },
-                ml: 1,
               }}
             >
               <MenuIcon />
@@ -954,6 +1100,166 @@ export default function Navbar() {
           {drawer}
         </Drawer>
       </AppBar>
+
+      {/* Mobile Bottom Navigation */}
+      {isMobile && (
+        <Paper
+          sx={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+            borderRadius: "16px 16px 0 0",
+            overflow: "hidden",
+            boxShadow: "0px -2px 10px rgba(0, 0, 0, 0.1)",
+          }}
+          elevation={3}
+        >
+          <BottomNavigation
+            value={mobileNavValue}
+            onChange={handleMobileNavChange}
+            showLabels
+            sx={{
+              height: 64,
+              backgroundColor: isDarkMode
+                ? "rgba(30, 30, 35, 0.95)"
+                : "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(10px)",
+              "& .MuiBottomNavigationAction-root": {
+                color: isDarkMode
+                  ? "rgba(255, 255, 255, 0.6)"
+                  : "rgba(0, 0, 0, 0.6)",
+                minWidth: 0,
+                padding: "6px 8px",
+                "&.Mui-selected": {
+                  color: "primary.main",
+                },
+                // Add subtle touch effect for mobile
+                "@media (hover: none)": {
+                  "&:active": {
+                    backgroundColor: isDarkMode
+                      ? "rgba(255, 255, 255, 0.05)"
+                      : "rgba(0, 0, 0, 0.05)",
+                  },
+                },
+              },
+            }}
+          >
+            <BottomNavigationAction
+              label="Home"
+              value="/"
+              icon={
+                <Badge
+                  variant="dot"
+                  invisible={mobileNavValue !== "/"}
+                  color="primary"
+                  sx={{
+                    "& .MuiBadge-badge": {
+                      transform: "scale(1.2) translate(75%, -75%)",
+                    },
+                  }}
+                >
+                  <Box
+                    component={motion.div}
+                    whileTap={{ scale: 0.9 }}
+                    animate={{
+                      scale: mobileNavValue === "/" ? [1, 1.1, 1] : 1,
+                    }}
+                    transition={{
+                      repeat: mobileNavValue === "/" ? 1 : 0,
+                      duration: 0.4,
+                    }}
+                  >
+                    {mobileNavValue === "/" ? (
+                      <HomeIcon sx={{ fontSize: { xs: "1.5rem" } }} />
+                    ) : (
+                      <HomeOutlinedIcon sx={{ fontSize: { xs: "1.4rem" } }} />
+                    )}
+                  </Box>
+                </Badge>
+              }
+              sx={{
+                "& .MuiBottomNavigationAction-label": {
+                  fontSize: "0.7rem",
+                  transition: "font-size 0.2s, opacity 0.2s",
+                  opacity: mobileNavValue === "/" ? 1 : 0.8,
+                  "&.Mui-selected": {
+                    fontSize: "0.75rem",
+                    fontWeight: "bold",
+                    color: "primary.main",
+                  },
+                },
+              }}
+            />
+            <BottomNavigationAction
+              label="Destinasi"
+              value="#categories"
+              icon={
+                <Box
+                  component={motion.div}
+                  whileTap={{ scale: 0.9 }}
+                  animate={{
+                    scale: mobileNavValue === "#categories" ? [1, 1.1, 1] : 1,
+                  }}
+                  transition={{
+                    repeat: mobileNavValue === "#categories" ? 1 : 0,
+                    duration: 0.4,
+                  }}
+                >
+                  {mobileNavValue === "#categories" ? (
+                    <ExploreIcon sx={{ fontSize: { xs: "1.5rem" } }} />
+                  ) : (
+                    <ExploreOutlinedIcon sx={{ fontSize: { xs: "1.4rem" } }} />
+                  )}
+                </Box>
+              }
+              sx={{
+                "& .MuiBottomNavigationAction-label": {
+                  fontSize: "0.7rem",
+                  transition: "font-size 0.2s, opacity 0.2s",
+                  opacity: mobileNavValue === "#categories" ? 1 : 0.8,
+                  "&.Mui-selected": { fontSize: "0.75rem", fontWeight: "bold" },
+                },
+              }}
+            />
+            <BottomNavigationAction
+              label="Trip Plan"
+              value="#trip-plans"
+              icon={
+                <Box
+                  component={motion.div}
+                  whileTap={{ scale: 0.9 }}
+                  animate={{
+                    scale: mobileNavValue === "#trip-plans" ? [1, 1.1, 1] : 1,
+                  }}
+                  transition={{
+                    repeat: mobileNavValue === "#trip-plans" ? 1 : 0,
+                    duration: 0.4,
+                  }}
+                >
+                  {mobileNavValue === "#trip-plans" ? (
+                    <MapIcon sx={{ fontSize: { xs: "1.5rem" } }} />
+                  ) : (
+                    <MapOutlinedIcon sx={{ fontSize: { xs: "1.4rem" } }} />
+                  )}
+                </Box>
+              }
+              sx={{
+                "& .MuiBottomNavigationAction-label": {
+                  fontSize: "0.7rem",
+                  transition: "font-size 0.2s, opacity 0.2s",
+                  opacity: mobileNavValue === "#trip-plans" ? 1 : 0.8,
+                  "&.Mui-selected": { fontSize: "0.75rem", fontWeight: "bold" },
+                },
+              }}
+            />
+          </BottomNavigation>
+        </Paper>
+      )}
+
+      {/* Add bottom padding to account for mobile navigation */}
+      {isMobile && <Box sx={{ height: 64 }} />}
 
       {/* Loading Backdrop for Profile */}
       <Backdrop

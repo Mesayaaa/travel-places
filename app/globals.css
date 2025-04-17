@@ -63,19 +63,84 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --transition-speed: 0.3s;
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 248, 250, 255;
+  --background-end-rgb: 255, 255, 255;
+  
+  /* Responsive variables */
+  --vh: 1vh;
+  --header-height: 60px;
+  --footer-height: 60px;
+  --mobile-padding: 16px;
+  --desktop-padding: 24px;
+  --border-radius-sm: 8px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 24px;
+  --touch-target-size: 44px;
+
+  /* Animation speed based on user preferences */
+  --animation-speed: 1;
+  --transition-fast: 0.15s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.5s ease;
   text-rendering: optimizeSpeed;
   text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --animation-speed: 0;
+    --transition-fast: 0s;
+    --transition-medium: 0s;
+    --transition-slow: 0s;
+  }
+  
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --header-height: 56px;
+    --footer-height: 56px;
+    --border-radius-lg: 20px;
+  }
+  
+  /* Fix hero image on mobile */
+  #hero {
+    min-height: 100vh;
+    height: 100vh !important;
+    height: calc(var(--vh, 1vh) * 100) !important;
+  }
+  
+  #hero img {
+    object-fit: cover !important;
+    object-position: center !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --header-height: 52px;
+    --footer-height: 52px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 16px;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 18, 18, 18;
+    --background-end-rgb: 10, 10, 10;
   }
 }
 
@@ -87,12 +152,18 @@ html {
 
 /* Base styles */
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      rgb(var(--background-start-rgb)),
+      rgb(var(--background-end-rgb))
+    )
+    fixed;
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  min-height: calc(var(--vh, 1vh) * 100);
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
@@ -106,6 +177,48 @@ img {
   height: auto;
   display: block;
   content-visibility: auto;
+}
+
+/* Hero Section Image Fixes */
+#hero, .hero-section {
+  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
+  position: relative;
+  overflow: hidden;
+}
+
+#hero img, .hero-section img {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Mobile hero image specific fixes */
+@media (max-width: 480px) {
+  .mobile-hero-image {
+    object-fit: cover !important;
+    object-position: center !important;
+    min-height: 100vh !important;
+    min-height: calc(var(--vh, 1vh) * 100) !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+  
+  /* Fix for PlaceCard images on mobile */
+  .mobile-card-image {
+    object-fit: cover !important;
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    transform: none !important;
+  }
 }
 
 /* Reduced motion preferences */
@@ -331,4 +444,131 @@ img {
   h1, h2, h3, .title, .heading {
     font-weight: 600 !important; /* Hindari font-weight yang terlalu tebal */
   }
+}
+
+/* Utility classes for responsive design */
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.safe-area-inset-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+.full-height {
+  height: 100vh; /* Fallback */
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+.touch-target {
+  min-width: var(--touch-target-size);
+  min-height: var(--touch-target-size);
+}
+
+/* Fix for mobile 100vh issue */
+.mobile-full-height {
+  height: 100vh; /* Fallback */
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+/* Hero background image mobile fixes */
+.hero-bg-image {
+  object-fit: cover !important;
+  object-position: center !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@media (max-width: 480px) {
+  .hero-bg-image {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    transform: none !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+  
+  #hero {
+    height: 100vh !important;
+    height: calc(var(--vh, 1vh) * 100) !important;
+  }
+}
+
+/* Disable pull-to-refresh and navigation gestures on iOS */
+html {
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overscroll-behavior-y: none;
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      rgb(var(--background-start-rgb)),
+      rgb(var(--background-end-rgb))
+    )
+    fixed;
+  min-height: 100vh;
+  min-height: calc(var(--vh, 1vh) * 100);
+  touch-action: manipulation;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  button, a, [role="button"], input, select, textarea {
+    touch-action: manipulation;
+  }
+  
+  input, textarea, select {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+}
+
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* Improve animation performance */
+.animate-gpu {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }

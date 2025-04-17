@@ -192,11 +192,12 @@ export default function Home() {
           >
             <Grid
               container
-              spacing={{ xs: 2, sm: 3, md: 4 }}
+              spacing={{ xs: 1.5, sm: 3, md: 4 }}
               columns={{ xs: 12, sm: 12, md: 12 }}
               sx={{
                 mx: "auto",
                 maxWidth: "1600px",
+                mt: { xs: -1, sm: 0 },
               }}
             >
               {isLoading
@@ -310,6 +311,7 @@ export default function Home() {
         sx={{
           py: { xs: 3, sm: 4, md: 6 },
           px: { xs: 2, sm: 3, md: 4 },
+          pb: { xs: 9, sm: 4, md: 6 },
           background: isDarkMode ? "#121212" : "#f8f9fa",
           color: isDarkMode ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)",
           textAlign: "center",
