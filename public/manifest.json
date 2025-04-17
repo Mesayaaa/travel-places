@@ -6,6 +6,14 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#FF5A5F",
+  "orientation": "portrait-primary",
+  "dir": "ltr",
+  "lang": "en-US",
+  "categories": ["travel", "tourism", "lifestyle"],
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
+  "handle_links": "preferred",
   "icons": [
     {
       "src": "/images/logo-192x192.png",
@@ -20,5 +28,31 @@
       "purpose": "any maskable"
     }
   ],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "View Destinations",
+      "url": "/#categories",
+      "description": "Browse all travel destinations"
+    },
+    {
+      "name": "Trip Plans",
+      "url": "/#plan",
+      "description": "View your planned trips"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshots/mobile-home.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "platform": "narrow"
+    },
+    {
+      "src": "/images/screenshots/desktop-home.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "platform": "wide"
+    }
+  ]
 } 

@@ -11,34 +11,35 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import PlaceCard from "./components/PlaceCard";
-import LoadingSkeleton from "./components/LoadingSkeleton";
-import { places } from "./data/places";
 import { useRef, useState, useEffect, Suspense, lazy } from "react";
-import Navbar from "./components/Navbar";
-import HeroSection from "./components/HeroSection";
-import CategoryFilter from "./components/CategoryFilter";
-import AddIcon from "@mui/icons-material/Add";
-import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import YouTubeIcon from "@mui/icons-material/YouTube";
-import TextField from "@mui/material/TextField";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
-import SendIcon from "@mui/icons-material/Send";
 import Link from "@mui/material/Link";
 import { useTrip } from "./context/TripContext";
 import { useTheme } from "./context/ThemeContext";
 import { isLowEndDevice } from "./utils/deviceUtils";
 
-// Lazy load komponen berat untuk perangkat mobile
+// Import basic components directly for immediate rendering
+import Navbar from "./components/Navbar";
+import HeroSection from "./components/HeroSection";
+import CategoryFilter from "./components/CategoryFilter";
+import LoadingSkeleton from "./components/LoadingSkeleton";
+
+// Lazy load components to reduce initial bundle size
+const PlaceCard = lazy(() => import("./components/PlaceCard"));
 const TripPlanModal = lazy(() => import("./components/TripPlanModal"));
 const TripPlansList = lazy(() => import("./components/TripPlansList"));
 
-// Fallback sederhana untuk lazy loading
+// Type declaration for the navigator connection
+declare global {
+  interface Navigator {
+    connection?: {
+      saveData?: boolean;
+      effectiveType?: string;
+      downlink?: number;
+    };
+  }
+}
+
+// Simplified fallback for lazy loading
 const SimpleFallback = () => (
   <Box sx={{ p: 2, textAlign: "center" }}>
     <Typography>Loading...</Typography>
@@ -51,7 +52,7 @@ const container = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.05, // Reduced for better performance
     },
   },
 };
@@ -62,14 +63,15 @@ const item = {
     opacity: 1,
     transition: {
       type: "tween",
-      duration: 0.3,
+      duration: 0.2, // Faster animation for mobile
     },
   },
 };
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
-  const [filteredPlaces, setFilteredPlaces] = useState(places);
+  const [filteredPlaces, setFilteredPlaces] = useState<any[]>([]);
+  const [places, setPlaces] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState("all");
   const [tripPlansRefreshKey, setTripPlansRefreshKey] = useState(0);
   const { openTripPlanModal, setOpenTripPlanModal } = useTrip();
@@ -77,6 +79,7 @@ export default function Home() {
   const isDarkMode = mode === "dark";
   const isMobile = useMediaQuery("(max-width:768px)");
   const isLowEnd = useRef(false);
+  const isDataSaver = useRef(false);
   const prefersReducedMotion = useReducedMotion();
   const destinationsRef = useRef(null);
   const planSectionRef = useRef(null);
@@ -89,15 +92,36 @@ export default function Home() {
     amount: 0.1,
   });
 
-  // Cek apakah perangkat adalah low-end device
+  // Load places data on mount with delay for mobile
   useEffect(() => {
+    // Check device capabilities
     if (typeof window !== "undefined") {
       isLowEnd.current = isLowEndDevice();
+
+      // Check for data saver mode
+      if (navigator.connection && "saveData" in navigator.connection) {
+        isDataSaver.current = !!navigator.connection.saveData;
+      } else {
+        isDataSaver.current = localStorage.getItem("dataSaver") === "true";
+      }
+
+      // Load places data with a slight delay for mobile
+      const timer = setTimeout(() => {
+        import("./data/places").then((module) => {
+          setPlaces(module.places);
+          setFilteredPlaces(module.places);
+          setIsLoading(false);
+        });
+      }, 100);
+
+      return () => clearTimeout(timer);
     }
   }, []);
 
   // Filter places by category
   useEffect(() => {
+    if (!places.length) return;
+
     if (activeCategory === "all") {
       setFilteredPlaces(places);
     } else {
@@ -105,19 +129,7 @@ export default function Home() {
         places.filter((place) => place.category === activeCategory)
       );
     }
-  }, [activeCategory]);
-
-  // Simulate loading state with shorter duration for mobile
-  useEffect(() => {
-    const timer = setTimeout(
-      () => {
-        setIsLoading(false);
-      },
-      isMobile || isLowEnd.current ? 500 : 1000
-    );
-
-    return () => clearTimeout(timer);
-  }, [isMobile]);
+  }, [activeCategory, places]);
 
   // Handle category change
   const handleCategoryChange = (category: string) => {
@@ -136,25 +148,61 @@ export default function Home() {
       return {
         initial: { opacity: 0 },
         animate: { opacity: 1 },
-        transition: { duration: 0.3 },
+        transition: { duration: 0.2 },
       };
     }
 
     return {
-      initial: { opacity: 0, y: 30 },
+      initial: { opacity: 0, y: 20 },
       whileInView: { opacity: 1, y: 0 },
       viewport: { once: true, amount: 0.2 },
-      transition: { duration: 0.6 },
+      transition: { duration: 0.5 },
     };
   };
 
-  // Batasi jumlah item yang ditampilkan di perangkat low-end
+  // Limit number of items shown on low-end devices
   const getPlacesToShow = () => {
-    if (isLowEnd.current) {
-      // Batasi ke 8 item untuk perangkat low-end
+    if (isLowEnd.current || isDataSaver.current) {
+      // Limit to 6 items for low-end devices or data saver mode
+      return filteredPlaces.slice(0, 6);
+    }
+    if (isMobile) {
+      // Limit to 8 items for mobile devices
       return filteredPlaces.slice(0, 8);
     }
     return filteredPlaces;
+  };
+
+  // Simplified rendering for low-end devices
+  const renderPlaceCards = () => {
+    const placesToShow = getPlacesToShow();
+
+    if (isLoading) {
+      // Show fewer skeletons on mobile/low-end devices
+      const skeletonCount = isMobile || isLowEnd.current ? 2 : 4;
+      return Array(skeletonCount)
+        .fill(0)
+        .map((_, index) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={`skeleton-${index}`}>
+            <LoadingSkeleton />
+          </Grid>
+        ));
+    }
+
+    return placesToShow.map((place, index) => (
+      <Grid item xs={12} sm={6} md={4} lg={3} key={place.id}>
+        <motion.div
+          variants={item}
+          // Disable hover animations on low-end devices
+          whileHover={isLowEnd.current ? {} : { scale: 1.02 }}
+          transition={{ type: "tween", duration: 0.2 }}
+        >
+          <Suspense fallback={<LoadingSkeleton />}>
+            <PlaceCard place={place} />
+          </Suspense>
+        </motion.div>
+      </Grid>
+    ));
   };
 
   return (
@@ -192,7 +240,7 @@ export default function Home() {
           >
             <Grid
               container
-              spacing={{ xs: 1.5, sm: 3, md: 4 }}
+              spacing={{ xs: 1.5, sm: 2, md: 3 }}
               columns={{ xs: 12, sm: 12, md: 12 }}
               sx={{
                 mx: "auto",
@@ -200,84 +248,72 @@ export default function Home() {
                 mt: { xs: -1, sm: 0 },
               }}
             >
-              {isLoading
-                ? Array.from(new Array(6)).map((_, index) => (
-                    <Grid item xs={12} sm={6} md={4} key={index}>
-                      <LoadingSkeleton />
-                    </Grid>
-                  ))
-                : getPlacesToShow().map((place, index) => (
-                    <Grid
-                      item
-                      xs={12}
-                      sm={6}
-                      md={4}
-                      key={place.id}
-                      component={motion.div}
-                      variants={item}
-                      custom={index}
-                      className="offscreen-content"
-                    >
-                      <motion.div
-                        whileHover={
-                          !isMobile && !isLowEnd.current
-                            ? {
-                                boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-                              }
-                            : undefined
-                        }
-                        transition={{
-                          type: "tween",
-                          duration: 0.2,
-                        }}
-                        style={{
-                          borderRadius: "28px",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <PlaceCard place={place} />
-                      </motion.div>
-                    </Grid>
-                  ))}
+              {renderPlaceCards()}
             </Grid>
           </motion.div>
-
-          {!isLoading && filteredPlaces.length === 0 && (
-            <Box
-              sx={{
-                textAlign: "center",
-                py: 4,
-                px: 2,
-              }}
-            >
-              <Typography
-                variant="h5"
-                sx={{
-                  color: isDarkMode ? "text.secondary" : "text.primary",
-                  mb: 2,
-                }}
-              >
-                Tidak ada tempat yang ditemukan
-              </Typography>
-              <Button
-                variant="contained"
-                onClick={() => setActiveCategory("all")}
-                sx={{
-                  bgcolor: isDarkMode ? "primary.dark" : "primary.main",
-                  "&:hover": {
-                    bgcolor: isDarkMode ? "primary.main" : "primary.dark",
-                  },
-                }}
-              >
-                Lihat Semua Tempat
-              </Button>
-            </Box>
-          )}
         </Container>
       </Box>
 
-      {/* Lazy loaded components */}
+      {/* Trip Planning Section - only load when in view */}
       <Suspense fallback={<SimpleFallback />}>
+        {!isLowEnd.current && (
+          <Box
+            component="section"
+            id="plan"
+            ref={planSectionRef}
+            sx={{
+              py: { xs: 6, md: 8 },
+              background: isDarkMode
+                ? "linear-gradient(to bottom, #1e1e1e, #262626)"
+                : "linear-gradient(to bottom, #f0f2f5, #e6e9ec)",
+            }}
+          >
+            <Container>
+              <Grid container spacing={4} justifyContent="center">
+                <Grid item xs={12} md={10} lg={8}>
+                  <Typography
+                    variant="h4"
+                    component="h2"
+                    align="center"
+                    gutterBottom
+                    sx={{
+                      fontWeight: "bold",
+                      mb: 4,
+                      fontSize: { xs: "1.75rem", md: "2.5rem" },
+                    }}
+                  >
+                    Rencana Perjalanan Anda
+                  </Typography>
+
+                  <motion.div
+                    {...getAnimationProps()}
+                    style={{ width: "100%" }}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={<Box component="span">+</Box>}
+                      fullWidth
+                      size="large"
+                      onClick={() => setOpenTripPlanModal(true)}
+                      sx={{
+                        mb: 4,
+                        py: 1.5,
+                        borderRadius: 2,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Buat Rencana Perjalanan
+                    </Button>
+                  </motion.div>
+
+                  <TripPlansList key={tripPlansRefreshKey} />
+                </Grid>
+              </Grid>
+            </Container>
+          </Box>
+        )}
+
         {openTripPlanModal && (
           <TripPlanModal
             open={openTripPlanModal}
@@ -285,104 +321,6 @@ export default function Home() {
           />
         )}
       </Suspense>
-
-      {/* Trip plans section - always visible */}
-      <Box
-        component="section"
-        ref={planSectionRef}
-        id="trip-plans"
-        sx={{
-          py: { xs: 4, md: 6 },
-          background: isDarkMode
-            ? "linear-gradient(to top, #121212, #1e1e1e)"
-            : "linear-gradient(to top, #f8f9fa, #f0f2f5)",
-        }}
-      >
-        <Container maxWidth="xl">
-          <Suspense fallback={<SimpleFallback />}>
-            <TripPlansList key={tripPlansRefreshKey} />
-          </Suspense>
-        </Container>
-      </Box>
-
-      {/* Footer section - simplified for mobile devices */}
-      <Box
-        component="footer"
-        sx={{
-          py: { xs: 3, sm: 4, md: 6 },
-          px: { xs: 2, sm: 3, md: 4 },
-          pb: { xs: 9, sm: 4, md: 6 },
-          background: isDarkMode ? "#121212" : "#f8f9fa",
-          color: isDarkMode ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)",
-          textAlign: "center",
-        }}
-      >
-        <Container maxWidth="lg">
-          <Typography
-            variant="h6"
-            component="h4"
-            sx={{ mb: 2, fontWeight: 600 }}
-          >
-            Travel Places
-          </Typography>
-
-          {/* Display simplified footer on mobile / low-end devices */}
-          {!isLowEnd.current && !isMobile && (
-            <Grid container spacing={3} justifyContent="center" sx={{ mb: 3 }}>
-              <Grid item xs={12} sm={4}>
-                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
-                  Contact
-                </Typography>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1,
-                    alignItems: "center",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                    }}
-                  >
-                    <EmailIcon fontSize="small" />
-                    <Typography variant="body2">
-                      info@travelplaces.com
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                    }}
-                  >
-                    <PhoneIcon fontSize="small" />
-                    <Typography variant="body2">+1 234 567 890</Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                    }}
-                  >
-                    <LocationOnIcon fontSize="small" />
-                    <Typography variant="body2">Jakarta, Indonesia</Typography>
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
-          )}
-
-          <Typography variant="body2" sx={{ mt: 2 }}>
-            © {new Date().getFullYear()} Travel Places. All rights reserved.
-          </Typography>
-        </Container>
-      </Box>
     </Box>
   );
 }
