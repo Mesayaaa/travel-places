@@ -3,15 +3,18 @@
  */
 
 /**
- * Mengecek apakah perangkat adalah perangkat low-end
- * Pengecekan berdasarkan memori perangkat, jumlah core CPU, dan data connection
+ * Simplified utilities for device detection
+ */
+
+/**
+ * Basic check if device is low-end
  * 
- * @returns {boolean} True jika perangkat terdeteksi low-end
+ * @returns {boolean} True if device is likely low-end
  */
 export function isLowEndDevice(): boolean {
   if (typeof window === 'undefined') return false;
   
-  // Deteksi berdasarkan memori (jika tersedia)
+  // Simple memory check
   if ('deviceMemory' in navigator) {
     const memory = (navigator as any).deviceMemory;
     if (memory && memory <= 2) {
@@ -19,33 +22,12 @@ export function isLowEndDevice(): boolean {
     }
   }
   
-  // Deteksi berdasarkan CPU (jika tersedia)
+  // Simple CPU check
   if ('hardwareConcurrency' in navigator) {
     const cpuCores = navigator.hardwareConcurrency;
-    if (cpuCores && cpuCores <= 4) {
+    if (cpuCores && cpuCores <= 2) {
       return true;
     }
-  }
-  
-  // Deteksi berdasarkan koneksi jaringan (jika tersedia)
-  if ('connection' in navigator) {
-    const conn = (navigator as any).connection;
-    if (conn) {
-      if (conn.saveData || 
-          conn.effectiveType === 'slow-2g' || 
-          conn.effectiveType === '2g' || 
-          conn.effectiveType === '3g') {
-        return true;
-      }
-    }
-  }
-  
-  // Cek apakah ua mengandung kata-kata yang umum pada perangkat low-end
-  const ua = navigator.userAgent.toLowerCase();
-  if (ua.includes('android 4.') || 
-      ua.includes('android 5.') || 
-      ua.includes('mobile') && ua.includes('windows phone')) {
-    return true;
   }
   
   return false;
@@ -105,9 +87,9 @@ export function applyLowEndOptimizations(): void {
 }
 
 /**
- * Mendeteksi jika pengguna menggunakan Data Saver
+ * Detect if user has data-saver enabled
  * 
- * @returns {boolean} True jika Data Saver aktif
+ * @returns {boolean} True if data saver is enabled
  */
 export function isDataSaverEnabled(): boolean {
   if (typeof window === 'undefined') return false;
