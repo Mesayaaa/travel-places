@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import ResponsiveImage from "./ResponsiveImage";
+import { getImagePath } from "../utils/getImagePath";
 
 export default function HeroSection() {
   const { mode } = useTheme();
@@ -83,8 +84,8 @@ export default function HeroSection() {
         }}
       >
         <ResponsiveImage
-          src="/images/borobudur.jpg"
-          mobileSrc="/images/mobile/borobudur-mobile.jpg"
+          src={getImagePath("/images/borobudur.jpg")}
+          mobileSrc={getImagePath("/images/mobile/borobudur-mobile.jpg")}
           alt="Hero Background"
           fill
           priority

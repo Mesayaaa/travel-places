@@ -176,9 +176,11 @@ export default function Navbar() {
 
     // Handle Home link to scroll to top
     if (href === "/") {
-      if (isProfilePage) {
+      if (pathname !== "/") {
+        // If not on homepage, navigate to root
         router.push("/");
       } else {
+        // If already on homepage, just scroll to top
         window.scrollTo({
           top: 0,
           behavior: "smooth",
@@ -189,11 +191,11 @@ export default function Navbar() {
 
     // Smooth scroll to section if on home page, or navigate to home page with hash if on profile
     if (href.startsWith("#")) {
-      if (isProfilePage) {
-        // If on profile page, navigate to home page with hash
+      if (pathname !== "/") {
+        // If not on homepage, navigate to homepage with hash
         router.push(`/${href}`);
       } else {
-        // If on home page, scroll to section
+        // If on homepage, scroll to section
         const element = document.querySelector(href);
         if (element) {
           const yOffset = -60; // Small offset to ensure the section is clearly visible
