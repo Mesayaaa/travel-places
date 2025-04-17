@@ -964,12 +964,17 @@ export default function Navbar() {
                         : scrolled
                         ? "primary.main"
                         : "white",
-                      backgroundColor: isDarkMode
-                        ? "rgba(255, 255, 255, 0.1)"
-                        : scrolled
-                        ? "rgba(0, 0, 0, 0.05)"
-                        : "rgba(255, 255, 255, 0.2)",
-                      p: 1,
+                      backgroundColor:
+                        pathname === "/profile"
+                          ? isDarkMode
+                            ? "rgba(25, 118, 210, 0.15)"
+                            : "rgba(25, 118, 210, 0.08)"
+                          : isDarkMode
+                          ? "transparent"
+                          : scrolled
+                          ? "transparent"
+                          : "transparent",
+                      p: pathname === "/profile" ? 0.5 : 0,
                       borderRadius: "10px",
                     },
                   }}
@@ -1061,12 +1066,17 @@ export default function Navbar() {
                       },
                     },
                     [muiTheme.breakpoints.down("sm")]: {
-                      backgroundColor: isDarkMode
-                        ? "rgba(255, 255, 255, 0.1)"
-                        : scrolled
-                        ? "rgba(0, 0, 0, 0.05)"
-                        : "rgba(255, 255, 255, 0.2)",
-                      p: 0.5,
+                      backgroundColor:
+                        pathname === "/profile"
+                          ? isDarkMode
+                            ? "rgba(25, 118, 210, 0.15)"
+                            : "rgba(25, 118, 210, 0.08)"
+                          : isDarkMode
+                          ? "transparent"
+                          : scrolled
+                          ? "transparent"
+                          : "transparent",
+                      p: pathname === "/profile" ? 0.5 : 0,
                       borderRadius: "10px",
                     },
                   }}
@@ -1100,7 +1110,7 @@ export default function Navbar() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               sx={{
-                display: { sm: "none" },
+                display: { xs: "none", sm: "none" },
                 ml: 1,
                 color: scrolled
                   ? isDarkMode
@@ -1139,7 +1149,7 @@ export default function Navbar() {
             keepMounted: true,
           }}
           sx={{
-            display: { xs: "block", sm: "none" },
+            display: { xs: "none", sm: "none" },
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: "85%",
