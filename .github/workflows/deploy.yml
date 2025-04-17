@@ -33,14 +33,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install critters explicitly
-        run: npm install critters@0.0.20
+      - name: Disable CSS optimization in Next.js config
+        run: |
+          sed -i 's/optimizeCss: true/optimizeCss: false/g' next.config.js
+          cat next.config.js
 
-      - name: Build with Next.js
-        run: npm run build:custom
+      - name: Install critters globally
+        run: npm install -g critters@0.0.20
+
+      - name: Build with direct script
+        run: node scripts/build-direct.js
         env:
           NEXT_PUBLIC_BASE_PATH: /travel-places
           NEXT_DISABLE_OPTIMIZED_CSS: "true"
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
