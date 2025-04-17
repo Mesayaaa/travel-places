@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "NEXT_DISABLE_OPTIMIZED_CSS=true next build && node -e \"require('fs').writeFileSync('out/.nojekyll', '')\"",
+    "build": "node scripts/build-direct.js",
     "build:custom": "node scripts/build-without-css-optimization.js",
+    "build:next": "NEXT_DISABLE_OPTIMIZED_CSS=true next build && node -e \"require('fs').writeFileSync('out/.nojekyll', '')\"",
     "start": "next start",
     "lint": "next lint",
     "optimize-images": "node scripts/optimize-images.js"
