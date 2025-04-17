@@ -65,7 +65,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { name: "Home", href: "/" },
   { name: "Destinasi", href: "#categories" },
-  { name: "Trip Planner", href: "#plan" },
+  { name: "Trip Planner", href: "#trip-plans" },
 ];
 
 export default function Navbar() {

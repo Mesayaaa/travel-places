@@ -151,9 +151,9 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
   const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
-  );
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "info" | "warning"
+  >("success");
   const modalRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const muiTheme = useMuiTheme();
@@ -236,13 +236,30 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
   };
 
   const handleAddToTrip = () => {
-    inTripStatus ? removePlaceFromTrip(place.id) : addPlaceToTrip(place);
-    handleCloseSnackbar();
-    setSnackbarSeverity("success");
-    setSnackbarMessage(
-      inTripStatus ? "Dihapus dari perjalanan" : "Ditambahkan ke perjalanan"
-    );
-    setSnackbarOpen(true);
+    try {
+      if (inTripStatus) {
+        removePlaceFromTrip(place.id);
+        setSnackbarSeverity("info");
+        setSnackbarMessage("Dihapus dari perjalanan");
+      } else {
+        addPlaceToTrip(place);
+        setSnackbarSeverity("success");
+        setSnackbarMessage("Ditambahkan ke perjalanan");
+      }
+
+      // Always close existing snackbar first to ensure animation plays
+      handleCloseSnackbar();
+
+      // Small delay to ensure the previous snackbar is closed
+      setTimeout(() => {
+        setSnackbarOpen(true);
+      }, 100);
+    } catch (error) {
+      console.error("Error updating trip:", error);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Gagal memperbarui perjalanan");
+      setSnackbarOpen(true);
+    }
   };
 
   // Handle image load

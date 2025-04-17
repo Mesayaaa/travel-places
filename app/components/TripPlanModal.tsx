@@ -16,6 +16,7 @@ import {
   Snackbar,
   Alert,
   InputAdornment,
+  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -61,6 +62,9 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
     setTripName,
     clearCurrentTrip,
     removePlaceFromTrip,
+    hasError,
+    errorMessage,
+    clearError,
   } = useTrip();
 
   const { mode } = useTheme();
@@ -69,6 +73,11 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
   const [companions, setCompanions] = useState<string[]>([]);
   const [newCompanion, setNewCompanion] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "info" | "warning"
+  >("success");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRemovePlace = (placeId: number) => {
     removePlaceFromTrip(placeId);
@@ -86,25 +95,49 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
   };
 
   const onSubmit = (data: FormData) => {
-    const tripPlan = {
-      id: Date.now(),
-      name: data.tripName,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      places: placesInTrip,
-      companions,
-      budget: data.budget,
-      notes: data.notes,
-      createdAt: new Date(),
-    };
+    if (placesInTrip.length === 0) {
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Tambahkan minimal satu tempat ke perjalanan");
+      setSnackbarOpen(true);
+      return;
+    }
 
-    localStorage.setItem(`tripPlan_${tripPlan.id}`, JSON.stringify(tripPlan));
+    setIsSubmitting(true);
 
-    resetForm();
-    clearCurrentTrip();
-    onClose();
+    try {
+      const tripPlan = {
+        id: Date.now(),
+        name: data.tripName,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        places: placesInTrip,
+        companions,
+        budget: data.budget,
+        notes: data.notes,
+        createdAt: new Date().toISOString(),
+      };
 
-    setSnackbarOpen(true);
+      localStorage.setItem(`tripPlan_${tripPlan.id}`, JSON.stringify(tripPlan));
+
+      // Dispatch event to notify TripPlansList
+      const event = new CustomEvent("tripPlanAdded");
+      window.dispatchEvent(event);
+
+      resetForm();
+      clearCurrentTrip();
+      onClose();
+
+      setSnackbarSeverity("success");
+      setSnackbarMessage("Rencana perjalanan berhasil disimpan!");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error("Error saving trip plan:", error);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Gagal menyimpan rencana perjalanan");
+      setSnackbarOpen(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
@@ -120,6 +153,16 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
+
+  // Show error from TripContext if present
+  useEffect(() => {
+    if (hasError) {
+      setSnackbarSeverity("error");
+      setSnackbarMessage(errorMessage);
+      setSnackbarOpen(true);
+      clearError();
+    }
+  }, [hasError, errorMessage, clearError]);
 
   useEffect(() => {
     if (open) {
@@ -508,8 +551,13 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
                       : "0 4px 20px rgba(78, 205, 196, 0.3)",
                   },
                 }}
+                disabled={isSubmitting || placesInTrip.length === 0}
               >
-                Simpan Rencana
+                {isSubmitting ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  "Simpan Rencana Perjalanan"
+                )}
               </Button>
             </Box>
           </Box>
@@ -519,21 +567,16 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
       {/* Success notification */}
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={5000}
+        autoHideDuration={4000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert
           onClose={handleCloseSnackbar}
-          severity="success"
-          variant="filled"
-          sx={{
-            boxShadow: isDarkMode
-              ? "0 4px 20px rgba(0,0,0,0.5)"
-              : "0 4px 20px rgba(0,0,0,0.2)",
-          }}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
         >
-          Rencana perjalanan berhasil dibuat!
+          {snackbarMessage}
         </Alert>
       </Snackbar>
     </>

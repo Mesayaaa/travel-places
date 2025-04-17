@@ -13,6 +13,8 @@ import {
   IconButton,
   Button,
   CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PeopleIcon from "@mui/icons-material/People";
@@ -24,6 +26,7 @@ import { format, parse } from "date-fns";
 import { Place } from "../data/places";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { useTheme } from "../context/ThemeContext";
+import { TRIP_UPDATED_EVENT_NAME } from "../context/TripContext";
 
 interface TripPlan {
   id: number;
@@ -43,6 +46,11 @@ export default function TripPlansList() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [planToDelete, setPlanToDelete] = useState<number | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "info" | "warning"
+  >("success");
   const { mode } = useTheme();
   const isDarkMode = mode === "dark";
 
@@ -59,46 +67,76 @@ export default function TripPlansList() {
       }
     };
 
+    const handleTripUpdated = () => {
+      handleRefresh();
+    };
+
+    const handleTripPlanAdded = () => {
+      handleRefresh();
+      setSnackbarSeverity("success");
+      setSnackbarMessage("Rencana perjalanan baru telah ditambahkan!");
+      setSnackbarOpen(true);
+    };
+
+    // Listen for storage changes (from other tabs)
     window.addEventListener("storage", handleStorageChange);
+
+    // Listen for custom events (from this tab)
+    window.addEventListener(TRIP_UPDATED_EVENT_NAME, handleTripUpdated);
+    window.addEventListener("tripPlanAdded", handleTripPlanAdded);
 
     // Cleanup function
     return () => {
       window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(TRIP_UPDATED_EVENT_NAME, handleTripUpdated);
+      window.removeEventListener("tripPlanAdded", handleTripPlanAdded);
     };
   }, []);
 
   useEffect(() => {
     // Load saved plans from localStorage
     const loadPlans = () => {
-      const savedPlans: TripPlan[] = [];
+      try {
+        const savedPlans: TripPlan[] = [];
 
-      // Find all keys that start with tripPlan_
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith("tripPlan_")) {
-          try {
-            const planData = JSON.parse(localStorage.getItem(key) || "");
-            savedPlans.push({
-              ...planData,
-              startDate: planData.startDate,
-              endDate: planData.endDate,
-              createdAt: planData.createdAt,
-            });
-          } catch (error) {
-            console.error("Error parsing saved plan:", error);
+        // Find all keys that start with tripPlan_
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith("tripPlan_")) {
+            try {
+              const planData = JSON.parse(localStorage.getItem(key) || "");
+              if (validatePlanData(planData)) {
+                savedPlans.push({
+                  ...planData,
+                  startDate: planData.startDate,
+                  endDate: planData.endDate,
+                  createdAt: planData.createdAt,
+                });
+              } else {
+                console.warn(`Invalid plan data format for key: ${key}`);
+              }
+            } catch (error) {
+              console.error("Error parsing saved plan:", error);
+            }
           }
         }
+
+        // Sort by creation date, newest first
+        savedPlans.sort((a, b) => {
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        });
+
+        setPlans(savedPlans);
+      } catch (error) {
+        console.error("Error loading plans:", error);
+        setSnackbarSeverity("error");
+        setSnackbarMessage("Gagal memuat rencana perjalanan");
+        setSnackbarOpen(true);
+      } finally {
+        setIsLoading(false);
       }
-
-      // Sort by creation date, newest first
-      savedPlans.sort((a, b) => {
-        return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-      });
-
-      setPlans(savedPlans);
-      setIsLoading(false);
     };
 
     // Small delay to ensure localStorage is updated
@@ -109,6 +147,17 @@ export default function TripPlansList() {
     return () => clearTimeout(timer);
   }, [refreshKey]);
 
+  // Validate plan data to avoid errors
+  const validatePlanData = (data: any): boolean => {
+    return (
+      data &&
+      typeof data === "object" &&
+      typeof data.id === "number" &&
+      typeof data.name === "string" &&
+      Array.isArray(data.places)
+    );
+  };
+
   const handleDeletePlan = (planId: number) => {
     setPlanToDelete(planId);
     setDialogOpen(true);
@@ -116,16 +165,31 @@ export default function TripPlansList() {
 
   const confirmDelete = () => {
     if (planToDelete !== null) {
-      localStorage.removeItem(`tripPlan_${planToDelete}`);
-      setPlans(plans.filter((plan) => plan.id !== planToDelete));
-      setDialogOpen(false);
-      setPlanToDelete(null);
+      try {
+        localStorage.removeItem(`tripPlan_${planToDelete}`);
+        setPlans(plans.filter((plan) => plan.id !== planToDelete));
+        setSnackbarSeverity("success");
+        setSnackbarMessage("Rencana perjalanan berhasil dihapus");
+        setSnackbarOpen(true);
+      } catch (error) {
+        console.error("Error deleting plan:", error);
+        setSnackbarSeverity("error");
+        setSnackbarMessage("Gagal menghapus rencana perjalanan");
+        setSnackbarOpen(true);
+      } finally {
+        setDialogOpen(false);
+        setPlanToDelete(null);
+      }
     }
   };
 
   const cancelDelete = () => {
     setDialogOpen(false);
     setPlanToDelete(null);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   const formatDate = (dateString: string | null) => {
@@ -526,6 +590,21 @@ export default function TripPlansList() {
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
       />
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
