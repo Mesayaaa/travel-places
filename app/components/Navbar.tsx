@@ -711,7 +711,7 @@ export default function Navbar() {
                 : "rgba(25, 25, 35, 0.9)"
               : scrolled
               ? "rgba(255, 255, 255, 0.95)"
-              : "rgba(25, 118, 210, 0.95)",
+              : "rgba(76, 76, 76, 0.95)",
             boxShadow: isDarkMode
               ? "0 2px 12px rgba(0, 0, 0, 0.3)"
               : "0 2px 12px rgba(0, 0, 0, 0.15)",
@@ -757,7 +757,7 @@ export default function Navbar() {
                   fontSize: { xs: 20, sm: 24, md: 28 },
                   transition: "color 0.3s ease",
                   [muiTheme.breakpoints.down("sm")]: {
-                    color: isDarkMode || !scrolled ? "white" : "primary.main",
+                    color: isDarkMode || !scrolled ? "white" : "#555",
                     filter:
                       !isDarkMode && !scrolled
                         ? "drop-shadow(0 1px 2px rgba(0,0,0,0.3))"
@@ -786,7 +786,7 @@ export default function Navbar() {
                     : "0 2px 10px rgba(0,0,0,0.2)",
                   transition: "color 0.3s ease, text-shadow 0.3s ease",
                   [muiTheme.breakpoints.down("sm")]: {
-                    color: isDarkMode || !scrolled ? "white" : "#333",
+                    color: isDarkMode || !scrolled ? "white" : "#444",
                     textShadow:
                       !isDarkMode && !scrolled
                         ? "0 1px 3px rgba(0,0,0,0.3)"
@@ -1133,7 +1133,7 @@ export default function Navbar() {
                 minWidth: 0,
                 padding: "6px 8px",
                 "&.Mui-selected": {
-                  color: "primary.main",
+                  color: isDarkMode ? "#f0f0f0" : "#555555",
                 },
                 // Add subtle touch effect for mobile
                 "@media (hover: none)": {
