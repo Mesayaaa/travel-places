@@ -323,7 +323,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
         }}
         onMouseEnter={() => !isMobile && setIsHovered(true)}
         onMouseLeave={() => !isMobile && setIsHovered(false)}
-        {...getAnimationProps()}
       >
         {!isImageLoaded && (
           <Box
@@ -392,59 +391,133 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
           <Box
             sx={{
               position: "absolute",
-              top: { xs: 8, md: 12 },
-              left: { xs: 10, md: 18 },
+              top: { xs: 10, md: 18 },
+              left: 0,
+              right: 0,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1,
+              px: { xs: 2, md: 3 },
             }}
           >
-            <MotionBox
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.4 }}
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                maxWidth: "500px",
+              }}
             >
-              <Chip
-                icon={getCategoryIcon(place.category)}
-                label={
-                  place.category.charAt(0).toUpperCase() +
-                  place.category.slice(1)
-                }
-                size={isMobile ? "small" : "medium"}
-                sx={{
-                  bgcolor: "rgba(255, 255, 255, 0.95)",
-                  fontWeight: 600,
-                  backdropFilter: "blur(8px)",
-                  boxShadow: `0 2px 10px rgba(0,0,0,0.15), 0 0 0 1px ${alpha(
-                    getCategoryColor(place.category),
-                    0.2
-                  )}`,
-                  transition: "all 0.3s ease",
-                  py: 1,
-                  px: 0.5,
-                  borderRadius: "20px",
-                  "& .MuiChip-icon": {
-                    color: getCategoryColor(place.category),
-                    marginLeft: "8px",
-                  },
-                  "& .MuiChip-label": {
-                    px: 1,
-                    fontSize: {
-                      xs: "0.65rem",
-                      sm: "0.7rem",
-                      md: "0.75rem",
-                    },
-                    fontWeight: 700,
-                    color: "#000000",
-                  },
-                  "&:hover": {
-                    transform: "translateY(-2px) scale(1.05)",
-                    boxShadow: `0 4px 12px rgba(0,0,0,0.2), 0 0 0 1px ${alpha(
+              <MotionBox
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.4 }}
+              >
+                <Chip
+                  icon={getCategoryIcon(place.category)}
+                  label={
+                    place.category.charAt(0).toUpperCase() +
+                    place.category.slice(1)
+                  }
+                  size={isMobile ? "small" : "medium"}
+                  sx={{
+                    bgcolor: "rgba(255, 255, 255, 0.95)",
+                    fontWeight: 600,
+                    backdropFilter: "blur(8px)",
+                    boxShadow: `0 2px 10px rgba(0,0,0,0.15), 0 0 0 1px ${alpha(
                       getCategoryColor(place.category),
-                      0.3
+                      0.2
                     )}`,
-                    bgcolor: "rgba(255, 255, 255, 0.98)",
-                  },
-                }}
-              />
-            </MotionBox>
+                    transition: "all 0.3s ease",
+                    py: 1,
+                    px: 0.5,
+                    borderRadius: "20px",
+                    "& .MuiChip-icon": {
+                      color: getCategoryColor(place.category),
+                      marginLeft: "8px",
+                    },
+                    "& .MuiChip-label": {
+                      px: 1,
+                      fontSize: {
+                        xs: "0.65rem",
+                        sm: "0.7rem",
+                        md: "0.75rem",
+                      },
+                      fontWeight: 700,
+                      color: "#000000",
+                    },
+                    "&:hover": {
+                      boxShadow: `0 4px 12px rgba(0,0,0,0.2), 0 0 0 1px ${alpha(
+                        getCategoryColor(place.category),
+                        0.3
+                      )}`,
+                      bgcolor: "rgba(255, 255, 255, 0.98)",
+                    },
+                  }}
+                />
+              </MotionBox>
+
+              <Tooltip
+                title={
+                  favoriteStatus ? "Hapus dari favorit" : "Tambah ke favorit"
+                }
+                arrow
+              >
+                <IconButton
+                  onClick={handleFavoriteToggle}
+                  aria-label={
+                    favoriteStatus
+                      ? "Remove from favorites"
+                      : "Add to favorites"
+                  }
+                  component={motion.button}
+                  variants={favoriteVariants}
+                  animate={favoriteStatus ? "favorited" : "unfavorited"}
+                  sx={(theme) => ({
+                    background: favoriteStatus
+                      ? "rgba(255, 0, 50, 0.95)"
+                      : alpha("#ffffff", 0.85),
+                    backdropFilter: "blur(8px)",
+                    padding: { xs: "6px", sm: "8px" },
+                    cursor: "pointer",
+                    color: favoriteStatus
+                      ? "white"
+                      : getCategoryColor(place.category),
+                    "&:hover": {
+                      background: favoriteStatus
+                        ? "rgba(255, 0, 50, 1)"
+                        : alpha("#ffffff", 0.95),
+                      boxShadow: `0 6px 20px ${alpha(
+                        "rgb(255, 0, 50)",
+                        favoriteStatus ? 0.8 : 0.6
+                      )}`,
+                    },
+                    "&:focus-visible": {
+                      outline: "2px solid white",
+                      outlineOffset: 2,
+                    },
+                    transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    boxShadow: favoriteStatus
+                      ? "0 0 15px rgba(255, 0, 50, 0.7)"
+                      : "none",
+                  })}
+                >
+                  {favoriteStatus ? (
+                    <FavoriteIcon
+                      sx={{
+                        color: "#ffffff",
+                        filter: "drop-shadow(0 0 2px rgba(255,255,255,0.5))",
+                      }}
+                      fontSize="medium"
+                    />
+                  ) : (
+                    <FavoriteBorderIcon fontSize="medium" />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
 
           <MotionBox
@@ -609,65 +682,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
             </Box>
           </MotionBox>
         </Box>
-
-        <Tooltip
-          title={favoriteStatus ? "Hapus dari favorit" : "Tambah ke favorit"}
-          arrow
-        >
-          <IconButton
-            onClick={handleFavoriteToggle}
-            aria-label={
-              favoriteStatus ? "Remove from favorites" : "Add to favorites"
-            }
-            component={motion.button}
-            variants={favoriteVariants}
-            animate={favoriteStatus ? "favorited" : "unfavorited"}
-            sx={(theme) => ({
-              position: "absolute",
-              top: { xs: 10, md: 18 },
-              right: { xs: 10, md: 18 },
-              background: favoriteStatus
-                ? "rgba(255, 0, 50, 0.95)"
-                : alpha("#ffffff", 0.85),
-              backdropFilter: "blur(8px)",
-              padding: { xs: "6px", sm: "8px" },
-              cursor: "pointer",
-              color: favoriteStatus
-                ? "white"
-                : getCategoryColor(place.category),
-              "&:hover": {
-                background: favoriteStatus
-                  ? "rgba(255, 0, 50, 1)"
-                  : alpha("#ffffff", 0.95),
-                transform: "scale(1.15)",
-                boxShadow: `0 6px 20px ${alpha(
-                  "rgb(255, 0, 50)",
-                  favoriteStatus ? 0.8 : 0.6
-                )}`,
-              },
-              "&:focus-visible": {
-                outline: "2px solid white",
-                outlineOffset: 2,
-              },
-              transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
-              boxShadow: favoriteStatus
-                ? "0 0 15px rgba(255, 0, 50, 0.7)"
-                : "none",
-            })}
-          >
-            {favoriteStatus ? (
-              <FavoriteIcon
-                sx={{
-                  color: "#ffffff",
-                  filter: "drop-shadow(0 0 2px rgba(255,255,255,0.5))",
-                }}
-                fontSize="medium"
-              />
-            ) : (
-              <FavoriteBorderIcon fontSize="medium" />
-            )}
-          </IconButton>
-        </Tooltip>
       </MotionCard>
 
       <AnimatePresence>
@@ -679,428 +693,659 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              pb: isMobile ? 2 : 4,
-              pt: isMobile ? 8 : 4,
+              pb: 2,
+              pt: 2,
+              overflow: "auto",
+              scrollbarWidth: "none", // Firefox
+              msOverflowStyle: "none", // IE and Edge
+              "&::-webkit-scrollbar": {
+                display: "none", // Chrome, Safari, and Opera
+              },
             }}
+            disableAutoFocus
+            disableEnforceFocus
+            keepMounted
           >
-            <MotionBox
-              initial={{ opacity: 0, y: 20, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.98 }}
-              transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
-              tabIndex={-1}
-              ref={modalRef}
-              sx={{
-                position: "relative",
-                bgcolor: "background.paper",
-                boxShadow: isDarkMode
-                  ? "0 10px 40px rgba(0,0,0,0.5)"
-                  : "0 10px 40px rgba(0,0,0,0.2)",
-                p: { xs: 2, sm: 3, md: 4 },
-                outline: "none",
-                width: { xs: "95%", sm: "85%", md: "80%" },
-                maxWidth: "1000px",
-                maxHeight: "90vh",
-                overflowY: "auto",
-                borderRadius: "20px",
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-                "&::-webkit-scrollbar": {
-                  display: "none",
-                },
-                "&:focus": {
-                  outline: "none",
-                },
-              }}
-            >
-              <Tooltip title="Close" arrow placement="left">
+            {isMobile ? (
+              // Mobile modal layout
+              <Box
+                sx={{
+                  width: "95%",
+                  maxWidth: "600px",
+                  maxHeight: "85vh",
+                  backgroundColor: "background.paper",
+                  borderRadius: "20px",
+                  boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+                  overflow: "auto",
+                  position: "relative",
+                  pb: 2,
+                  scrollbarWidth: "none", // Firefox
+                  msOverflowStyle: "none", // IE and Edge
+                  "&::-webkit-scrollbar": {
+                    display: "none", // Chrome, Safari, and Opera
+                  },
+                }}
+              >
+                {/* Close button */}
                 <IconButton
                   onClick={() => setIsModalOpen(false)}
                   aria-label="close modal"
                   sx={{
                     position: "absolute",
-                    top: 16,
-                    right: 16,
+                    top: 10,
+                    right: 10,
                     bgcolor: "rgba(0, 0, 0, 0.5)",
                     color: "white",
                     zIndex: 10,
                     "&:hover": {
                       bgcolor: "rgba(0, 0, 0, 0.7)",
-                      transform: "scale(1.1) rotate(90deg)",
                     },
-                    transition: "all 0.3s ease",
                   }}
                 >
                   <CloseIcon />
                 </IconButton>
-              </Tooltip>
 
-              <Grid container>
-                <Grid item xs={12} md={6}>
+                {/* Image */}
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: "35vh",
+                    backgroundImage: `url(${place.image})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    borderTopLeftRadius: "20px",
+                    borderTopRightRadius: "20px",
+                    position: "relative",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 16,
+                      left: 16,
+                    }}
+                  >
+                    <Chip
+                      icon={getCategoryIcon(place.category)}
+                      label={
+                        place.category.charAt(0).toUpperCase() +
+                        place.category.slice(1)
+                      }
+                      sx={{
+                        bgcolor: "white",
+                        fontWeight: 600,
+                        "& .MuiChip-icon": {
+                          color: getCategoryColor(place.category),
+                        },
+                      }}
+                    />
+                  </Box>
+                </Box>
+
+                {/* Content */}
+                <Box sx={{ p: 2 }}>
+                  {/* Title and favorite button */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mb: 2,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography
+                      variant="h5"
+                      component="h2"
+                      fontWeight="bold"
+                      color="text.primary"
+                    >
+                      {place.name}
+                      {place.featured && (
+                        <VerifiedIcon
+                          sx={{
+                            fontSize: "1rem",
+                            color: muiTheme.palette.primary.main,
+                            ml: 0.5,
+                            verticalAlign: "middle",
+                          }}
+                        />
+                      )}
+                    </Typography>
+
+                    <IconButton
+                      onClick={handleFavoriteToggle}
+                      sx={{
+                        color: favoriteStatus ? "#ff0032" : "gray",
+                      }}
+                    >
+                      {favoriteStatus ? (
+                        <FavoriteIcon />
+                      ) : (
+                        <FavoriteBorderIcon />
+                      )}
+                    </IconButton>
+                  </Box>
+
+                  {/* Rating and price */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mb: 2,
+                    }}
+                  >
+                    <Rating
+                      value={place.rating}
+                      precision={0.5}
+                      readOnly
+                      size="small"
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      {place.rating} ({place.reviewCount} ulasan)
+                    </Typography>
+                    <Chip
+                      label={place.priceRange}
+                      size="small"
+                      variant="outlined"
+                    />
+                  </Box>
+
+                  {/* Location and hours */}
+                  {place.address && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 1,
+                        mb: 1.5,
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <LocationOnIcon
+                        color="primary"
+                        fontSize="small"
+                        sx={{ mt: 0.3 }}
+                      />
+                      <Typography variant="body2" color="text.primary">
+                        {place.address}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {place.openingHours && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 1,
+                        mb: 2,
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <AccessTimeIcon
+                        color="primary"
+                        fontSize="small"
+                        sx={{ mt: 0.3 }}
+                      />
+                      <Typography variant="body2" color="text.primary">
+                        {place.openingHours}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  {/* Description */}
+                  <Typography
+                    variant="body2"
+                    paragraph
+                    sx={{ mb: 3 }}
+                    color="text.primary"
+                  >
+                    {place.description}
+                  </Typography>
+
+                  {/* Features */}
+                  {inTripStatus &&
+                    place.features &&
+                    place.features.length > 0 && (
+                      <>
+                        <Typography
+                          variant="subtitle2"
+                          fontWeight="bold"
+                          sx={{ mb: 1 }}
+                          color="text.primary"
+                        >
+                          Fasilitas:
+                        </Typography>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 1,
+                            mb: 3,
+                          }}
+                        >
+                          {place.features.map((feature, idx) => (
+                            <Chip key={idx} label={feature} size="small" />
+                          ))}
+                        </Box>
+                      </>
+                    )}
+
+                  {/* Buttons */}
+                  <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      startIcon={<DirectionsIcon />}
+                      onClick={handleMapClick}
+                      sx={{
+                        py: 1.5,
+                        borderRadius: "12px",
+                        background: `linear-gradient(45deg, ${getCategoryColor(
+                          place.category
+                        )}, ${alpha(getCategoryColor(place.category), 0.7)})`,
+                      }}
+                    >
+                      Lihat Lokasi
+                    </Button>
+                    <Button
+                      fullWidth
+                      variant={inTripStatus ? "contained" : "outlined"}
+                      color="primary"
+                      startIcon={
+                        inTripStatus ? (
+                          <BookmarkAddedIcon />
+                        ) : (
+                          <BookmarkAddIcon />
+                        )
+                      }
+                      onClick={handleAddToTrip}
+                    >
+                      {inTripStatus ? "Ditambahkan" : "Tambahkan"}
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+            ) : (
+              // Desktop modal layout - keeping the existing layout
+              <MotionBox
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.98 }}
+                transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
+                tabIndex={-1}
+                ref={modalRef}
+                sx={{
+                  position: "relative",
+                  bgcolor: "background.paper",
+                  boxShadow: isDarkMode
+                    ? "0 10px 40px rgba(0,0,0,0.5)"
+                    : "0 10px 40px rgba(0,0,0,0.2)",
+                  p: 0,
+                  outline: "none",
+                  width: "85%",
+                  maxWidth: "1000px",
+                  height: "auto",
+                  maxHeight: "85vh",
+                  borderRadius: "20px",
+                  overflow: "auto",
+                  scrollbarWidth: "none", // Firefox
+                  msOverflowStyle: "none", // IE and Edge
+                  "&::-webkit-scrollbar": {
+                    display: "none", // Chrome, Safari, and Opera
+                  },
+                  "&:focus": {
+                    outline: "none",
+                  },
+                }}
+              >
+                <Tooltip title="Close" arrow placement="left">
+                  <IconButton
+                    onClick={() => setIsModalOpen(false)}
+                    aria-label="close modal"
+                    sx={{
+                      position: "absolute",
+                      top: 16,
+                      right: 16,
+                      bgcolor: "rgba(0, 0, 0, 0.5)",
+                      color: "white",
+                      zIndex: 10,
+                      "&:hover": {
+                        bgcolor: "rgba(0, 0, 0, 0.7)",
+                        transform: "scale(1.1) rotate(90deg)",
+                      },
+                      transition: "all 0.3s ease",
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Tooltip>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    height: "70vh",
+                  }}
+                >
+                  {/* Left side - Image */}
                   <Box
                     sx={{
                       position: "relative",
-                      height: { xs: "40vh", md: "100%" },
-                      backgroundImage: `url(${place.image})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      borderTopLeftRadius: { md: "28px" },
-                      borderTopRightRadius: { xs: "28px", md: 0 },
-                      borderBottomLeftRadius: { xs: 0, md: "28px" },
-                      transition: "all 0.5s ease",
-                      transformOrigin: "center",
-                      overflow: "hidden",
+                      width: "50%",
+                      flexShrink: 0,
                     }}
                   >
                     <Box
                       sx={{
-                        position: "absolute",
-                        top: 16,
-                        left: 16,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 1,
+                        width: "100%",
+                        height: "100%",
+                        backgroundImage: `url(${place.image})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        borderTopLeftRadius: "20px",
+                        borderBottomLeftRadius: "20px",
                       }}
                     >
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 16,
+                          left: 16,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1,
+                        }}
                       >
-                        <Chip
-                          icon={getCategoryIcon(place.category)}
-                          label={
-                            place.category.charAt(0).toUpperCase() +
-                            place.category.slice(1)
-                          }
-                          sx={{
-                            bgcolor: "white",
-                            fontWeight: 600,
-                            boxShadow: `0 2px 12px rgba(0,0,0,0.2), 0 0 0 1px ${alpha(
-                              getCategoryColor(place.category),
-                              0.2
-                            )}`,
-                            transition: "all 0.2s ease",
-                            py: 1,
-                            px: 0.5,
-                            borderRadius: "20px",
-                            "& .MuiChip-icon": {
-                              color: getCategoryColor(place.category),
-                              marginLeft: "8px",
-                            },
-                            "& .MuiChip-label": {
-                              px: 1,
-                              fontSize: "0.85rem",
-                              fontWeight: 700,
-                              color: "#000000",
-                            },
-                            "&:hover": {
-                              transform: "translateY(-2px) scale(1.05)",
-                              boxShadow: `0 4px 15px rgba(0,0,0,0.3), 0 0 0 1px ${alpha(
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          <Chip
+                            icon={getCategoryIcon(place.category)}
+                            label={
+                              place.category.charAt(0).toUpperCase() +
+                              place.category.slice(1)
+                            }
+                            sx={{
+                              bgcolor: "white",
+                              fontWeight: 600,
+                              boxShadow: `0 2px 12px rgba(0,0,0,0.2), 0 0 0 1px ${alpha(
                                 getCategoryColor(place.category),
-                                0.3
+                                0.2
                               )}`,
-                            },
-                          }}
-                        />
-                      </motion.div>
-                    </Box>
+                              transition: "all 0.2s ease",
+                              py: 1,
+                              px: 0.5,
+                              borderRadius: "20px",
+                              "& .MuiChip-icon": {
+                                color: getCategoryColor(place.category),
+                                marginLeft: "8px",
+                              },
+                              "& .MuiChip-label": {
+                                px: 1,
+                                fontSize: "0.85rem",
+                                fontWeight: 700,
+                                color: "#000000",
+                              },
+                              "&:hover": {
+                                transform: "translateY(-2px) scale(1.05)",
+                                boxShadow: `0 4px 15px rgba(0,0,0,0.3), 0 0 0 1px ${alpha(
+                                  getCategoryColor(place.category),
+                                  0.3
+                                )}`,
+                              },
+                            }}
+                          />
+                        </motion.div>
+                      </Box>
 
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        bottom: 16,
-                        left: 16,
-                        right: 16,
-                        display: "flex",
-                        gap: 1,
-                      }}
-                    >
-                      <Stack direction="row" spacing={1}>
-                        <Tooltip title="Share" arrow>
-                          <IconButton
-                            onClick={handleMapClick}
-                            sx={{
-                              bgcolor: "rgba(255, 255, 255, 0.2)",
-                              backdropFilter: "blur(10px)",
-                              color: "white",
-                              "&:hover": {
-                                bgcolor: "rgba(255, 255, 255, 0.3)",
-                                transform: "translateY(-2px)",
-                              },
-                              transition: "all 0.2s ease",
-                            }}
-                          >
-                            <ShareIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Get Directions" arrow>
-                          <IconButton
-                            onClick={handleMapClick}
-                            sx={{
-                              bgcolor: "rgba(255, 255, 255, 0.2)",
-                              backdropFilter: "blur(10px)",
-                              color: "white",
-                              "&:hover": {
-                                bgcolor: "rgba(255, 255, 255, 0.3)",
-                                transform: "translateY(-2px)",
-                              },
-                              transition: "all 0.2s ease",
-                            }}
-                          >
-                            <DirectionsIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </Stack>
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          bottom: 16,
+                          left: 16,
+                          right: 16,
+                          display: "flex",
+                          gap: 1,
+                        }}
+                      >
+                        <Stack direction="row" spacing={1}>
+                          <Tooltip title="Share" arrow>
+                            <IconButton
+                              onClick={handleMapClick}
+                              sx={{
+                                bgcolor: "rgba(255, 255, 255, 0.2)",
+                                backdropFilter: "blur(10px)",
+                                color: "white",
+                                "&:hover": {
+                                  bgcolor: "rgba(255, 255, 255, 0.3)",
+                                  transform: "translateY(-2px)",
+                                },
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              <ShareIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Get Directions" arrow>
+                            <IconButton
+                              onClick={handleMapClick}
+                              sx={{
+                                bgcolor: "rgba(255, 255, 255, 0.2)",
+                                backdropFilter: "blur(10px)",
+                                color: "white",
+                                "&:hover": {
+                                  bgcolor: "rgba(255, 255, 255, 0.3)",
+                                  transform: "translateY(-2px)",
+                                },
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              <DirectionsIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
+                      </Box>
                     </Box>
                   </Box>
-                </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <Box sx={{ p: { xs: 2.5, sm: 3.5, md: 4.5 } }}>
+                  {/* Right side - Content */}
+                  <Box
+                    sx={{
+                      p: 4,
+                      width: "50%",
+                      display: "flex",
+                      flexDirection: "column",
+                      overflow: "auto",
+                      scrollbarWidth: "none", // Firefox
+                      msOverflowStyle: "none", // IE and Edge
+                      "&::-webkit-scrollbar": {
+                        display: "none", // Chrome, Safari, and Opera
+                      },
+                    }}
+                  >
                     <Box
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        mb: 1.5,
+                        flex: 1,
+                        overflow: "auto",
+                        scrollbarWidth: "none", // Firefox
+                        msOverflowStyle: "none", // IE and Edge
+                        "&::-webkit-scrollbar": {
+                          display: "none", // Chrome, Safari, and Opera
+                        },
                       }}
                     >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          mb: 1.5,
+                        }}
+                      >
+                        <motion.div
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1.5,
+                              mb: 1,
+                            }}
+                          >
+                            <Typography
+                              variant="h4"
+                              component="h2"
+                              id={"modal-" + place.id + "-title"}
+                              sx={{
+                                fontWeight: 700,
+                                lineHeight: 1.2,
+                                fontSize: "2.2rem",
+                                letterSpacing: "-0.02em",
+                                color: isDarkMode ? "#ffffff" : "#000000",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              {place.name}
+                              {place.featured && (
+                                <Tooltip title="Featured Place" arrow>
+                                  <VerifiedIcon
+                                    sx={{
+                                      fontSize: "1.2rem",
+                                      color: muiTheme.palette.primary.main,
+                                      verticalAlign: "middle",
+                                    }}
+                                  />
+                                </Tooltip>
+                              )}
+                            </Typography>
+
+                            <Tooltip
+                              title={
+                                favoriteStatus
+                                  ? "Hapus dari favorit"
+                                  : "Tambah ke favorit"
+                              }
+                              arrow
+                            >
+                              <IconButton
+                                onClick={handleFavoriteToggle}
+                                color="primary"
+                                aria-label={
+                                  favoriteStatus
+                                    ? "Remove from favorites"
+                                    : "Add to favorites"
+                                }
+                                component={motion.button}
+                                variants={favoriteVariants}
+                                animate={
+                                  favoriteStatus ? "favorited" : "unfavorited"
+                                }
+                                sx={{
+                                  p: 1,
+                                  color: favoriteStatus
+                                    ? "#ff0032"
+                                    : alpha(
+                                        getCategoryColor(place.category),
+                                        0.8
+                                      ),
+                                  "&:hover": {
+                                    transform: "scale(1.15)",
+                                    bgcolor: favoriteStatus
+                                      ? alpha("#ff0032", 0.1)
+                                      : alpha(
+                                          getCategoryColor(place.category),
+                                          0.08
+                                        ),
+                                    boxShadow: favoriteStatus
+                                      ? "0 0 10px rgba(255, 0, 50, 0.4)"
+                                      : "none",
+                                  },
+                                  transition: "all 0.3s ease",
+                                }}
+                              >
+                                {favoriteStatus ? (
+                                  <FavoriteIcon
+                                    sx={{
+                                      color: "#ff0032",
+                                      filter:
+                                        "drop-shadow(0 0 2px rgba(255,255,255,0.5))",
+                                    }}
+                                    fontSize="medium"
+                                  />
+                                ) : (
+                                  <FavoriteBorderIcon fontSize="medium" />
+                                )}
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </motion.div>
+                      </Box>
+
                       <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.1 }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
                       >
                         <Box
                           sx={{
                             display: "flex",
                             alignItems: "center",
-                            gap: 1.5,
-                            mb: 1,
+                            gap: 1,
+                            mb: 2.5,
                           }}
                         >
-                          <Typography
-                            variant="h4"
-                            component="h2"
-                            id={"modal-" + place.id + "-title"}
+                          <Rating
+                            value={place.rating}
+                            precision={0.5}
+                            readOnly
+                            size="small"
                             sx={{
-                              fontWeight: 700,
-                              lineHeight: 1.2,
-                              fontSize: { xs: "1.8rem", md: "2.2rem" },
-                              letterSpacing: "-0.02em",
-                              color: isDarkMode ? "#ffffff" : "#000000",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
+                              "& .MuiRating-iconFilled": {
+                                color: muiTheme.palette.secondary.main,
+                              },
                             }}
-                          >
-                            {place.name}
-                            {place.featured && (
-                              <Tooltip title="Featured Place" arrow>
-                                <VerifiedIcon
-                                  sx={{
-                                    fontSize: "1.2rem",
-                                    color: muiTheme.palette.primary.main,
-                                    verticalAlign: "middle",
-                                  }}
-                                />
-                              </Tooltip>
-                            )}
+                          />
+                          <Typography variant="body2" color="text.secondary">
+                            {place.rating} ({place.reviewCount} ulasan)
                           </Typography>
-
-                          <Tooltip
-                            title={
-                              favoriteStatus
-                                ? "Hapus dari favorit"
-                                : "Tambah ke favorit"
-                            }
-                            arrow
-                          >
-                            <IconButton
-                              onClick={handleFavoriteToggle}
-                              color="primary"
-                              aria-label={
-                                favoriteStatus
-                                  ? "Remove from favorites"
-                                  : "Add to favorites"
-                              }
-                              component={motion.button}
-                              variants={favoriteVariants}
-                              animate={
-                                favoriteStatus ? "favorited" : "unfavorited"
-                              }
-                              sx={{
-                                p: 1,
-                                color: favoriteStatus
-                                  ? "#ff0032"
-                                  : alpha(
-                                      getCategoryColor(place.category),
-                                      0.8
-                                    ),
-                                "&:hover": {
-                                  transform: "scale(1.15)",
-                                  bgcolor: favoriteStatus
-                                    ? alpha("#ff0032", 0.1)
-                                    : alpha(
-                                        getCategoryColor(place.category),
-                                        0.08
-                                      ),
-                                  boxShadow: favoriteStatus
-                                    ? "0 0 10px rgba(255, 0, 50, 0.4)"
-                                    : "none",
-                                },
-                                transition: "all 0.3s ease",
-                              }}
-                            >
-                              {favoriteStatus ? (
-                                <FavoriteIcon
-                                  sx={{
-                                    color: "#ff0032",
-                                    filter:
-                                      "drop-shadow(0 0 2px rgba(255,255,255,0.5))",
-                                  }}
-                                  fontSize="medium"
-                                />
-                              ) : (
-                                <FavoriteBorderIcon fontSize="medium" />
-                              )}
-                            </IconButton>
-                          </Tooltip>
+                          <Chip
+                            label={place.priceRange}
+                            size="small"
+                            variant="outlined"
+                            sx={{
+                              fontWeight: 600,
+                              borderRadius: "8px",
+                              transition: "all 0.2s ease",
+                              "&:hover": {
+                                transform: "translateY(-2px)",
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                              },
+                            }}
+                          />
                         </Box>
                       </motion.div>
-                    </Box>
 
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1,
-                          mb: 2.5,
-                        }}
-                      >
-                        <Rating
-                          value={place.rating}
-                          precision={0.5}
-                          readOnly
-                          size="small"
-                          sx={{
-                            "& .MuiRating-iconFilled": {
-                              color: muiTheme.palette.secondary.main,
-                            },
-                          }}
-                        />
-                        <Typography variant="body2" color="text.secondary">
-                          {place.rating} ({place.reviewCount} ulasan)
-                        </Typography>
-                        <Chip
-                          label={place.priceRange}
-                          size="small"
-                          variant="outlined"
-                          sx={{
-                            fontWeight: 600,
-                            borderRadius: "8px",
-                            transition: "all 0.2s ease",
-                            "&:hover": {
-                              transform: "translateY(-2px)",
-                              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                            },
-                          }}
-                        />
-                      </Box>
-                    </motion.div>
-
-                    {place.address && place.openingHours ? (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: { xs: "column", sm: "row" },
-                            gap: 2,
-                            mb: 3.5,
-                          }}
+                      {place.address && place.openingHours ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
                         >
-                          <Paper
-                            elevation={0}
+                          <Box
                             sx={{
                               display: "flex",
-                              alignItems: "flex-start",
-                              gap: 1.2,
-                              p: 1.5,
-                              bgcolor: alpha(
-                                muiTheme.palette.primary.main,
-                                0.05
-                              ),
-                              borderRadius: "12px",
-                              flex: { xs: 1, sm: "auto" },
-                              width: { sm: "fit-content" },
-                              maxWidth: "100%",
+                              flexDirection: "row",
+                              gap: 2,
+                              mb: 3.5,
                             }}
-                          >
-                            <LocationOnIcon
-                              color="primary"
-                              sx={{
-                                fontSize: "1.25rem",
-                                mt: 0.15,
-                              }}
-                            />
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ lineHeight: 1.5 }}
-                            >
-                              {place.address}
-                            </Typography>
-                          </Paper>
-
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              display: "flex",
-                              alignItems: "flex-start",
-                              gap: 1.2,
-                              p: 1.5,
-                              bgcolor: alpha(
-                                muiTheme.palette.primary.main,
-                                0.05
-                              ),
-                              borderRadius: "12px",
-                              flex: { xs: 1, sm: "auto" },
-                              width: { sm: "fit-content" },
-                              maxWidth: "100%",
-                            }}
-                          >
-                            <AccessTimeIcon
-                              color="primary"
-                              sx={{
-                                fontSize: "1.25rem",
-                                mt: 0.15,
-                              }}
-                            />
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ lineHeight: 1.5 }}
-                            >
-                              {place.openingHours}
-                            </Typography>
-                          </Paper>
-                        </Box>
-                      </motion.div>
-                    ) : (
-                      <>
-                        {place.address && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
                           >
                             <Paper
                               elevation={0}
@@ -1108,13 +1353,13 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                                 display: "flex",
                                 alignItems: "flex-start",
                                 gap: 1.2,
-                                mb: 2.5,
                                 p: 1.5,
                                 bgcolor: alpha(
                                   muiTheme.palette.primary.main,
                                   0.05
                                 ),
                                 borderRadius: "12px",
+                                flex: "auto",
                                 width: "fit-content",
                                 maxWidth: "100%",
                               }}
@@ -1134,28 +1379,20 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                                 {place.address}
                               </Typography>
                             </Paper>
-                          </motion.div>
-                        )}
 
-                        {place.openingHours && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
-                          >
                             <Paper
                               elevation={0}
                               sx={{
                                 display: "flex",
                                 alignItems: "flex-start",
                                 gap: 1.2,
-                                mb: 3.5,
                                 p: 1.5,
                                 bgcolor: alpha(
                                   muiTheme.palette.primary.main,
                                   0.05
                                 ),
                                 borderRadius: "12px",
+                                flex: "auto",
                                 width: "fit-content",
                                 maxWidth: "100%",
                               }}
@@ -1175,177 +1412,263 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                                 {place.openingHours}
                               </Typography>
                             </Paper>
-                          </motion.div>
-                        )}
-                      </>
-                    )}
+                          </Box>
+                        </motion.div>
+                      ) : (
+                        <>
+                          {place.address && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.3 }}
+                            >
+                              <Paper
+                                elevation={0}
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "flex-start",
+                                  gap: 1.2,
+                                  mb: 2.5,
+                                  p: 1.5,
+                                  bgcolor: alpha(
+                                    muiTheme.palette.primary.main,
+                                    0.05
+                                  ),
+                                  borderRadius: "12px",
+                                  width: "fit-content",
+                                  maxWidth: "100%",
+                                }}
+                              >
+                                <LocationOnIcon
+                                  color="primary"
+                                  sx={{
+                                    fontSize: "1.25rem",
+                                    mt: 0.15,
+                                  }}
+                                />
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{ lineHeight: 1.5 }}
+                                >
+                                  {place.address}
+                                </Typography>
+                              </Paper>
+                            </motion.div>
+                          )}
 
-                    <Divider sx={{ mb: 3.5 }} />
+                          {place.openingHours && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.4 }}
+                            >
+                              <Paper
+                                elevation={0}
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "flex-start",
+                                  gap: 1.2,
+                                  mb: 3.5,
+                                  p: 1.5,
+                                  bgcolor: alpha(
+                                    muiTheme.palette.primary.main,
+                                    0.05
+                                  ),
+                                  borderRadius: "12px",
+                                  width: "fit-content",
+                                  maxWidth: "100%",
+                                }}
+                              >
+                                <AccessTimeIcon
+                                  color="primary"
+                                  sx={{
+                                    fontSize: "1.25rem",
+                                    mt: 0.15,
+                                  }}
+                                />
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{ lineHeight: 1.5 }}
+                                >
+                                  {place.openingHours}
+                                </Typography>
+                              </Paper>
+                            </motion.div>
+                          )}
+                        </>
+                      )}
 
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
-                    >
-                      <Typography
-                        variant="body1"
-                        paragraph
-                        id={"modal-" + place.id + "-description"}
-                        sx={{
-                          lineHeight: 1.7,
-                          color: "text.primary",
-                          mb: 3,
-                        }}
-                      >
-                        {place.description}
-                      </Typography>
-                    </motion.div>
+                      <Divider sx={{ mb: 3.5 }} />
 
-                    {inTripStatus && (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 }}
+                        transition={{ delay: 0.5 }}
                       >
                         <Typography
-                          variant="subtitle1"
+                          variant="body1"
+                          paragraph
+                          id={"modal-" + place.id + "-description"}
                           sx={{
-                            fontWeight: 600,
-                            mb: 1.5,
+                            lineHeight: 1.7,
                             color: "text.primary",
+                            mb: 3,
                           }}
                         >
-                          Fasilitas:
+                          {place.description}
                         </Typography>
+                      </motion.div>
 
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: 1,
-                            mb: 4.5,
-                          }}
+                      {inTripStatus && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.6 }}
                         >
-                          {place.features.map((feature, index) => (
-                            <Chip
-                              key={index}
-                              label={feature}
-                              size="small"
-                              sx={{
-                                bgcolor: alpha(
-                                  muiTheme.palette.primary.main,
-                                  0.08
-                                ),
-                                borderRadius: "8px",
-                                transition: "all 0.2s ease",
-                                "&:hover": {
-                                  transform: "translateY(-2px)",
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              fontWeight: 600,
+                              mb: 1.5,
+                              color: "text.primary",
+                            }}
+                          >
+                            Fasilitas:
+                          </Typography>
+
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: 1,
+                              mb: 4.5,
+                            }}
+                          >
+                            {place.features.map((feature, index) => (
+                              <Chip
+                                key={index}
+                                label={feature}
+                                size="small"
+                                sx={{
                                   bgcolor: alpha(
                                     muiTheme.palette.primary.main,
-                                    0.12
+                                    0.08
                                   ),
-                                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                                },
-                              }}
-                            />
-                          ))}
+                                  borderRadius: "8px",
+                                  transition: "all 0.2s ease",
+                                  "&:hover": {
+                                    transform: "translateY(-2px)",
+                                    bgcolor: alpha(
+                                      muiTheme.palette.primary.main,
+                                      0.12
+                                    ),
+                                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                                  },
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </motion.div>
+                      )}
+                    </Box>
+
+                    <Box sx={{ mt: 2 }}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.7 }}
+                      >
+                        <Box sx={{ display: "flex", gap: 2 }}>
+                          <Button
+                            variant="contained"
+                            fullWidth
+                            startIcon={<DirectionsIcon />}
+                            onClick={handleMapClick}
+                            sx={{
+                              py: 1.8,
+                              borderRadius: "14px",
+                              fontWeight: 600,
+                              background: `linear-gradient(45deg, ${getCategoryColor(
+                                place.category
+                              )}, ${alpha(
+                                getCategoryColor(place.category),
+                                0.7
+                              )})`,
+                              boxShadow: `0 8px 25px ${alpha(
+                                getCategoryColor(place.category),
+                                0.4
+                              )}`,
+                              textTransform: "none",
+                              "&:hover": {
+                                boxShadow: `0 10px 30px ${alpha(
+                                  getCategoryColor(place.category),
+                                  0.6
+                                )}`,
+                                transform: "translateY(-4px) scale(1.01)",
+                              },
+                              transition:
+                                "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                              fontSize: "1rem",
+                            }}
+                          >
+                            Lihat Lokasi
+                          </Button>
+                          <Button
+                            variant={inTripStatus ? "contained" : "outlined"}
+                            color="primary"
+                            fullWidth
+                            disableElevation
+                            startIcon={
+                              inTripStatus ? (
+                                <BookmarkAddedIcon />
+                              ) : (
+                                <BookmarkAddIcon />
+                              )
+                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddToTrip();
+                            }}
+                            sx={{
+                              py: 1.5,
+                              textTransform: "none",
+                              bgcolor: inTripStatus
+                                ? alpha(muiTheme.palette.primary.main, 0.9)
+                                : "transparent",
+                              color: inTripStatus
+                                ? "white"
+                                : muiTheme.palette.primary.main,
+                              border: `1px solid ${
+                                inTripStatus
+                                  ? "transparent"
+                                  : muiTheme.palette.primary.main
+                              }`,
+                              "&:hover": {
+                                color: "white",
+                                boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
+                                bgcolor: inTripStatus
+                                  ? muiTheme.palette.primary.dark
+                                  : isDarkMode
+                                  ? alpha(muiTheme.palette.primary.main, 0.04)
+                                  : "#B02A37",
+                              },
+                              transition:
+                                "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                            }}
+                          >
+                            {inTripStatus
+                              ? "Ditambahkan ke Trip"
+                              : "Tambahkan ke Trip"}
+                          </Button>
                         </Box>
                       </motion.div>
-                    )}
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.7 }}
-                    >
-                      <Box sx={{ display: "flex", gap: 2 }}>
-                        <Button
-                          variant="contained"
-                          fullWidth
-                          startIcon={<DirectionsIcon />}
-                          onClick={handleMapClick}
-                          sx={{
-                            py: 1.8,
-                            borderRadius: "14px",
-                            fontWeight: 600,
-                            background: `linear-gradient(45deg, ${getCategoryColor(
-                              place.category
-                            )}, ${alpha(
-                              getCategoryColor(place.category),
-                              0.7
-                            )})`,
-                            boxShadow: `0 8px 25px ${alpha(
-                              getCategoryColor(place.category),
-                              0.4
-                            )}`,
-                            textTransform: "none",
-                            "&:hover": {
-                              boxShadow: `0 10px 30px ${alpha(
-                                getCategoryColor(place.category),
-                                0.6
-                              )}`,
-                              transform: "translateY(-4px) scale(1.01)",
-                            },
-                            transition:
-                              "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
-                            fontSize: "1rem",
-                          }}
-                        >
-                          Lihat Lokasi
-                        </Button>
-                        <Button
-                          variant={inTripStatus ? "contained" : "outlined"}
-                          color="primary"
-                          fullWidth
-                          disableElevation
-                          startIcon={
-                            inTripStatus ? (
-                              <BookmarkAddedIcon />
-                            ) : (
-                              <BookmarkAddIcon />
-                            )
-                          }
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddToTrip();
-                          }}
-                          sx={{
-                            py: 1.5,
-                            textTransform: "none",
-                            bgcolor: inTripStatus
-                              ? alpha(muiTheme.palette.primary.main, 0.9)
-                              : "transparent",
-                            color: inTripStatus
-                              ? "white"
-                              : muiTheme.palette.primary.main,
-                            border: `1px solid ${
-                              inTripStatus
-                                ? "transparent"
-                                : muiTheme.palette.primary.main
-                            }`,
-                            "&:hover": {
-                              color: "white",
-                              boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
-                              bgcolor: inTripStatus
-                                ? muiTheme.palette.primary.dark
-                                : isDarkMode
-                                ? alpha(muiTheme.palette.primary.main, 0.04)
-                                : "#B02A37",
-                            },
-                            transition:
-                              "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
-                          }}
-                        >
-                          {inTripStatus
-                            ? "Ditambahkan ke Trip"
-                            : "Tambahkan ke Trip"}
-                        </Button>
-                      </Box>
-                    </motion.div>
+                    </Box>
                   </Box>
-                </Grid>
-              </Grid>
-            </MotionBox>
+                </Box>
+              </MotionBox>
+            )}
           </Modal>
         )}
       </AnimatePresence>
