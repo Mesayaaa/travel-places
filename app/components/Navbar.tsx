@@ -18,6 +18,10 @@ import {
   Badge,
   Backdrop,
   CircularProgress,
+  ListItemIcon,
+  Divider,
+  Paper,
+  SwipeableDrawer,
 } from "@mui/material";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -35,6 +39,13 @@ import { useRouter, usePathname } from "next/navigation";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import { useTheme } from "../context/ThemeContext";
+import HomeIcon from "@mui/icons-material/Home";
+import ExploreIcon from "@mui/icons-material/Explore";
+import MapIcon from "@mui/icons-material/Map";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
+import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
+import React from "react";
 
 interface Props {
   window?: () => Window;
@@ -58,14 +69,14 @@ interface Props {
 interface NavItem {
   name: string;
   href: string;
-  icon?: React.ReactNode;
+  icon: React.ReactNode;
   badge?: number;
 }
 
 const navItems: NavItem[] = [
-  { name: "Home", href: "/" },
-  { name: "Destinasi", href: "#categories" },
-  { name: "Trip Planner", href: "#trip-plans" },
+  { name: "Home", href: "/", icon: <HomeOutlinedIcon /> },
+  { name: "Destinasi", href: "#categories", icon: <ExploreOutlinedIcon /> },
+  { name: "Trip Planner", href: "#trip-plans", icon: <MapOutlinedIcon /> },
 ];
 
 export default function Navbar() {
@@ -250,260 +261,338 @@ export default function Navbar() {
   };
 
   const drawer = (
-    <Box sx={{ textAlign: "center", py: 2 }}>
+    <Box
+      sx={{ display: "flex", flexDirection: "column", height: "100%", py: 2 }}
+    >
+      {/* Header with app name and close button */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           p: 2,
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          mb: 2,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <FlightTakeoffIcon sx={{ mr: 1, color: "primary.main" }} />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <Avatar
+            sx={{
+              bgcolor: "primary.main",
+              width: 40,
+              height: 40,
+              boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+            }}
+          >
+            <FlightTakeoffIcon sx={{ color: "white" }} />
+          </Avatar>
           <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }}>
             TravelSayang
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Tooltip title={isDarkMode ? "Light Mode" : "Dark Mode"} arrow>
-            <IconButton
-              onClick={toggleTheme}
-              sx={{
-                color: isDarkMode ? "orange" : "primary.main",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "rotate(180deg)",
-                  backgroundColor: isDarkMode
-                    ? "rgba(255, 165, 0, 0.1)"
-                    : "rgba(25, 118, 210, 0.1)",
-                },
-              }}
-            >
-              {isDarkMode ? (
-                <LightModeOutlinedIcon />
-              ) : (
-                <DarkModeOutlinedIcon />
-              )}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Favorit Saya" arrow>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                color: "primary.main",
-                position: "relative",
-                "&:hover": {
-                  transform: "scale(1.1)",
-                  transition: "transform 0.2s ease",
-                },
-              }}
-            >
-              <Badge
-                badgeContent={favoritesCount}
-                color="error"
-                sx={{
-                  "& .MuiBadge-badge": {
-                    fontSize: "0.6rem",
-                    fontWeight: "bold",
-                    minWidth: "16px",
-                    height: "16px",
-                    animation:
-                      favoritesCount > 0 ? "pulse 1.5s infinite" : "none",
-                  },
-                  "@keyframes pulse": {
-                    "0%": { transform: "scale(1)" },
-                    "50%": { transform: "scale(1.2)" },
-                    "100%": { transform: "scale(1)" },
-                  },
-                }}
-              >
-                <FavoriteIcon />
-              </Badge>
-            </Box>
-          </Tooltip>
-          <IconButton
-            onClick={handleDrawerToggle}
-            aria-label="close menu"
-            sx={{
-              transition: "transform 0.2s ease",
-              "&:hover": {
-                transform: "rotate(90deg)",
-              },
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </Box>
-      <List sx={{ pt: 2 }}>
-        {navItems.map((item) => (
-          <ListItem
-            key={item.name}
-            button
-            onClick={() => handleNavClick(item.href)}
-            sx={{
-              textAlign: "center",
-              py: 2,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 1.5,
-              borderRadius: "10px",
-              mx: 2,
-              my: 0.5,
-              backgroundColor: isItemActive(item.href)
-                ? "rgba(25, 118, 210, 0.08)"
-                : "transparent",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                backgroundColor: "rgba(25, 118, 210, 0.15)",
-                transform: "translateX(5px)",
-              },
-              position: "relative",
-              "&::after": {
-                content: '""',
-                position: "absolute",
-                width: "100%",
-                height: "100%",
-                top: 0,
-                left: 0,
-                borderRadius: "10px",
-                boxShadow: isItemActive(item.href)
-                  ? "0 0 15px rgba(25, 118, 210, 0.2)"
-                  : "none",
-                transition: "box-shadow 0.3s ease",
-              },
-            }}
-          >
-            {item.icon && (
-              <Box sx={{ color: "primary.main", display: "flex" }}>
-                {item.badge ? (
-                  <Badge badgeContent={item.badge} color="error">
-                    {item.icon}
-                  </Badge>
-                ) : (
-                  item.icon
-                )}
-              </Box>
-            )}
-            <ListItemText
-              primary={item.name}
-              sx={{
-                "& .MuiTypography-root": {
-                  fontWeight: isItemActive(item.href) ? 600 : 500,
-                  fontSize: "1rem",
-                  color: isItemActive(item.href)
-                    ? "primary.main"
-                    : "text.primary",
-                  transition: "all 0.3s ease",
-                },
-              }}
-            />
-          </ListItem>
-        ))}
 
-        {/* Profile Button */}
-        <ListItem
-          button
-          onClick={() => {
-            handleDrawerToggle();
-            handleProfileClick();
-          }}
+        <IconButton
+          onClick={handleDrawerToggle}
+          aria-label="close menu"
           sx={{
-            textAlign: "center",
-            py: 2,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 1.5,
-            borderRadius: "10px",
-            mx: 2,
-            my: 1.5,
-            backgroundColor: isProfilePage
-              ? "rgba(25, 118, 210, 0.08)"
-              : "transparent",
-            transition: "all 0.3s ease",
+            transition: "transform 0.2s ease",
+            background: isDarkMode ? "rgba(50,50,55,0.1)" : "rgba(0,0,0,0.05)",
             "&:hover": {
-              backgroundColor: "rgba(25, 118, 210, 0.15)",
-              transform: "translateX(5px)",
-            },
-            border: isProfilePage
-              ? "1px solid rgba(25, 118, 210, 0.3)"
-              : "none",
-            position: "relative",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-              top: 0,
-              left: 0,
-              borderRadius: "10px",
-              boxShadow: isProfilePage
-                ? "0 0 15px rgba(25, 118, 210, 0.2)"
-                : "none",
-              transition: "box-shadow 0.3s ease",
+              transform: "rotate(90deg)",
+              background: isDarkMode ? "rgba(50,50,55,0.2)" : "rgba(0,0,0,0.1)",
             },
           }}
         >
-          <Box
+          <CloseIcon />
+        </IconButton>
+      </Box>
+
+      {/* Quick actions */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-around",
+          mb: 3,
+          mx: 2,
+          gap: 1,
+        }}
+      >
+        <Paper
+          component={motion.div}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          elevation={2}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 1.5,
+            flex: 1,
+            borderRadius: 2,
+            cursor: "pointer",
+            backgroundColor:
+              pathname === "/profile"
+                ? "rgba(25, 118, 210, 0.1)"
+                : isDarkMode
+                ? "rgba(50,50,55,0.3)"
+                : "background.paper",
+            border:
+              pathname === "/profile"
+                ? "1px solid rgba(25, 118, 210, 0.3)"
+                : "none",
+          }}
+          onClick={handleProfileClick}
+        >
+          <Avatar
             sx={{
-              color: "primary.main",
-              display: "flex",
-              position: "relative",
+              width: 36,
+              height: 36,
+              mb: 1,
+              bgcolor:
+                pathname === "/profile" ? "primary.dark" : "primary.main",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             }}
           >
-            {isProfilePage && (
-              <Box
-                component={motion.div}
-                animate={{
-                  scale: [1, 1.4, 1],
-                  opacity: [0.7, 0, 0.7],
-                }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 2,
-                  ease: "easeInOut",
-                }}
-                sx={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "50%",
-                  border: "2px solid",
-                  borderColor: "primary.main",
-                }}
-              />
-            )}
+            <AccountCircleIcon />
+          </Avatar>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: pathname === "/profile" ? 600 : 500,
+              color: pathname === "/profile" ? "primary.main" : "text.primary",
+            }}
+          >
+            Profil
+          </Typography>
+        </Paper>
+
+        <Paper
+          component={motion.div}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          elevation={2}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 1.5,
+            flex: 1,
+            borderRadius: 2,
+            cursor: "pointer",
+            backgroundColor:
+              pathname === "/favorites"
+                ? "rgba(25, 118, 210, 0.1)"
+                : isDarkMode
+                ? "rgba(50,50,55,0.3)"
+                : "background.paper",
+            border:
+              pathname === "/favorites"
+                ? "1px solid rgba(25, 118, 210, 0.3)"
+                : "none",
+          }}
+          onClick={handleFavoritesClick}
+        >
+          <Badge
+            badgeContent={favoritesCount}
+            color="error"
+            sx={{
+              mb: 1,
+              "& .MuiBadge-badge": {
+                fontSize: "0.6rem",
+                fontWeight: "bold",
+                minWidth: "16px",
+                height: "16px",
+                animation: favoritesCount > 0 ? "pulse 1.5s infinite" : "none",
+              },
+            }}
+          >
             <Avatar
               sx={{
-                width: 24,
-                height: 24,
-                bgcolor: isProfilePage ? "primary.dark" : "primary.main",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                width: 36,
+                height: 36,
+                bgcolor: "error.light",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              }}
+            >
+              <FavoriteIcon sx={{ color: "white" }} />
+            </Avatar>
+          </Badge>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: pathname === "/favorites" ? 600 : 500,
+              color:
+                pathname === "/favorites" ? "primary.main" : "text.primary",
+            }}
+          >
+            Favorit
+          </Typography>
+        </Paper>
+
+        <Paper
+          component={motion.div}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          elevation={2}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 1.5,
+            flex: 1,
+            borderRadius: 2,
+            cursor: "pointer",
+            backgroundColor: isDarkMode
+              ? "rgba(50,50,55,0.3)"
+              : "background.paper",
+          }}
+          onClick={toggleTheme}
+        >
+          <Avatar
+            sx={{
+              width: 36,
+              height: 36,
+              mb: 1,
+              bgcolor: isDarkMode ? "orange" : "primary.dark",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            }}
+          >
+            {isDarkMode ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
+          </Avatar>
+          <Typography variant="body2">
+            {isDarkMode ? "Light" : "Dark"}
+          </Typography>
+        </Paper>
+      </Box>
+
+      <Typography
+        variant="subtitle2"
+        sx={{
+          px: 3,
+          mb: 1,
+          fontWeight: 600,
+          color: "text.secondary",
+        }}
+      >
+        NAVIGASI UTAMA
+      </Typography>
+
+      <List sx={{ px: 1.5 }}>
+        {navItems.map((item) => {
+          const isActive = isItemActive(item.href);
+
+          return (
+            <ListItem
+              key={item.name}
+              component={motion.div}
+              whileHover={{ x: 5 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleNavClick(item.href)}
+              sx={{
+                py: 1.8,
+                px: 1.5,
+                mb: 0.5,
+                borderRadius: "12px",
+                backgroundColor: isActive
+                  ? "rgba(25, 118, 210, 0.1)"
+                  : "transparent",
                 transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "scale(1.1)",
+                border: isActive ? "1px solid rgba(25, 118, 210, 0.1)" : "none",
+                position: "relative",
+                overflow: "hidden",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  width: isActive ? "4px" : "0",
+                  height: "60%",
+                  left: 0,
+                  top: "20%",
+                  backgroundColor: "primary.main",
+                  borderRadius: "0 4px 4px 0",
+                  transition: "width 0.3s ease",
                 },
               }}
             >
-              <AccountCircleIcon sx={{ fontSize: 16 }} />
-            </Avatar>
-          </Box>
-          <ListItemText
-            primary="Profil Saya"
-            sx={{
-              "& .MuiTypography-root": {
-                fontWeight: isProfilePage ? 600 : 500,
-                fontSize: "1rem",
-                color: isProfilePage ? "primary.main" : "text.primary",
-              },
-            }}
-          />
-        </ListItem>
+              <ListItemIcon
+                sx={{
+                  minWidth: "42px",
+                  color: isActive ? "primary.main" : "text.secondary",
+                }}
+              >
+                {isActive ? (
+                  item.href === "/" ? (
+                    <HomeIcon />
+                  ) : item.href === "#categories" ? (
+                    <ExploreIcon />
+                  ) : (
+                    <MapIcon />
+                  )
+                ) : (
+                  item.icon
+                )}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.name}
+                sx={{
+                  "& .MuiTypography-root": {
+                    fontWeight: isActive ? 600 : 500,
+                    fontSize: "0.95rem",
+                    color: isActive ? "primary.main" : "text.primary",
+                    transition: "all 0.3s ease",
+                  },
+                }}
+              />
+              {isActive && (
+                <Box
+                  component={motion.div}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 0.04, scale: 1 }}
+                  sx={{
+                    position: "absolute",
+                    right: -40,
+                    width: 100,
+                    height: 100,
+                    borderRadius: "50%",
+                    backgroundColor: "primary.main",
+                    zIndex: 0,
+                  }}
+                />
+              )}
+            </ListItem>
+          );
+        })}
       </List>
+
+      <Box sx={{ flexGrow: 1 }} />
+
+      <Box
+        sx={{
+          mt: 2,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+          gap: 1,
+        }}
+      >
+        <Divider flexItem sx={{ width: "80%", mb: 1 }} />
+        <Typography
+          variant="caption"
+          sx={{ color: "text.secondary", textAlign: "center" }}
+        >
+          © 2023 TravelSayang
+        </Typography>
+      </Box>
     </Box>
   );
 
@@ -840,7 +929,7 @@ export default function Navbar() {
         </Container>
 
         <Drawer
-          anchor={isMobile ? "bottom" : "right"}
+          anchor="left"
           open={mobileOpen}
           onClose={handleDrawerToggle}
           BackdropProps={{
@@ -853,12 +942,10 @@ export default function Navbar() {
             display: { xs: "block", sm: "none" },
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
-              width: "100%",
-              maxHeight: "85vh",
-              borderTopLeftRadius: "20px",
-              borderTopRightRadius: "20px",
-              boxShadow: "0 -5px 25px rgba(0,0,0,0.1)",
-              px: { xs: 2, sm: 3 },
+              width: "85%",
+              maxWidth: "320px",
+              height: "100vh",
+              boxShadow: "0 0 25px rgba(0,0,0,0.15)",
             },
           }}
         >
