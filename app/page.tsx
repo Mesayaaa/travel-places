@@ -225,6 +225,7 @@ export default function Home() {
         ref={destinationsRef}
         sx={{
           pt: { xs: 0, md: 0 },
+          mt: { xs: -3, md: 0 }, // Reduce top margin on mobile to bring close to CategoryFilter
           pb: { xs: 4, md: 6 },
           background: isDarkMode
             ? "linear-gradient(to bottom, #121212, #1e1e1e)"
@@ -245,7 +246,7 @@ export default function Home() {
               sx={{
                 mx: "auto",
                 maxWidth: "1600px",
-                mt: { xs: -1, sm: 0 },
+                mt: { xs: 0.5, sm: 1, md: 2 }, // Reduced top margin on mobile
               }}
             >
               {renderPlaceCards()}

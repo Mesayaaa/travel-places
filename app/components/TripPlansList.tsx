@@ -222,12 +222,18 @@ export default function TripPlansList() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 0 },
           }}
         >
           <Typography
             variant="h5"
             component="h3"
-            sx={{ fontWeight: 600, color: "primary.main" }}
+            sx={{
+              fontWeight: 600,
+              color: "primary.main",
+              fontSize: { xs: "1.3rem", sm: "1.5rem" },
+            }}
           >
             Rencana Perjalanan Anda
           </Typography>
@@ -252,8 +258,8 @@ export default function TripPlansList() {
         <Box
           sx={{
             textAlign: "center",
-            py: 6,
-            px: 2,
+            py: { xs: 4, sm: 6 },
+            px: { xs: 1, sm: 2 },
             bgcolor: isDarkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.01)",
             borderRadius: 2,
             border: "1px dashed",
@@ -290,12 +296,18 @@ export default function TripPlansList() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexDirection: { xs: "column", sm: "row" },
+          gap: { xs: 2, sm: 0 },
         }}
       >
         <Typography
           variant="h5"
           component="h3"
-          sx={{ fontWeight: 600, color: "primary.main" }}
+          sx={{
+            fontWeight: 600,
+            color: "primary.main",
+            fontSize: { xs: "1.3rem", sm: "1.5rem" },
+          }}
         >
           Rencana Perjalanan Anda
         </Typography>
@@ -307,6 +319,7 @@ export default function TripPlansList() {
           sx={{
             borderColor: isDarkMode ? "rgba(255,255,255,0.3)" : undefined,
             color: isDarkMode ? "rgba(255,255,255,0.8)" : undefined,
+            width: { xs: "100%", sm: "auto" },
             "&:hover": {
               borderColor: isDarkMode ? "rgba(255,255,255,0.5)" : undefined,
               bgcolor: isDarkMode ? "rgba(255,255,255,0.05)" : undefined,
@@ -337,9 +350,9 @@ export default function TripPlansList() {
           {plans.length === 0 ? (
             <Box sx={{ textAlign: "center", py: 4 }}></Box>
           ) : (
-            <Grid container spacing={3}>
+            <Grid container spacing={{ xs: 2, sm: 3 }}>
               {plans.map((plan) => (
-                <Grid item xs={12} md={6} key={plan.id}>
+                <Grid item xs={12} sm={6} lg={4} key={plan.id}>
                   <Card
                     elevation={0}
                     sx={{
@@ -350,15 +363,16 @@ export default function TripPlansList() {
                         : "rgba(0,0,0,0.08)",
                       bgcolor: isDarkMode ? "#1e1e1e" : "#ffffff",
                       transition: "transform 0.2s, box-shadow 0.2s",
+                      height: "100%",
                       "&:hover": {
-                        transform: "translateY(-4px)",
+                        transform: { xs: "none", sm: "translateY(-4px)" },
                         boxShadow: isDarkMode
                           ? "0 6px 20px rgba(0,0,0,0.3)"
                           : "0 6px 20px rgba(0,0,0,0.06)",
                       },
                     }}
                   >
-                    <CardContent>
+                    <CardContent sx={{ height: "100%" }}>
                       <Box
                         sx={{
                           display: "flex",
@@ -369,7 +383,16 @@ export default function TripPlansList() {
                         <Typography
                           variant="h6"
                           component="h4"
-                          sx={{ fontWeight: 600, mb: 1 }}
+                          sx={{
+                            fontWeight: 600,
+                            mb: 1,
+                            fontSize: {
+                              xs: "1rem",
+                              sm: "1.1rem",
+                              md: "1.25rem",
+                            },
+                            wordBreak: "break-word",
+                          }}
                           color="text.primary"
                         >
                           {plan.name}
@@ -378,6 +401,8 @@ export default function TripPlansList() {
                           size="small"
                           onClick={() => handleDeletePlan(plan.id)}
                           sx={{
+                            ml: 1,
+                            flexShrink: 0,
                             color: isDarkMode
                               ? "rgba(255,255,255,0.5)"
                               : "text.secondary",
@@ -407,6 +432,7 @@ export default function TripPlansList() {
                             color: isDarkMode
                               ? "rgba(255,255,255,0.6)"
                               : "text.secondary",
+                            flexShrink: 0,
                           }}
                         />
                         <Typography
@@ -416,6 +442,10 @@ export default function TripPlansList() {
                               ? "rgba(255,255,255,0.6)"
                               : "text.secondary"
                           }
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
                         >
                           {formatDate(plan.startDate)}
                           {plan.endDate ? ` - ${formatDate(plan.endDate)}` : ""}
@@ -441,6 +471,7 @@ export default function TripPlansList() {
                             fontSize="small"
                             sx={{
                               mr: 1,
+                              flexShrink: 0,
                               color: isDarkMode
                                 ? "rgba(255,255,255,0.6)"
                                 : "text.secondary",
@@ -449,7 +480,7 @@ export default function TripPlansList() {
                           Destinasi ({plan.places.length})
                         </Typography>
 
-                        <Box sx={{ ml: 4 }}>
+                        <Box sx={{ ml: 4, display: "flex", flexWrap: "wrap" }}>
                           {plan.places.map((place) => (
                             <Chip
                               key={place.id}
@@ -487,6 +518,7 @@ export default function TripPlansList() {
                               fontSize="small"
                               sx={{
                                 mr: 1,
+                                flexShrink: 0,
                                 color: isDarkMode
                                   ? "rgba(255,255,255,0.6)"
                                   : "text.secondary",
@@ -494,7 +526,9 @@ export default function TripPlansList() {
                             />
                             Bersama
                           </Typography>
-                          <Box sx={{ ml: 4 }}>
+                          <Box
+                            sx={{ ml: 4, display: "flex", flexWrap: "wrap" }}
+                          >
                             {plan.companions.map((companion) => (
                               <Chip
                                 key={companion}
@@ -521,13 +555,18 @@ export default function TripPlansList() {
                         <Box sx={{ mb: 2 }}>
                           <Typography
                             variant="subtitle2"
-                            sx={{ display: "flex", alignItems: "center" }}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              flexWrap: "wrap",
+                            }}
                             color="text.primary"
                           >
                             <AccountBalanceWalletIcon
                               fontSize="small"
                               sx={{
                                 mr: 1,
+                                flexShrink: 0,
                                 color: isDarkMode
                                   ? "rgba(255,255,255,0.6)"
                                   : "text.secondary",
@@ -542,6 +581,7 @@ export default function TripPlansList() {
                                 color: isDarkMode
                                   ? "rgba(255,255,255,0.7)"
                                   : undefined,
+                                wordBreak: "break-word",
                               }}
                             >
                               Rp {plan.budget}
@@ -568,6 +608,10 @@ export default function TripPlansList() {
                                 ? "rgba(255,255,255,0.7)"
                                 : "text.secondary"
                             }
+                            sx={{
+                              wordBreak: "break-word",
+                              whiteSpace: "pre-wrap",
+                            }}
                           >
                             {plan.notes}
                           </Typography>

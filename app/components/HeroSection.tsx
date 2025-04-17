@@ -116,8 +116,9 @@ export default function HeroSection() {
           zIndex: 2,
           height: "100%",
           display: "flex",
-          alignItems: "center",
+          alignItems: { xs: "flex-start", sm: "center", md: "center" },
           justifyContent: "center",
+          paddingTop: { xs: "15vh", sm: "inherit" },
         }}
       >
         <Box
@@ -130,6 +131,7 @@ export default function HeroSection() {
             mb: { xs: 1, sm: 2, md: 4, lg: 6 },
             p: { xs: 1.5, sm: 2, md: 3, lg: 4 },
             borderRadius: { xs: "12px", sm: "16px" },
+            backgroundColor: { xs: "transparent", sm: "transparent" },
           }}
         >
           <motion.div
@@ -142,7 +144,7 @@ export default function HeroSection() {
               sx={{
                 fontWeight: 800,
                 fontSize: {
-                  xs: "2rem",
+                  xs: "2.5rem",
                   sm: "2.25rem",
                   md: "3.25rem",
                   lg: "4.5rem",
@@ -172,12 +174,12 @@ export default function HeroSection() {
             <Typography
               variant="h5"
               sx={{
-                fontWeight: 400,
+                fontWeight: { xs: 500, sm: 400 },
                 mb: { xs: 2, sm: 3, md: 4, lg: 5 },
                 maxWidth: { xs: "100%", sm: "95%", md: "90%", lg: "80%" },
                 mx: "auto",
                 fontSize: {
-                  xs: "1rem",
+                  xs: "1.15rem",
                   sm: "0.95rem",
                   md: "1.15rem",
                   lg: "1.5rem",
@@ -202,7 +204,7 @@ export default function HeroSection() {
       <Box
         sx={{
           position: "absolute",
-          bottom: { xs: "3vh", sm: "5vh", md: "7vh", lg: "5vh" },
+          bottom: { xs: "25vh", sm: "5vh", md: "7vh", lg: "5vh" },
           left: "50%",
           transform: "translateX(-50%)",
           zIndex: 20,

@@ -254,7 +254,7 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
             onSubmit={handleSubmit(onSubmit)}
             sx={{ mt: 1 }}
           >
-            <Grid container spacing={3}>
+            <Grid container spacing={{ xs: 2, sm: 3 }}>
               <Grid item xs={12}>
                 <Controller
                   name="tripName"
@@ -405,7 +405,7 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
                 >
                   Destinasi Perjalanan
                 </Typography>
-                <Box sx={{ mt: 2 }}>
+                <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap" }}>
                   {placesInTrip.map((place) => (
                     <Chip
                       key={place.id}
@@ -439,7 +439,11 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
                 >
                   Dengan Siapa?
                 </Typography>
-                <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={{ xs: 1, sm: 1 }}
+                  sx={{ mb: 1 }}
+                >
                   <TextField
                     value={newCompanion}
                     onChange={(e) => setNewCompanion(e.target.value)}
@@ -458,12 +462,16 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
                     onClick={handleAddCompanion}
                     disabled={!newCompanion}
                     startIcon={<AddCircleOutlineIcon />}
+                    sx={{
+                      width: { xs: "100%", sm: "auto" },
+                      mt: { xs: 1, sm: 0 },
+                    }}
                   >
                     Tambah
                   </Button>
                 </Stack>
 
-                <Box>
+                <Box sx={{ display: "flex", flexWrap: "wrap" }}>
                   {companions.map((companion) => (
                     <Chip
                       key={companion}
@@ -481,7 +489,7 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
                 </Box>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6} md={4}>
                 <Controller
                   name="budget"
                   control={control}
@@ -519,12 +527,20 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
               </Grid>
             </Grid>
 
-            <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
+            <Box
+              sx={{
+                mt: { xs: 3, sm: 4 },
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                justifyContent: { xs: "center", sm: "flex-end" },
+                gap: 2,
+              }}
+            >
               <Button
                 variant="outlined"
                 onClick={() => resetForm()}
                 sx={{
-                  mr: 2,
+                  width: { xs: "100%", sm: "auto" },
                   borderColor: isDarkMode ? "rgba(255,255,255,0.3)" : undefined,
                   color: isDarkMode ? "rgba(255,255,255,0.8)" : undefined,
                   "&:hover": {
@@ -541,6 +557,7 @@ export default function TripPlanModal({ open, onClose }: TripPlanModalProps) {
                 variant="contained"
                 type="submit"
                 sx={{
+                  width: { xs: "100%", sm: "auto" },
                   background: "linear-gradient(45deg, #FF6B6B, #4ECDC4)",
                   color: "#ffffff",
                   fontWeight: "bold",
