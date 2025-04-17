@@ -175,15 +175,11 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
     // Skip animations for mobile or reduced motion preference
     if (isMobile || prefersReducedMotion) {
       return {
-        whileHover: {},
         transition: { type: "tween", duration: 0.2 },
       };
     }
 
     return {
-      whileHover: {
-        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-      },
       transition: {
         type: "tween",
         duration: 0.2,
@@ -286,14 +282,13 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
 
   const imageVariants = {
     hover: {
-      scale: 1,
       transition: { duration: 0.7, ease: [0.2, 0.65, 0.3, 0.9] },
     },
   };
 
   const favoriteVariants = {
     unfavorited: { scale: 1 },
-    favorited: { scale: [1, 1.5, 1], transition: { duration: 0.5 } },
+    favorited: { scale: [1, 1.2, 1], transition: { duration: 0.5 } },
   };
 
   return (
@@ -651,7 +646,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                     textTransform: "none",
                     "&:hover": {
                       bgcolor: alpha("#ffffff", 0.28),
-                      transform: "translateY(-3px) scale(1.05)",
                       boxShadow: "0 6px 15px rgba(0,0,0,0.25)",
                     },
                     transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
@@ -674,7 +668,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                   textShadow: "0px 1px 3px rgba(0,0,0,0.4)",
                   transition: "all 0.25s ease",
                   "&:hover": {
-                    transform: "translateY(-2px)",
                     bgcolor: alpha("#ffffff", 0.22),
                   },
                 }}
@@ -1013,9 +1006,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                       zIndex: 10,
                       "&:hover": {
                         bgcolor: "rgba(0, 0, 0, 0.7)",
-                        transform: "scale(1.1) rotate(90deg)",
                       },
-                      transition: "all 0.3s ease",
                     }}
                   >
                     <CloseIcon />
@@ -1091,7 +1082,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                                 color: "#000000",
                               },
                               "&:hover": {
-                                transform: "translateY(-2px) scale(1.05)",
                                 boxShadow: `0 4px 15px rgba(0,0,0,0.3), 0 0 0 1px ${alpha(
                                   getCategoryColor(place.category),
                                   0.3
@@ -1122,9 +1112,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                                 color: "white",
                                 "&:hover": {
                                   bgcolor: "rgba(255, 255, 255, 0.3)",
-                                  transform: "translateY(-2px)",
                                 },
-                                transition: "all 0.2s ease",
                               }}
                             >
                               <ShareIcon />
@@ -1139,9 +1127,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                                 color: "white",
                                 "&:hover": {
                                   bgcolor: "rgba(255, 255, 255, 0.3)",
-                                  transform: "translateY(-2px)",
                                 },
-                                transition: "all 0.2s ease",
                               }}
                             >
                               <DirectionsIcon />
@@ -1257,7 +1243,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                                         0.8
                                       ),
                                   "&:hover": {
-                                    transform: "scale(1.15)",
                                     bgcolor: favoriteStatus
                                       ? alpha("#ff0032", 0.1)
                                       : alpha(
@@ -1268,7 +1253,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                                       ? "0 0 10px rgba(255, 0, 50, 0.4)"
                                       : "none",
                                   },
-                                  transition: "all 0.3s ease",
                                 }}
                               >
                                 {favoriteStatus ? (
@@ -1606,7 +1590,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                                   getCategoryColor(place.category),
                                   0.6
                                 )}`,
-                                transform: "translateY(-4px) scale(1.01)",
                               },
                               transition:
                                 "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
