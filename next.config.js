@@ -8,10 +8,9 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60,
   },
-  ...(process.env.NODE_ENV === 'production' ? {
-    basePath: '/travel-places',
-    assetPrefix: '/travel-places',
-  } : {}),
+  // Use basePath and assetPrefix for both production and local environments with GitHub repository name
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
+  assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || '',
   experimental: {
     optimizeCss: false,
     optimizePackageImports: [

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:github": "NEXT_PUBLIC_BASE_PATH=/travel-places next dev",
     "build": "node scripts/build-direct.js",
     "build:custom": "node scripts/build-without-css-optimization.js",
     "build:next": "NEXT_DISABLE_OPTIMIZED_CSS=true next build && node -e \"require('fs').writeFileSync('out/.nojekyll', '')\"",
