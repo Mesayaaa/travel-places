@@ -19,8 +19,6 @@ import {
   useMediaQuery,
   CircularProgress,
   Paper,
-  Snackbar,
-  Alert,
   Container,
 } from "@mui/material";
 import MapIcon from "@mui/icons-material/Map";
@@ -150,11 +148,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<
-    "success" | "error" | "info" | "warning"
-  >("success");
   const modalRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const muiTheme = useMuiTheme();
@@ -236,26 +229,11 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
     try {
       if (inTripStatus) {
         removePlaceFromTrip(place.id);
-        setSnackbarSeverity("info");
-        setSnackbarMessage("Dihapus dari perjalanan");
       } else {
         addPlaceToTrip(place);
-        setSnackbarSeverity("success");
-        setSnackbarMessage("Ditambahkan ke perjalanan");
       }
-
-      // Always close existing snackbar first to ensure animation plays
-      handleCloseSnackbar();
-
-      // Small delay to ensure the previous snackbar is closed
-      setTimeout(() => {
-        setSnackbarOpen(true);
-      }, 100);
     } catch (error) {
       console.error("Error updating trip:", error);
-      setSnackbarSeverity("error");
-      setSnackbarMessage("Gagal memperbarui perjalanan");
-      setSnackbarOpen(true);
     }
   };
 
@@ -270,10 +248,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
       return place.imageSmall || place.image;
     }
     return place.image;
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbarOpen(false);
   };
 
   const cardVariants = {
@@ -1909,51 +1883,6 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
           </Modal>
         )}
       </AnimatePresence>
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={2500}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        sx={{
-          mt: 2,
-          maxWidth: "95%",
-          "& .MuiPaper-root": {
-            borderRadius: "12px",
-            boxShadow: isDarkMode
-              ? "0 8px 32px rgba(0,0,0,0.4)"
-              : "0 8px 32px rgba(0,0,0,0.08)",
-          },
-        }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbarSeverity}
-          variant="filled"
-          icon={<CheckCircleOutlineIcon />}
-          sx={{
-            width: "100%",
-            alignItems: "center",
-            "& .MuiAlert-icon": {
-              fontSize: "1.2rem",
-              mr: 1,
-              my: 0,
-              opacity: 0.9,
-            },
-            "& .MuiAlert-message": {
-              fontSize: "0.9rem",
-              fontWeight: 500,
-            },
-            bgcolor:
-              snackbarSeverity === "success"
-                ? getCategoryColor(place.category)
-                : undefined,
-            py: 0.8,
-          }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </>
   );
 }

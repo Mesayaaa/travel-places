@@ -9,6 +9,10 @@ import {
   Fade,
   IconButton,
   useMediaQuery,
+  Alert,
+  Collapse,
+  Paper,
+  Chip,
 } from "@mui/material";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useRef, useState, useEffect, Suspense, lazy } from "react";
@@ -16,6 +20,7 @@ import Link from "@mui/material/Link";
 import { useTrip } from "./context/TripContext";
 import { useTheme } from "./context/ThemeContext";
 import { isLowEndDevice } from "./utils/deviceUtils";
+import CloseIcon from "@mui/icons-material/Close";
 
 // Import basic components directly for immediate rendering
 import Navbar from "./components/Navbar";
@@ -74,14 +79,14 @@ export default function Home() {
   const [places, setPlaces] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState("all");
   const [tripPlansRefreshKey, setTripPlansRefreshKey] = useState(0);
-  const { openTripPlanModal, setOpenTripPlanModal } = useTrip();
+  const { openTripPlanModal, setOpenTripPlanModal, placesInTrip } = useTrip();
   const { mode } = useTheme();
   const isDarkMode = mode === "dark";
   const isMobile = useMediaQuery("(max-width:768px)");
   const isLowEnd = useRef(false);
   const isDataSaver = useRef(false);
   const prefersReducedMotion = useReducedMotion();
-  const destinationsRef = useRef(null);
+  const destinationsRef = useRef<HTMLElement | null>(null);
   const planSectionRef = useRef(null);
   const isDestinationsInView = useInView(destinationsRef, {
     once: true,
@@ -140,6 +145,33 @@ export default function Home() {
   const handleTripPlanModalClose = () => {
     setOpenTripPlanModal(false);
     setTripPlansRefreshKey((prev) => prev + 1);
+  };
+
+  // Add a function to consistently scroll to destinations section
+  const scrollToDestinations = () => {
+    const destinationsSection = document.querySelector("#categories");
+    if (destinationsSection) {
+      const yOffset = -60; // Small offset to ensure the section is clearly visible
+      const y =
+        destinationsSection.getBoundingClientRect().top +
+        window.pageYOffset +
+        yOffset;
+      window.scrollTo({
+        top: y,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Update the handleTripPlanButtonClick function
+  const handleTripPlanButtonClick = () => {
+    if (placesInTrip.length > 0) {
+      // If places have been added to the trip, open the modal
+      setOpenTripPlanModal(true);
+    } else {
+      // If no places have been added, scroll to the destinations section
+      scrollToDestinations();
+    }
   };
 
   // Get animation props based on device and user preferences
@@ -212,9 +244,11 @@ export default function Home() {
           ? "linear-gradient(to bottom, #121212, #1a1a1a)"
           : "linear-gradient(to bottom, #f8f9fa, #e9ecef)",
         overflowX: "hidden",
+        position: "relative", // Add this for absolute positioned elements
       }}
     >
       <Navbar />
+
       <HeroSection />
 
       <CategoryFilter onCategoryChange={handleCategoryChange} />
@@ -297,7 +331,7 @@ export default function Home() {
                       startIcon={<Box component="span">+</Box>}
                       fullWidth
                       size="large"
-                      onClick={() => setOpenTripPlanModal(true)}
+                      onClick={handleTripPlanButtonClick}
                       sx={{
                         mb: 4,
                         py: 1.5,
@@ -305,7 +339,9 @@ export default function Home() {
                         fontWeight: "bold",
                       }}
                     >
-                      Buat Rencana Perjalanan (pilih dahulu destinasi diatas)
+                      {placesInTrip.length > 0
+                        ? "Buat Rencana Perjalanan"
+                        : "Buat Rencana Perjalanan (pilih dahulu destinasi diatas)"}
                     </Button>
                   </motion.div>
 
