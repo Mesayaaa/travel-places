@@ -280,6 +280,7 @@ export default function Home() {
                       fontWeight: "bold",
                       mb: 4,
                       fontSize: { xs: "1.75rem", md: "2.5rem" },
+                      color: isDarkMode ? "white" : "black",
                     }}
                   >
                     Rencana Perjalanan Anda

@@ -188,7 +188,10 @@ export default function Navbar() {
         .filter((href) => href.startsWith("#"));
 
       for (const section of sections) {
-        const element = document.querySelector(section);
+        // For trip-plans, check if #plan section is in view
+        const targetSelector = section === "#trip-plans" ? "#plan" : section;
+        const element = document.querySelector(targetSelector);
+
         if (element) {
           const rect = element.getBoundingClientRect();
           // Make this more accurate by checking if it's closer to the center
@@ -257,6 +260,12 @@ export default function Navbar() {
       return;
     }
 
+    // Handle Trip Planner separately
+    if (href === "#trip-plans") {
+      handleTripPlannerClick();
+      return;
+    }
+
     // Smooth scroll to section if on home page, or navigate to home page with hash if on profile
     if (href.startsWith("#")) {
       if (pathname !== "/") {
@@ -280,6 +289,34 @@ export default function Navbar() {
       // For any other paths, use router
       router.push(href);
     }
+  };
+
+  // Handle Trip Planner click
+  const handleTripPlannerClick = () => {
+    // Update active section to trip plans
+    setActiveSection("#trip-plans");
+
+    // If already on homepage, scroll to plan section
+    if (pathname === "/") {
+      const planSection = document.querySelector("#plan");
+      if (planSection) {
+        const yOffset = -60;
+        const y =
+          planSection.getBoundingClientRect().top +
+          window.pageYOffset +
+          yOffset;
+        window.scrollTo({
+          top: y,
+          behavior: "smooth",
+        });
+      }
+    } else {
+      // If not on homepage, navigate to homepage and then scroll
+      router.push("/#plan");
+    }
+
+    // Don't automatically open the modal
+    // Let user choose to open the modal after seeing the section
   };
 
   const handleProfileClick = () => {
@@ -336,6 +373,13 @@ export default function Navbar() {
     newValue: string
   ) => {
     setMobileNavValue(newValue);
+
+    // Handle Trip Planner separately
+    if (newValue === "#trip-plans") {
+      handleTripPlannerClick();
+      return;
+    }
+
     handleNavClick(newValue);
   };
 
@@ -576,7 +620,11 @@ export default function Navbar() {
               component={motion.div}
               whileHover={{ x: 5 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => handleNavClick(item.href)}
+              onClick={() =>
+                item.href === "#trip-plans"
+                  ? handleTripPlannerClick()
+                  : handleNavClick(item.href)
+              }
               sx={{
                 py: 1.8,
                 px: 1.5,
@@ -807,7 +855,11 @@ export default function Navbar() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Button
-                    onClick={() => handleNavClick(item.href)}
+                    onClick={() =>
+                      item.href === "#trip-plans"
+                        ? handleTripPlannerClick()
+                        : handleNavClick(item.href)
+                    }
                     sx={{
                       my: 1,
                       mx: { md: 0.5, lg: 1.2 },
@@ -1226,6 +1278,7 @@ export default function Navbar() {
             <BottomNavigationAction
               label="Trip Plan"
               value="#trip-plans"
+              onClick={handleTripPlannerClick}
               icon={
                 <Box
                   component={motion.div}
