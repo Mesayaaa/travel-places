@@ -11,6 +11,8 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { motion, useReducedMotion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
+import { getResponsiveImageSrc } from "../utils/imageUtils";
+import ResponsiveImage from "./ResponsiveImage";
 
 export default function HeroSection() {
   const [searchValue, setSearchValue] = useState("");
@@ -22,6 +24,9 @@ export default function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  // Get responsive image sources
+  const heroImage = getResponsiveImageSrc("/images/borobudur.jpg");
 
   // Check for mobile device on client side
   useEffect(() => {
@@ -72,11 +77,6 @@ export default function HeroSection() {
     };
   };
 
-  // Choose smaller background image for mobile devices
-  const bgImage = isMobile
-    ? "url('/images/borobudur-mobile.jpg')"
-    : "url('/images/borobudur.jpg')";
-
   return (
     <Box
       component="section"
@@ -84,22 +84,54 @@ export default function HeroSection() {
       sx={{
         position: "relative",
         height: { xs: "80vh", sm: "85vh", md: "100vh" },
-        background: `linear-gradient(rgba(0,0,0,${
-          isDarkMode ? "0.6" : "0.4"
-        }), rgba(0,0,0,${isDarkMode ? "0.7" : "0.5"})), ${bgImage}`,
-        backgroundSize: "cover",
-        backgroundPosition: isMobile ? "center top" : "center",
-        backgroundRepeat: "no-repeat",
-        display: "flex",
-        alignItems: "center",
         overflow: "hidden",
+        marginBottom: 0,
+        paddingBottom: 0,
       }}
     >
+      {/* Hero Background Image */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: 0,
+          "&::after": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: `linear-gradient(rgba(0,0,0,${
+              isDarkMode ? "0.6" : "0.4"
+            }), rgba(0,0,0,${isDarkMode ? "0.7" : "0.5"}))`,
+            zIndex: 1,
+          },
+        }}
+      >
+        <ResponsiveImage
+          src={heroImage.src}
+          mobileSrc={heroImage.mobileSrc}
+          alt="Hero Background"
+          fill
+          priority
+          className="object-cover object-center"
+        />
+      </Box>
+
       <Container
         maxWidth="xl"
         sx={{
           px: { xs: 2, sm: 3, md: 4 },
           py: { xs: 4, sm: 6, md: 8 },
+          position: "relative",
+          zIndex: 2,
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
         }}
       >
         <Box

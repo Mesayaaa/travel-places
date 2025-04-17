@@ -48,6 +48,8 @@ import { useFavorites } from "../context/FavoritesContext";
 import { useTrip } from "../context/TripContext";
 import { SxProps, Theme, alpha } from "@mui/material/styles";
 import { useTheme as useCustomTheme } from "../context/ThemeContext";
+import ResponsiveImage from "./ResponsiveImage";
+import { getResponsiveImageSrc } from "../utils/imageUtils";
 
 interface PlaceCardProps {
   place: Place;
@@ -165,6 +167,9 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
   const favoriteStatus = isFavorite(place.id);
   const inTripStatus = isInCurrentTrip(place.id);
 
+  // Get responsive image sources
+  const placeImage = getResponsiveImageSrc(place.image);
+
   // Simplified animationProps for better mobile performance
   const getAnimationProps = () => {
     // Skip animations for mobile or reduced motion preference
@@ -177,13 +182,11 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
 
     return {
       whileHover: {
-        scale: 1.03,
         boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
       },
       transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 17,
+        type: "tween",
+        duration: 0.2,
       },
     };
   };
@@ -242,6 +245,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
     setSnackbarOpen(true);
   };
 
+  // Handle image load
   const handleImageLoad = () => {
     setIsImageLoaded(true);
   };
@@ -265,7 +269,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
 
   const imageVariants = {
     hover: {
-      scale: 1.08,
+      scale: 1,
       transition: { duration: 0.7, ease: [0.2, 0.65, 0.3, 0.9] },
     },
   };
@@ -329,24 +333,19 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
           </Box>
         )}
 
-        <MotionBox
-          variants={imageVariants}
-          sx={{ height: "100%", width: "100%" }}
-        >
-          <CardMedia
-            component="img"
-            height="100%"
-            image={getImagePath()}
+        <Box sx={{ height: "100%", width: "100%", position: "relative" }}>
+          <ResponsiveImage
+            src={placeImage.src}
+            mobileSrc={placeImage.mobileSrc}
             alt={place.name}
+            fill
             onLoad={handleImageLoad}
-            sx={{
-              height: "100%",
-              width: "100%",
-              objectFit: "cover",
-              opacity: isImageLoaded ? 1 : 0,
+            className="object-cover scale-100"
+            style={{
+              transition: "transform 0.5s ease",
             }}
           />
-        </MotionBox>
+        </Box>
 
         <Box
           className="overlay"
@@ -611,7 +610,7 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
               top: { xs: 10, md: 18 },
               right: { xs: 10, md: 18 },
               background: favoriteStatus
-                ? alpha(theme.palette.primary.main, 0.9)
+                ? "rgba(255, 0, 50, 0.95)"
                 : alpha("#ffffff", 0.85),
               backdropFilter: "blur(8px)",
               padding: { xs: "6px", sm: "8px" },
@@ -621,12 +620,12 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                 : getCategoryColor(place.category),
               "&:hover": {
                 background: favoriteStatus
-                  ? theme.palette.primary.dark
+                  ? "rgba(255, 0, 50, 1)"
                   : alpha("#ffffff", 0.95),
                 transform: "scale(1.15)",
                 boxShadow: `0 6px 20px ${alpha(
-                  theme.palette.primary.main,
-                  0.6
+                  "rgb(255, 0, 50)",
+                  favoriteStatus ? 0.8 : 0.6
                 )}`,
               },
               "&:focus-visible": {
@@ -634,10 +633,19 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                 outlineOffset: 2,
               },
               transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
+              boxShadow: favoriteStatus
+                ? "0 0 15px rgba(255, 0, 50, 0.7)"
+                : "none",
             })}
           >
             {favoriteStatus ? (
-              <FavoriteIcon color="error" fontSize="medium" />
+              <FavoriteIcon
+                sx={{
+                  color: "#ffffff",
+                  filter: "drop-shadow(0 0 2px rgba(255,255,255,0.5))",
+                }}
+                fontSize="medium"
+              />
             ) : (
               <FavoriteBorderIcon fontSize="medium" />
             )}
@@ -906,23 +914,35 @@ export default function PlaceCard({ place, sx }: PlaceCardProps) {
                               sx={{
                                 p: 1,
                                 color: favoriteStatus
-                                  ? "error.main"
+                                  ? "#ff0032"
                                   : alpha(
                                       getCategoryColor(place.category),
                                       0.8
                                     ),
                                 "&:hover": {
                                   transform: "scale(1.15)",
-                                  bgcolor: alpha(
-                                    getCategoryColor(place.category),
-                                    0.08
-                                  ),
+                                  bgcolor: favoriteStatus
+                                    ? alpha("#ff0032", 0.1)
+                                    : alpha(
+                                        getCategoryColor(place.category),
+                                        0.08
+                                      ),
+                                  boxShadow: favoriteStatus
+                                    ? "0 0 10px rgba(255, 0, 50, 0.4)"
+                                    : "none",
                                 },
                                 transition: "all 0.3s ease",
                               }}
                             >
                               {favoriteStatus ? (
-                                <FavoriteIcon color="error" fontSize="medium" />
+                                <FavoriteIcon
+                                  sx={{
+                                    color: "#ff0032",
+                                    filter:
+                                      "drop-shadow(0 0 2px rgba(255,255,255,0.5))",
+                                  }}
+                                  fontSize="medium"
+                                />
                               ) : (
                                 <FavoriteBorderIcon fontSize="medium" />
                               )}

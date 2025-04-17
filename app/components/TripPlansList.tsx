@@ -148,9 +148,73 @@ export default function TripPlansList() {
     }
   };
 
-  // If there are no plans and not loading, don't render anything
+  // If there are no plans and not loading, show empty state message
   if (!isLoading && plans.length === 0) {
-    return null;
+    return (
+      <Box>
+        <Box
+          sx={{
+            mb: 3,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            variant="h5"
+            component="h3"
+            sx={{ fontWeight: 600, color: "primary.main" }}
+          >
+            Rencana Perjalanan Anda
+          </Typography>
+          <Button
+            startIcon={<RefreshIcon />}
+            onClick={handleRefresh}
+            variant="outlined"
+            size="small"
+            sx={{
+              borderColor: isDarkMode ? "rgba(255,255,255,0.3)" : undefined,
+              color: isDarkMode ? "rgba(255,255,255,0.8)" : undefined,
+              "&:hover": {
+                borderColor: isDarkMode ? "rgba(255,255,255,0.5)" : undefined,
+                bgcolor: isDarkMode ? "rgba(255,255,255,0.05)" : undefined,
+              },
+            }}
+          >
+            Refresh
+          </Button>
+        </Box>
+
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 6,
+            px: 2,
+            bgcolor: isDarkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.01)",
+            borderRadius: 2,
+            border: "1px dashed",
+            borderColor: isDarkMode
+              ? "rgba(255,255,255,0.1)"
+              : "rgba(0,0,0,0.1)",
+          }}
+        >
+          <PlaceIcon
+            sx={{ fontSize: 40, color: "text.secondary", opacity: 0.5, mb: 2 }}
+          />
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            Belum ada rencana perjalanan
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 3, maxWidth: "500px", mx: "auto" }}
+          >
+            Tambahkan tempat ke favorit Anda, lalu masukkan ke dalam trip untuk
+            membuat rencana perjalanan.
+          </Typography>
+        </Box>
+      </Box>
+    );
   }
 
   return (

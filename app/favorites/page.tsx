@@ -355,9 +355,6 @@ export default function FavoritesPage() {
                             sx={{
                               objectFit: "cover",
                               transition: "transform 0.3s ease",
-                              "&:hover": {
-                                transform: "scale(1.05)",
-                              },
                             }}
                           />
                           <CardContent

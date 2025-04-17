@@ -66,6 +66,10 @@
   --background: #ffffff;
   --foreground: #171717;
   --transition-speed: 0.3s;
+  text-rendering: optimizeSpeed;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -75,10 +79,33 @@
   }
 }
 
+/* Memperbaiki rendering font di mobile */
+html {
+  -webkit-text-size-adjust: 100%;
+  font-size: 16px;
+}
+
+/* Base styles */
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  font-display: swap;
+}
+
+/* Optimasi untuk image rendering */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  content-visibility: auto;
 }
 
 /* Reduced motion preferences */
@@ -111,17 +138,108 @@ body {
   .pulse {
     animation: none;
   }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .scroll-animate {
-    view-timeline-name: --card;
-    view-timeline-axis: block;
-    animation-timeline: --card;
-    animation-range: entry 20% cover 30%;
+  
+  /* Mengurangi ukuran font untuk performa lebih baik */
+  html {
+    font-size: 14px;
+  }
+  
+  /* Menghilangkan efek hover pada mobile untuk meningkatkan performa */
+  * {
+    transition: none !important;
+  }
+  
+  /* Mengurangi penggunaan efek box-shadow dan backdrop-filter yang berat */
+  .card, .button, .modal, .dialog {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+    backdrop-filter: none !important;
+  }
+  
+  /* Agar scrolling lebih mulus */
+  body {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Mengurangi ukuran padding dan margin pada mobile */
+  .container, .section, .content {
+    padding: 1rem !important;
+    margin: 0.5rem !important;
   }
 }
 
+/* Optimasi khusus untuk perangkat low-end */
+.low-end-device {
+  /* Nonaktifkan semua animasi dan transisi */
+  * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  /* Mengatur paint hinting untuk membuat rendering lebih efisien */
+  .MuiPaper-root,
+  .MuiCard-root,
+  .card,
+  .container,
+  .box {
+    contain: content;
+    content-visibility: auto;
+    will-change: auto;
+  }
+
+  /* Mematikan efek visual non-esensial */
+  .hover-effect,
+  .shadow-effect,
+  .gradient-bg {
+    display: none !important;
+  }
+
+  /* Mengurangi kompleksitas UI */
+  .container {
+    max-width: 100% !important;
+  }
+
+  /* Menggunakan font system default */
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+  }
+
+  /* Mengurangi opacity transitions */
+  img, .MuiPaper-root, .card, .fade-in {
+    opacity: 1 !important;
+  }
+
+  /* Mengoptimalkan rendering list */
+  ul, ol {
+    content-visibility: auto;
+  }
+
+  /* Mengatur ukuran gambar yang lebih kecil */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}
+
+/* Tambahan optimasi untuk mode Data Saver */
+.data-saver {
+  /* Nonaktifkan loading gambar background */
+  [style*="background-image"] {
+    background-image: none !important;
+  }
+
+  /* Mengurangi kualitas gambar */
+  img {
+    filter: blur(0px) !important;
+  }
+}
+
+/* Animasi yang telah dioptimalkan */
 @keyframes fadeSlideUp {
   from {
     opacity: 0;
@@ -137,6 +255,7 @@ body {
   animation: fadeSlideUp linear;
 }
 
+/* Selalu buat transition properti spesifik, jangan gunakan all */
 * {
   transition: background-color var(--transition-speed) ease,
     border-color var(--transition-speed) ease,
@@ -157,5 +276,43 @@ body {
   
   .scroll-animate {
     animation: none !important;
+  }
+  
+  /* Optimasi rendering untuk perangkat low-end */
+  .MuiPaper-root,
+  .MuiCard-root {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: auto;
+  }
+}
+
+/* Enable optimized loading of custom font */
+@layer base {
+  @font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/inter-var.woff2') format('woff2');
+  }
+}
+
+/* Optimasi untuk content visibility untuk meningkatkan paint & layout performance */
+.offscreen-content {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px; /* Estimasi ukuran */
+}
+
+/* Menggunakan font lightweight untuk perangkat low-end */
+@media (max-width: 480px) {
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  
+  /* Mengurangi font weight untuk rendering yang lebih cepat */
+  h1, h2, h3, .title, .heading {
+    font-weight: 600 !important; /* Hindari font-weight yang terlalu tebal */
   }
 }

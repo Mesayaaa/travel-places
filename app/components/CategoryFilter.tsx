@@ -92,8 +92,8 @@ export default function CategoryFilter({
       component="section"
       id="categories"
       sx={{
-        py: 1,
-        pb: 0,
+        py: { xs: 0, md: 2 },
+        pb: { xs: 0, md: 2 },
         background: isDarkMode
           ? "linear-gradient(to bottom, #1a1a1a, #121212)"
           : "linear-gradient(to bottom, #ffffff, #f8f9fa)",
@@ -104,6 +104,7 @@ export default function CategoryFilter({
         borderRadius: { xs: 0, md: "0 0 20px 20px" },
         position: "relative",
         zIndex: 10,
+        marginTop: 0,
       }}
     >
       <Container maxWidth="xl">
@@ -113,7 +114,7 @@ export default function CategoryFilter({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           sx={{
-            mb: { xs: 1.5, md: 2 },
+            mb: { xs: 0, md: 0 },
             position: "relative",
           }}
         >
@@ -218,7 +219,7 @@ export default function CategoryFilter({
               justifyContent: { xs: "flex-start", md: "center" },
               px: { xs: 2, sm: 4 },
               py: 1,
-              mt: 1,
+              mt: 0,
               overflowX: { xs: "auto", md: "visible" },
               scrollbarWidth: "none",
               "&::-webkit-scrollbar": {

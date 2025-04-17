@@ -13,9 +13,72 @@ import {
   ThemeProvider as CustomThemeProvider,
   useTheme,
 } from "./context/ThemeContext";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import {
+  applyLowEndOptimizations,
+  isDataSaverEnabled,
+  isLowEndDevice,
+} from "./utils/deviceUtils";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// Komponen untuk menerapkan optimasi perangkat low-end
+function DeviceOptimizationProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  useEffect(() => {
+    // Terapkan optimasi untuk perangkat low-end
+    applyLowEndOptimizations();
+
+    // Terapkan optimasi Data Saver jika diaktifkan
+    if (isDataSaverEnabled()) {
+      document.body.classList.add("data-saver");
+    }
+
+    // Terapkan optimasi tambahan untuk perangkat low-end
+    if (isLowEndDevice()) {
+      // Kurangi jumlah efek visual
+      const optimizeForLowEnd = () => {
+        // Nonaktifkan scroll animations
+        window.scrollTo = (options) => {
+          if (typeof options === "object") {
+            window.scrollTo(options.left || 0, options.top || 0);
+          } else {
+            window.scrollTo(arguments[0] || 0, arguments[1] || 0);
+          }
+          return undefined;
+        };
+
+        // Nonaktifkan intersection observer jika ada banyak elemen
+        const allElements = document.querySelectorAll("*");
+        if (allElements.length > 500) {
+          // Website terlalu berat, nonaktifkan observer yang tidak perlu
+          const cleanup = (node: Element) => {
+            const clone = node.cloneNode(true);
+            if (node.parentNode) {
+              node.parentNode.replaceChild(clone, node);
+            }
+          };
+
+          // Clean up heavy components
+          document.querySelectorAll(".heavy-component").forEach(cleanup);
+        }
+      };
+
+      // Jalankan setelah page load selesai
+      if (document.readyState === "complete") {
+        optimizeForLowEnd();
+      } else {
+        window.addEventListener("load", optimizeForLowEnd);
+        return () => window.removeEventListener("load", optimizeForLowEnd);
+      }
+    }
+  }, []);
+
+  return <>{children}</>;
+}
 
 function AppThemeProvider({ children }: { children: React.ReactNode }) {
   const { mode } = useTheme();
@@ -133,7 +196,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <CustomThemeProvider>
       <AppThemeProvider>
         <FavoritesProvider>
-          <TripProvider>{children}</TripProvider>
+          <TripProvider>
+            <DeviceOptimizationProvider>{children}</DeviceOptimizationProvider>
+          </TripProvider>
         </FavoritesProvider>
       </AppThemeProvider>
     </CustomThemeProvider>
