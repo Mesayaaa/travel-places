@@ -13,7 +13,7 @@ const nextConfig = {
     assetPrefix: '/travel-places',
   } : {}),
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
     optimizePackageImports: [
       '@mui/material',
       '@mui/icons-material',
